@@ -19,7 +19,6 @@ export default function RootLayout() {
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="listing/[id]" />
-            <Stack.Screen name="offer/[id]" />
           </Stack>
         </AuthGuard>
       </QueryClientProvider>

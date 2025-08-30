@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -24,9 +24,33 @@ export default function WelcomeScreen() {
     phone: '',
     otp: '',
   });
+  const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { signUp, signIn, signInWithPhone, verifyOTP } = useAuth();
+  const { signUp, signIn, signInWithPhone, verifyOTP, getSavedCredentials } = useAuth();
+
+  // Load saved credentials when login screen opens
+  useEffect(() => {
+    const loadSavedCredentials = async () => {
+      if (currentStep === 'login') {
+        try {
+          const savedCredentials = await getSavedCredentials();
+          if (savedCredentials) {
+            setFormData(prev => ({
+              ...prev,
+              email: savedCredentials.email,
+              password: savedCredentials.password
+            }));
+            setRememberMe(true);
+          }
+        } catch (error) {
+          console.error('Error loading saved credentials:', error);
+        }
+      }
+    };
+
+    loadSavedCredentials();
+  }, [currentStep, getSavedCredentials]);
 
   const handleSignUp = async () => {
     if (!formData.email || !formData.password || !formData.displayName) {
@@ -66,7 +90,11 @@ export default function WelcomeScreen() {
 
     setIsLoading(true);
     try {
-      await signIn(formData.email, formData.password);
+      const result = await signIn(formData.email, formData.password, rememberMe);
+      if (!result) {
+        Alert.alert('Hata', 'Geçersiz email veya şifre');
+      }
+      // If result is truthy, user is successfully logged in and auth state will update
     } catch (error: any) {
       Alert.alert('Hata', error.message || 'Giriş sırasında bir hata oluştu');
     } finally {
@@ -247,6 +275,16 @@ export default function WelcomeScreen() {
             onChangeText={(text) => setFormData({...formData, password: text})}
             secureTextEntry
           />
+
+          <Pressable 
+            style={styles.checkboxContainer}
+            onPress={() => setRememberMe(!rememberMe)}
+          >
+            <View style={[styles.checkbox, rememberMe && styles.checkboxChecked]}>
+              {rememberMe && <Text style={styles.checkmark}>✓</Text>}
+            </View>
+            <Text style={styles.checkboxLabel}>Beni hatırla (otomatik giriş)</Text>
+          </Pressable>
 
           <Pressable 
             style={[styles.button, styles.primaryButton, isLoading && styles.disabledButton]}
@@ -461,5 +499,35 @@ const styles = StyleSheet.create({
     color: '#00d4aa',
     fontSize: 14,
     marginTop: 10,
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderWidth: 2,
+    borderColor: '#e9ecef',
+    borderRadius: 4,
+    marginRight: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f8f9fa',
+  },
+  checkboxChecked: {
+    backgroundColor: '#00d4aa',
+    borderColor: '#00d4aa',
+  },
+  checkmark: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  checkboxLabel: {
+    fontSize: 14,
+    color: '#333',
+    flex: 1,
   },
 });

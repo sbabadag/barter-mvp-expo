@@ -1,15 +1,22 @@
-import { View, Text, Pressable, ScrollView, Image, StyleSheet, Dimensions } from "react-native";
+import { View, Text, Pressable, ScrollView, Image, StyleSheet, Dimensions, Alert } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useListing } from "../../src/services/listings";
+import { useBidsForListing } from "../../src/services/bids";
+import { useAuth } from "../../src/state/AuthProvider";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useState } from "react";
+import BiddingModal from "../../src/components/BiddingModal";
+import ErrorBoundary from "../../src/components/ErrorBoundary";
 
 const { width } = Dimensions.get('window');
 
 export default function ListingDetail(){
   const { id } = useLocalSearchParams<{id: string}>();
   const { data } = useListing(id!);
+  const { bids, isLoading, error, refetch: refetchBids } = useBidsForListing(id!);
+  const { user, isAuthenticated } = useAuth();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showBiddingModal, setShowBiddingModal] = useState(false);
 
   if (!data) return (
     <View style={styles.loadingContainer}>
@@ -37,7 +44,8 @@ export default function ListingDetail(){
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ErrorBoundary>
+      <ScrollView style={styles.container}>
       {/* Image Gallery */}
       <View style={styles.imageGallery}>
         <Image 
@@ -123,6 +131,62 @@ export default function ListingDetail(){
             {new Date(data.created_at).toLocaleDateString('tr-TR')}
           </Text>
         </View>
+
+        {/* Bidding Section */}
+        {bids && bids.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>Teklifler ({bids.length})</Text>
+            <View style={styles.bidsContainer}>
+              {bids.slice(0, 3).map((bid, index) => (
+                <View key={bid.id} style={styles.bidItem}>
+                  <View style={styles.bidHeader}>
+                    <Text style={styles.bidAmount}>{bid.amount} TL</Text>
+                    <View style={[
+                      styles.bidStatus,
+                      { backgroundColor: 
+                        bid.status === 'accepted' ? '#4CAF50' :
+                        bid.status === 'rejected' ? '#F44336' :
+                        bid.status === 'countered' ? '#FF9800' : '#9E9E9E'
+                      }
+                    ]}>
+                      <Text style={styles.bidStatusText}>
+                        {bid.status === 'pending' ? 'Bekliyor' :
+                         bid.status === 'accepted' ? 'Kabul' :
+                         bid.status === 'rejected' ? 'Red' : 'Karşı Teklif'}
+                      </Text>
+                    </View>
+                  </View>
+                  {bid.message && (
+                    <Text style={styles.bidMessage} numberOfLines={2}>
+                      "{bid.message}"
+                    </Text>
+                  )}
+                  <Text style={styles.bidDate}>
+                    {new Date(bid.created_at).toLocaleDateString('tr-TR')}
+                  </Text>
+                </View>
+              ))}
+              {bids.length > 3 && (
+                <Text style={styles.moreBidsText}>
+                  +{bids.length - 3} teklif daha
+                </Text>
+              )}
+            </View>
+          </>
+        )}
+
+        {/* Debug info */}
+        {__DEV__ && (
+          <View style={styles.debugContainer}>
+            <Text style={styles.debugTitle}>Debug Info:</Text>
+            <Text style={styles.debugText}>Listing ID: {id}</Text>
+            <Text style={styles.debugText}>User: {user ? user.display_name || user.id : 'null'}</Text>
+            <Text style={styles.debugText}>Authenticated: {isAuthenticated ? 'true' : 'false'}</Text>
+            <Text style={styles.debugText}>Bids count: {bids ? bids.length : 'undefined'}</Text>
+            <Text style={styles.debugText}>Is loading: {isLoading ? 'true' : 'false'}</Text>
+            <Text style={styles.debugText}>Error: {error || 'none'}</Text>
+          </View>
+        )}
       </View>
 
       {/* Action Buttons */}
@@ -131,12 +195,37 @@ export default function ListingDetail(){
           <MaterialIcons name="chat" size={20} color="white" />
           <Text style={styles.messageButtonText}>Mesaj Gönder</Text>
         </Pressable>
-        <Pressable style={styles.offerButton}>
+        <Pressable 
+          style={[
+            styles.offerButton,
+            !isAuthenticated && styles.disabledButton
+          ]}
+          onPress={() => {
+            if (!isAuthenticated) {
+              Alert.alert('Giriş Gerekli', 'Teklif vermek için önce giriş yapmalısınız.');
+              return;
+            }
+            setShowBiddingModal(true);
+          }}
+        >
           <MaterialIcons name="local-offer" size={20} color="white" />
-          <Text style={styles.offerButtonText}>Teklif Ver</Text>
+          <Text style={styles.offerButtonText}>
+            {isAuthenticated ? 'Teklif Ver' : 'Giriş Yap'}
+          </Text>
         </Pressable>
       </View>
+
+      {/* Bidding Modal */}
+      <BiddingModal
+        visible={showBiddingModal}
+        onClose={() => setShowBiddingModal(false)}
+        listingId={id!}
+        listingTitle={data.title}
+        currentPrice={data.price || 0}
+        onBidSubmitted={refetchBids}
+      />
     </ScrollView>
+    </ErrorBoundary>
   );
 }
 
@@ -303,5 +392,81 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
+  },
+  // Bidding styles
+  bidsContainer: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 8,
+  },
+  bidItem: {
+    backgroundColor: 'white',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  bidHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  bidAmount: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#00d4aa',
+  },
+  bidStatus: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 12,
+  },
+  bidStatusText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: 'white',
+  },
+  bidMessage: {
+    fontSize: 14,
+    color: '#666',
+    fontStyle: 'italic',
+    marginVertical: 4,
+  },
+  bidDate: {
+    fontSize: 12,
+    color: '#999',
+  },
+  moreBidsText: {
+    fontSize: 14,
+    color: '#00d4aa',
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  // Debug styles
+  debugContainer: {
+    backgroundColor: '#f0f0f0',
+    padding: 12,
+    marginTop: 16,
+    borderRadius: 8,
+  },
+  debugTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 8,
+  },
+  debugText: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 4,
+  },
+  disabledButton: {
+    opacity: 0.6,
   },
 });
