@@ -2,13 +2,14 @@ import { View, Text, Pressable, Image, StyleSheet, Dimensions } from "react-nati
 import { FlashList } from "@shopify/flash-list";
 import { useListings } from "../../src/services/listings";
 import CommentsModal from "../../src/components/CommentsModal";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 
 const { width } = Dimensions.get('window');
 const cardWidth = width * 0.48; // Each card takes 48% of screen width - much wider!
 
 export default function FeedScreen() {
+  const router = useRouter();
   const { data, isLoading, refetch } = useListings();
   const [likedItems, setLikedItems] = useState<{[key: string]: boolean}>({});
   const [likeCounts, setLikeCounts] = useState<{[key: string]: number}>({});
@@ -65,6 +66,11 @@ export default function FeedScreen() {
   const handleFollow = (sellerId: string) => {
     // Follow functionality - could connect to backend
     console.log('Following seller:', sellerId);
+  };
+
+  const handleCardPress = (itemId: string) => {
+    console.log('Navigating to listing detail:', itemId);
+    router.push(`/listing/${itemId}`);
   };
 
   const renderItem = ({ item, index }: { item: any, index: number }) => {
@@ -130,7 +136,7 @@ export default function FeedScreen() {
         </View>
 
         {/* Product Image with Badge */}
-        <Pressable onPress={() => {/* Navigate to detail */}}>
+        <Pressable onPress={() => handleCardPress(item.id)}>
           <View style={styles.imageContainer}>
             <Image 
               source={{ uri: item.image_url || `https://picsum.photos/300/400?random=${item.id}` }}

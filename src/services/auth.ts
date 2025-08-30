@@ -23,25 +23,63 @@ export type AuthContextType = {
   isLoading: boolean;
   isAuthenticated: boolean;
   signUp: (email: string, password: string, userData: Partial<User>) => Promise<void>;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string, rememberMe?: boolean) => Promise<User | null>;
   signInWithPhone: (phone: string) => Promise<void>;
   verifyOTP: (phone: string, otp: string) => Promise<void>;
-  signOut: () => Promise<void>;
+  signOut: (clearSavedCredentials?: boolean) => Promise<void>;
   updateProfile: (userData: Partial<User>) => Promise<void>;
+  refresh: () => Promise<void>;
+  autoLogin: () => Promise<boolean>;
+  getSavedCredentials: () => Promise<{email: string; password: string} | null>;
+  clearSavedCredentials: () => Promise<void>;
 };
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
 // Mock user storage for development
-let mockUsers: User[] = [];
+let mockUsers: User[] = [
+  // Pre-populate with a test user for easier testing
+  {
+    id: 'test-user-123',
+    email: 'test@example.com',
+    display_name: 'Test Kullanıcı',
+    city: 'İstanbul',
+    created_at: new Date().toISOString(),
+  }
+];
 let currentMockUser: User | null = null;
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+// Constants for credential storage
+const STORAGE_KEYS = {
+  SAVED_EMAIL: 'saved_email',
+  SAVED_PASSWORD: 'saved_password_encrypted', // Note: In production, use proper encryption
+  REMEMBER_ME: 'remember_me',
+  AUTO_LOGIN: 'auto_login_enabled',
+  MOCK_USER: 'mock_user',
+  ENCRYPTION_SALT: 'barter_app_salt_2024',
+};
+
+// Simple encryption/decryption (for demo - use proper encryption in production)
+const encryptPassword = (password: string): string => {
+  // Simple encoding using React Native compatible methods
+  try {
+    const saltedPassword = password + STORAGE_KEYS.ENCRYPTION_SALT;
+    // Use simple string manipulation for basic obfuscation
+    return saltedPassword.split('').map(char => char.charCodeAt(0).toString(16)).join('');
+  } catch (error) {
+    console.error('Encryption error:', error);
+    return password; // Fallback to plain text
   }
-  return context;
+};
+
+const decryptPassword = (encryptedPassword: string): string => {
+  try {
+    // Reverse the hex encoding
+    const hexPairs = encryptedPassword.match(/.{1,2}/g) || [];
+    const decoded = hexPairs.map(hex => String.fromCharCode(parseInt(hex, 16))).join('');
+    return decoded.replace(STORAGE_KEYS.ENCRYPTION_SALT, '');
+  } catch (error) {
+    console.error('Decryption error:', error);
+    return '';
+  }
 };
 
 export const useAuthService = () => {
@@ -56,11 +94,117 @@ export const useAuthService = () => {
     initializeAuth();
   }, []);
 
+  // Save credentials function
+  const saveCredentials = async (email: string, password: string): Promise<void> => {
+    try {
+      const encryptedPassword = await encryptPassword(password);
+      await AsyncStorage.multiSet([
+        [STORAGE_KEYS.SAVED_EMAIL, email],
+        [STORAGE_KEYS.SAVED_PASSWORD, encryptedPassword],
+        [STORAGE_KEYS.REMEMBER_ME, 'true'],
+        [STORAGE_KEYS.AUTO_LOGIN, 'true']
+      ]);
+    } catch (error) {
+      console.error('Error saving credentials:', error);
+    }
+  };
+
+  // Auto-login function
+  const autoLogin = async (): Promise<boolean> => {
+    try {
+      const savedEmail = await AsyncStorage.getItem(STORAGE_KEYS.SAVED_EMAIL);
+      const savedPassword = await AsyncStorage.getItem(STORAGE_KEYS.SAVED_PASSWORD);
+      
+      if (!savedEmail || !savedPassword) {
+        console.log('No saved credentials found for auto-login');
+        return false; // No saved credentials
+      }
+
+      const decryptedPassword = decryptPassword(savedPassword);
+      if (!decryptedPassword) {
+        console.log('Failed to decrypt saved password');
+        await clearSavedCredentials(); // Clear corrupted credentials
+        return false; // Failed to decrypt password
+      }
+
+      console.log('Attempting auto-login with saved credentials for:', savedEmail);
+      const user = await signIn(savedEmail, decryptedPassword, false); // Don't save again
+      
+      if (user) {
+        console.log('Auto-login successful');
+        return true;
+      } else {
+        console.log('Auto-login failed - invalid credentials');
+        await clearSavedCredentials(); // Clear invalid credentials
+        return false;
+      }
+    } catch (error) {
+      console.error('Auto-login failed:', error);
+      // Clear potentially corrupted credentials on error
+      await clearSavedCredentials();
+      return false;
+    }
+  };
+
+  // Get saved credentials function
+  const getSavedCredentials = async (): Promise<{ email: string; password: string } | null> => {
+    try {
+      const savedEmail = await AsyncStorage.getItem(STORAGE_KEYS.SAVED_EMAIL);
+      const savedPassword = await AsyncStorage.getItem(STORAGE_KEYS.SAVED_PASSWORD);
+      
+      if (!savedEmail || !savedPassword) {
+        return null;
+      }
+
+      const decryptedPassword = await decryptPassword(savedPassword);
+      if (!decryptedPassword) {
+        return null;
+      }
+
+      return {
+        email: savedEmail,
+        password: decryptedPassword
+      };
+    } catch (error) {
+      console.error('Error getting saved credentials:', error);
+      return null;
+    }
+  };
+
+  // Clear saved credentials function
+  const clearSavedCredentials = async (): Promise<void> => {
+    try {
+      await AsyncStorage.multiRemove([
+        STORAGE_KEYS.SAVED_EMAIL,
+        STORAGE_KEYS.SAVED_PASSWORD,
+        STORAGE_KEYS.REMEMBER_ME,
+        STORAGE_KEYS.AUTO_LOGIN
+      ]);
+    } catch (error) {
+      console.error('Error clearing saved credentials:', error);
+    }
+  };
+
   const initializeAuth = async () => {
     try {
+      // First, try auto-login if enabled
+      const autoLoginEnabled = await AsyncStorage.getItem(STORAGE_KEYS.AUTO_LOGIN);
+      if (autoLoginEnabled === 'true') {
+        console.log('Auto-login is enabled, attempting...');
+        const autoLoginSuccess = await autoLogin();
+        if (autoLoginSuccess) {
+          console.log('Auto-login completed successfully');
+          return; // Auto-login successful, we're done
+        } else {
+          console.log('Auto-login failed, proceeding with normal initialization');
+        }
+      } else {
+        console.log('Auto-login not enabled');
+      }
+
       if (supabaseConfig.isPlaceholder) {
         // Mock mode - check AsyncStorage for saved user
-        const savedUser = await AsyncStorage.getItem('mock_user');
+        const savedUser = await AsyncStorage.getItem(STORAGE_KEYS.MOCK_USER);
         if (savedUser) {
           const user = JSON.parse(savedUser);
           currentMockUser = user;
@@ -131,18 +275,65 @@ export const useAuthService = () => {
       };
     }
 
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
 
-    if (error) {
+      if (error) {
+        // Handle "profile not found" error specifically
+        if (error.code === 'PGRST116') {
+          console.warn('Profile not found for user:', userId, 'Creating a basic profile...');
+          
+          // Try to create a basic profile first
+          try {
+            const { error: insertError } = await supabase
+              .from('profiles')
+              .insert([{
+                id: userId,
+                display_name: 'Yeni Kullanıcı',
+              }]);
+
+            if (insertError) {
+              console.error('Error creating profile:', insertError);
+            } else {
+              // Successfully created, return the new profile
+              return {
+                id: userId,
+                display_name: 'Yeni Kullanıcı',
+                created_at: new Date().toISOString(),
+              };
+            }
+          } catch (createError) {
+            console.error('Error creating profile:', createError);
+          }
+          
+          // Return a basic user object that can be used until profile is created
+          return {
+            id: userId,
+            display_name: 'Yeni Kullanıcı',
+            created_at: new Date().toISOString(),
+          };
+        }
+        
+        console.error('Error fetching profile:', error);
+        throw error;
+      }
+
+      return data;
+    } catch (error) {
       console.error('Error fetching profile:', error);
-      throw error;
+      console.warn('Falling back to basic user profile for:', userId);
+      
+      // Fallback to basic profile if any error occurs
+      return {
+        id: userId,
+        display_name: 'Kullanıcı',
+        created_at: new Date().toISOString(),
+      };
     }
-
-    return data;
   };
 
   const signUp = async (email: string, password: string, userData: Partial<User>) => {
@@ -229,48 +420,102 @@ export const useAuthService = () => {
     }
   };
 
-  const signIn = async (email: string, password: string) => {
-    if (supabaseConfig.isPlaceholder) {
-      // Mock sign in - find user by email
-      const user = mockUsers.find(u => u.email === email);
-      if (!user) {
-        throw new Error('Kullanıcı bulunamadı');
-      }
-      
-      currentMockUser = user;
-      await AsyncStorage.setItem('mock_user', JSON.stringify(user));
-      
-      setAuthState({
-        user,
-        isLoading: false,
-        isAuthenticated: true,
-      });
-    } else {
-      try {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+  const signIn = async (email: string, password: string, rememberMe: boolean = false) => {
+    try {
+      setAuthState(prev => ({ ...prev, isLoading: true }));
 
-        if (error) throw error;
-      } catch (error) {
-        // Fallback to mock mode
-        console.warn('Falling back to mock authentication for sign in:', error);
-        
+      if (supabaseConfig.isPlaceholder) {
+        // Mock sign in - find user by email
         const user = mockUsers.find(u => u.email === email);
         if (!user) {
-          throw new Error('Kullanıcı bulunamadı');
+          console.log('User not found in mock users for email:', email);
+          setAuthState(prev => ({ ...prev, isLoading: false }));
+          return null; // Return null instead of throwing error
         }
         
         currentMockUser = user;
-        await AsyncStorage.setItem('mock_user', JSON.stringify(user));
+        await AsyncStorage.setItem(STORAGE_KEYS.MOCK_USER, JSON.stringify(user));
+
+        // Save credentials if remember me is enabled
+        if (rememberMe) {
+          await saveCredentials(email, password);
+        }
         
         setAuthState({
           user,
           isLoading: false,
           isAuthenticated: true,
         });
+
+        return user;
+      } else {
+        try {
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+
+          if (error) {
+            console.log('Supabase auth error:', error.message);
+            setAuthState(prev => ({ ...prev, isLoading: false }));
+            return null; // Return null instead of throwing error
+          }
+
+          if (data.user) {
+            const profile = await getProfile(data.user.id);
+            
+            // Save credentials if remember me is enabled
+            if (rememberMe) {
+              await saveCredentials(email, password);
+            }
+
+            setAuthState({
+              user: profile,
+              isLoading: false,
+              isAuthenticated: true,
+            });
+
+            return profile;
+          }
+        } catch (error) {
+          // Fallback to mock mode
+          console.log('Falling back to mock authentication for sign in:', error);
+          
+          const user = mockUsers.find(u => u.email === email);
+          if (!user) {
+            console.log('User not found in mock fallback for email:', email);
+            setAuthState(prev => ({ ...prev, isLoading: false }));
+            return null; // Return null instead of throwing error
+          }
+          
+          currentMockUser = user;
+          await AsyncStorage.setItem(STORAGE_KEYS.MOCK_USER, JSON.stringify(user));
+
+          // Save credentials if remember me is enabled
+          if (rememberMe) {
+            await saveCredentials(email, password);
+          }
+          
+          setAuthState({
+            user,
+            isLoading: false,
+            isAuthenticated: true,
+          });
+
+          return user;
+        }
       }
+
+      setAuthState(prev => ({ ...prev, isLoading: false }));
+      return null;
+    } catch (error) {
+      console.error('Sign in error:', error);
+      setAuthState({
+        user: null,
+        isLoading: false,
+        isAuthenticated: false,
+      });
+      return null; // Return null instead of throwing error for auto-login compatibility
     }
   };
 
@@ -328,12 +573,17 @@ export const useAuthService = () => {
     }
   };
 
-  const signOut = async () => {
+  const signOut = async (clearCredentials: boolean = false) => {
     if (supabaseConfig.isPlaceholder) {
       currentMockUser = null;
-      await AsyncStorage.removeItem('mock_user');
+      await AsyncStorage.removeItem(STORAGE_KEYS.MOCK_USER);
     } else {
       await supabase.auth.signOut();
+    }
+    
+    // Clear saved credentials if requested
+    if (clearCredentials) {
+      await clearSavedCredentials();
     }
     
     setAuthState({
@@ -397,5 +647,9 @@ export const useAuthService = () => {
     verifyOTP,
     signOut,
     updateProfile,
+    autoLogin,
+    getSavedCredentials,
+    clearSavedCredentials,
+    refresh: initializeAuth,
   };
 };

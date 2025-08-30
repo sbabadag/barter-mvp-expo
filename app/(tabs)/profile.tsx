@@ -1,15 +1,30 @@
-import { View, Text, Pressable, StyleSheet, ScrollView } from "react-native";
+import { View, Text, Pressable, StyleSheet, ScrollView, Alert } from "react-native";
 import { useAuth } from "../../src/state/AuthProvider";
 
 export default function ProfileScreen(){
   const { user, signOut, isLoading } = useAuth();
   
   const handleSignOut = async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      console.error('Sign out error:', error);
-    }
+    Alert.alert(
+      'Çıkış Yap',
+      'Nasıl çıkış yapmak istiyorsunuz?',
+      [
+        {
+          text: 'İptal',
+          style: 'cancel'
+        },
+        {
+          text: 'Şifremi Hatırla',
+          onPress: () => signOut(false),
+          style: 'default'
+        },
+        {
+          text: 'Şifremi Unut',
+          onPress: () => signOut(true),
+          style: 'destructive'
+        }
+      ]
+    );
   };
 
   return (
