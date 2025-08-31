@@ -20,8 +20,16 @@ export default function WelcomeScreen() {
     password: '',
     confirmPassword: '',
     displayName: '',
+    firstName: '',
+    lastName: '',
     city: '',
     phone: '',
+    birthDate: '',
+    gender: '',
+    homeAddress: '',
+    homePostalCode: '',
+    workAddress: '',
+    workPostalCode: '',
     otp: '',
   });
   const [rememberMe, setRememberMe] = useState(false);
@@ -53,8 +61,8 @@ export default function WelcomeScreen() {
   }, [currentStep, getSavedCredentials]);
 
   const handleSignUp = async () => {
-    if (!formData.email || !formData.password || !formData.displayName) {
-      Alert.alert('Hata', 'Lütfen tüm alanları doldurun');
+    if (!formData.email || !formData.password || !formData.firstName || !formData.lastName) {
+      Alert.alert('Hata', 'Lütfen zorunlu alanları doldurun (Ad, Soyad, Email, Şifre)');
       return;
     }
 
@@ -68,13 +76,96 @@ export default function WelcomeScreen() {
       return;
     }
 
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      Alert.alert('Hata', 'Geçerli bir email adresi girin');
+      return;
+    }
+
+    // Phone format validation (if provided)
+    if (formData.phone && !/^(\+90|0)?[5][0-9]{9}$/.test(formData.phone.replace(/\s/g, ''))) {
+      Alert.alert('Hata', 'Geçerli bir Türkiye telefon numarası girin (örn: 0555 123 45 67)');
+      return;
+    }
+
+    // Birth date format validation (if provided)
+    if (formData.birthDate) {
+      const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+      const match = formData.birthDate.match(dateRegex);
+      
+      if (!match) {
+        Alert.alert('Hata', 'Doğum tarihi formatı: GG/AA/YYYY (örn: 06/08/1975)');
+        return;
+      }
+      
+      const [, day, month, year] = match;
+      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      
+      // Check if date is valid
+      if (date.getDate() != parseInt(day) || 
+          date.getMonth() != parseInt(month) - 1 || 
+          date.getFullYear() != parseInt(year)) {
+        Alert.alert('Hata', 'Geçersiz tarih. Lütfen geçerli bir tarih girin.');
+        return;
+      }
+      
+      // Check if date is reasonable (not in future, not too old)
+      const today = new Date();
+      const minDate = new Date(today.getFullYear() - 120, 0, 1); // 120 years ago
+      
+      if (date > today) {
+        Alert.alert('Hata', 'Doğum tarihi gelecekte olamaz.');
+        return;
+      }
+      
+      if (date < minDate) {
+        Alert.alert('Hata', 'Lütfen geçerli bir doğum tarihi girin.');
+        return;
+      }
+    }
+
+    // Postal code validation (if provided)
+    const postalCodeRegex = /^\d{5}$/;
+    if (formData.homePostalCode && !postalCodeRegex.test(formData.homePostalCode)) {
+      Alert.alert('Hata', 'Ev posta kodu 5 haneli rakam olmalıdır (örn: 34567)');
+      return;
+    }
+    
+    if (formData.workPostalCode && !postalCodeRegex.test(formData.workPostalCode)) {
+      Alert.alert('Hata', 'İş posta kodu 5 haneli rakam olmalıdır (örn: 34567)');
+      return;
+    }
+
     setIsLoading(true);
     try {
+      const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+      
+      // Format birth date for database (convert DD/MM/YYYY to YYYY-MM-DD)
+      let formattedBirthDate = '';
+      if (formData.birthDate) {
+        const dateMatch = formData.birthDate.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+        if (dateMatch) {
+          const [, day, month, year] = dateMatch;
+          formattedBirthDate = `${year}-${month}-${day}`;
+        }
+      }
+      
       await signUp(formData.email, formData.password, {
-        display_name: formData.displayName,
+        display_name: fullName,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
         city: formData.city,
+        phone: formData.phone,
+        birth_date: formattedBirthDate || undefined,
+        gender: formData.gender,
+        home_address: formData.homeAddress || undefined,
+        home_postal_code: formData.homePostalCode || undefined,
+        work_address: formData.workAddress || undefined,
+        work_postal_code: formData.workPostalCode || undefined,
       });
-      Alert.alert('Başarılı!', 'Hesabınız oluşturuldu!');
+      Alert.alert('Başarılı!', 'Hesabınız oluşturuldu! Artık giriş yapabilirsiniz.');
+      setCurrentStep('login');
     } catch (error: any) {
       Alert.alert('Hata', error.message || 'Kayıt sırasında bir hata oluştu');
     } finally {
@@ -192,16 +283,25 @@ export default function WelcomeScreen() {
         </View>
 
         <View style={styles.form}>
+          <Text style={styles.sectionTitle}>Kişisel Bilgiler</Text>
+          
           <TextInput
             style={styles.input}
-            placeholder="Ad Soyad"
-            value={formData.displayName}
-            onChangeText={(text) => setFormData({...formData, displayName: text})}
+            placeholder="Ad *"
+            value={formData.firstName}
+            onChangeText={(text) => setFormData({...formData, firstName: text})}
           />
 
           <TextInput
             style={styles.input}
-            placeholder="Email"
+            placeholder="Soyad *"
+            value={formData.lastName}
+            onChangeText={(text) => setFormData({...formData, lastName: text})}
+          />
+
+          <TextInput
+            style={styles.input}
+            placeholder="Email *"
             value={formData.email}
             onChangeText={(text) => setFormData({...formData, email: text})}
             keyboardType="email-address"
@@ -210,14 +310,113 @@ export default function WelcomeScreen() {
 
           <TextInput
             style={styles.input}
-            placeholder="Şehir (opsiyonel)"
+            placeholder="Telefon (örn: 0555 123 45 67)"
+            value={formData.phone}
+            onChangeText={(text) => setFormData({...formData, phone: text})}
+            keyboardType="phone-pad"
+          />
+
+          <TextInput
+            style={styles.input}
+            placeholder="Şehir"
             value={formData.city}
             onChangeText={(text) => setFormData({...formData, city: text})}
           />
 
           <TextInput
             style={styles.input}
-            placeholder="Şifre"
+            placeholder="Doğum Tarihi (GG/AA/YYYY örn: 06/08/1975)"
+            value={formData.birthDate}
+            onChangeText={(text) => {
+              // Auto-format the date input
+              let formatted = text.replace(/\D/g, ''); // Remove non-digits
+              if (formatted.length >= 2) {
+                formatted = formatted.substring(0, 2) + '/' + formatted.substring(2);
+              }
+              if (formatted.length >= 5) {
+                formatted = formatted.substring(0, 5) + '/' + formatted.substring(5, 9);
+              }
+              setFormData({...formData, birthDate: formatted});
+            }}
+            keyboardType="numeric"
+            maxLength={10}
+          />
+
+          <View style={styles.genderContainer}>
+            <Text style={styles.genderLabel}>Cinsiyet:</Text>
+            <View style={styles.genderButtons}>
+              <Pressable 
+                style={[styles.genderButton, formData.gender === 'male' && styles.genderButtonSelected]}
+                onPress={() => setFormData({...formData, gender: 'male'})}
+              >
+                <Text style={[styles.genderButtonText, formData.gender === 'male' && styles.genderButtonTextSelected]}>Erkek</Text>
+              </Pressable>
+              <Pressable 
+                style={[styles.genderButton, formData.gender === 'female' && styles.genderButtonSelected]}
+                onPress={() => setFormData({...formData, gender: 'female'})}
+              >
+                <Text style={[styles.genderButtonText, formData.gender === 'female' && styles.genderButtonTextSelected]}>Kadın</Text>
+              </Pressable>
+              <Pressable 
+                style={[styles.genderButton, formData.gender === 'other' && styles.genderButtonSelected]}
+                onPress={() => setFormData({...formData, gender: 'other'})}
+              >
+                <Text style={[styles.genderButtonText, formData.gender === 'other' && styles.genderButtonTextSelected]}>Diğer</Text>
+              </Pressable>
+            </View>
+          </View>
+
+          <Text style={styles.sectionTitle}>Adres Bilgileri (İsteğe Bağlı)</Text>
+
+          <TextInput
+            style={styles.input}
+            placeholder="Ev Adresi"
+            value={formData.homeAddress}
+            onChangeText={(text) => setFormData({...formData, homeAddress: text})}
+            multiline
+            numberOfLines={2}
+          />
+
+          <TextInput
+            style={styles.input}
+            placeholder="Ev Posta Kodu (5 haneli, örn: 34567)"
+            value={formData.homePostalCode}
+            onChangeText={(text) => {
+              // Only allow 5 digits
+              const formatted = text.replace(/\D/g, '').substring(0, 5);
+              setFormData({...formData, homePostalCode: formatted});
+            }}
+            keyboardType="numeric"
+            maxLength={5}
+          />
+
+          <TextInput
+            style={styles.input}
+            placeholder="İş/Ofis Adresi"
+            value={formData.workAddress}
+            onChangeText={(text) => setFormData({...formData, workAddress: text})}
+            multiline
+            numberOfLines={2}
+          />
+
+          <TextInput
+            style={styles.input}
+            placeholder="İş Posta Kodu (5 haneli, örn: 34567)"
+            value={formData.workPostalCode}
+            onChangeText={(text) => {
+              // Only allow 5 digits
+              const formatted = text.replace(/\D/g, '').substring(0, 5);
+              setFormData({...formData, workPostalCode: formatted});
+            }}
+            keyboardType="numeric"
+            maxLength={5}
+          />
+
+          <Text style={styles.sectionTitle}>Güvenlik</Text>
+
+          <TextInput
+            style={styles.input}
+            placeholder="Şifre *"
             value={formData.password}
             onChangeText={(text) => setFormData({...formData, password: text})}
             secureTextEntry
@@ -225,11 +424,13 @@ export default function WelcomeScreen() {
 
           <TextInput
             style={styles.input}
-            placeholder="Şifre Tekrar"
+            placeholder="Şifre Tekrar *"
             value={formData.confirmPassword}
             onChangeText={(text) => setFormData({...formData, confirmPassword: text})}
             secureTextEntry
           />
+
+          <Text style={styles.formNote}>* Zorunlu alanlar</Text>
 
           <Pressable 
             style={[styles.button, styles.primaryButton, isLoading && styles.disabledButton]}
@@ -529,5 +730,55 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
     flex: 1,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginTop: 15,
+    marginBottom: 5,
+  },
+  genderContainer: {
+    marginVertical: 10,
+  },
+  genderLabel: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 10,
+    fontWeight: '500',
+  },
+  genderButtons: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  genderButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    backgroundColor: '#f8f9fa',
+    alignItems: 'center',
+  },
+  genderButtonSelected: {
+    backgroundColor: '#00d4aa',
+    borderColor: '#00d4aa',
+  },
+  genderButtonText: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '500',
+  },
+  genderButtonTextSelected: {
+    color: 'white',
+    fontWeight: '600',
+  },
+  formNote: {
+    fontSize: 12,
+    color: '#666',
+    fontStyle: 'italic',
+    marginTop: 5,
+    textAlign: 'center',
   },
 });

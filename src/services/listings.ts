@@ -30,6 +30,12 @@ export type Listing = {
   created_at: string;
   image_url?: string; // Primary image URL
   images?: string[]; // Array of all image URLs
+  currency?: string; // Currency code (TRY, USD, EUR)
+  category?: string; // Product category
+  location?: string; // Seller location
+  seller_name?: string; // Seller display name
+  condition?: 'new' | 'like_new' | 'good' | 'fair' | 'poor'; // Item condition
+  status?: 'active' | 'sold' | 'inactive'; // Listing status
 };
 
 export const useListings = () => useQuery({
@@ -50,26 +56,38 @@ export const useListings = () => useQuery({
             "https://picsum.photos/300/400?random=11",
             "https://picsum.photos/300/400?random=12",
             "https://picsum.photos/300/400?random=13",
-          ]
+          ],
+          currency: 'TRY',
+          category: 'Giyim',
+          location: 'İstanbul',
+          seller_name: 'solo',
+          condition: 'good' as const,
+          status: 'active' as const
         },
         {
           id: generateMockUUID("mock_2"), 
-          title: "Midi sundress with ruched front",
-          description: "Elegant mint green dress with ruched detailing",
-          price: 18,
+          title: "iPhone 13 Pro 128GB",
+          description: "Excellent condition iPhone 13 Pro with original box and accessories",
+          price: 18000,
           created_at: new Date().toISOString(),
           image_url: "https://picsum.photos/300/400?random=2",
           images: [
             "https://picsum.photos/300/400?random=2",
             "https://picsum.photos/300/400?random=21",
             "https://picsum.photos/300/400?random=22",
-          ]
+          ],
+          currency: 'TRY',
+          category: 'Elektronik',
+          location: 'Ankara',
+          seller_name: '3dmake',
+          condition: 'like_new' as const,
+          status: 'active' as const
         },
         {
           id: generateMockUUID("mock_3"),
-          title: "Midi dress in pink ditsy floral",
-          description: "Cute pink floral pattern midi dress",
-          price: 14,
+          title: "Nike Air Max 90 Spor Ayakkabı",
+          description: "Orijinal Nike Air Max 90 ayakkabı, 42 numara",
+          price: 1200,
           created_at: new Date().toISOString(),
           image_url: "https://picsum.photos/300/400?random=3",
           images: [
@@ -78,51 +96,75 @@ export const useListings = () => useQuery({
             "https://picsum.photos/300/400?random=32",
             "https://picsum.photos/300/400?random=33",
             "https://picsum.photos/300/400?random=34",
-          ]
+          ],
+          currency: 'TRY',
+          category: 'Ayakkabı',
+          location: 'İzmir',
+          seller_name: 'emirfashionn',
+          condition: 'good' as const,
+          status: 'active' as const
         },
         {
           id: generateMockUUID("mock_4"),
-          title: "Cami maxi dress in polka dot",
-          description: "Classic black polka dot maxi dress",
-          price: 25,
+          title: "Vintage Deri Çanta",
+          description: "Hakiki deri vintage tarzı el çantası",
+          price: 450,
           created_at: new Date().toISOString(),
           image_url: "https://picsum.photos/300/400?random=4",
           images: [
             "https://picsum.photos/300/400?random=4",
             "https://picsum.photos/300/400?random=41",
-          ]
+          ],
+          currency: 'TRY',
+          category: 'Çanta',
+          location: 'Bursa',
+          seller_name: 'vintage_store',
+          condition: 'fair' as const,
+          status: 'active' as const
         },
         {
           id: generateMockUUID("mock_5"),
-          title: "Summer dress in yellow",
-          description: "Bright yellow summer dress for warm days",
-          price: 22,
+          title: "MacBook Air M2 2022",
+          description: "13 inch MacBook Air with M2 chip, 8GB RAM, 256GB SSD",
+          price: 25000,
           created_at: new Date().toISOString(),
           image_url: "https://picsum.photos/300/400?random=5",
           images: [
             "https://picsum.photos/300/400?random=5",
             "https://picsum.photos/300/400?random=51",
             "https://picsum.photos/300/400?random=52",
-          ]
+          ],
+          currency: 'TRY',
+          category: 'Elektronik',
+          location: 'İstanbul',
+          seller_name: 'tech_guru',
+          condition: 'like_new' as const,
+          status: 'active' as const
         },
         {
           id: generateMockUUID("mock_6"),
-          title: "Casual blue midi dress",
-          description: "Comfortable light blue midi dress",
-          price: 20,
+          title: "Harry Potter Kitap Seti",
+          description: "Tam set Harry Potter kitapları, orijinal İngilizce",
+          price: 300,
           created_at: new Date().toISOString(),
           image_url: "https://picsum.photos/300/400?random=6",
           images: [
             "https://picsum.photos/300/400?random=6",
             "https://picsum.photos/300/400?random=61",
             "https://picsum.photos/300/400?random=62",
-          ]
+          ],
+          currency: 'TRY',
+          category: 'Kitap',
+          location: 'Ankara',
+          seller_name: 'book_lover',
+          condition: 'good' as const,
+          status: 'active' as const
         },
         {
           id: generateMockUUID("mock_7"),
-          title: "Floral wrap dress",
-          description: "Elegant wrap style dress with floral print",
-          price: 32,
+          title: "Yoga Matı ve Aksesuarları",
+          description: "Premium yoga matı, blok ve kayış seti",
+          price: 200,
           created_at: new Date().toISOString(),
           image_url: "https://picsum.photos/300/400?random=7",
           images: [
@@ -130,33 +172,69 @@ export const useListings = () => useQuery({
             "https://picsum.photos/300/400?random=71",
             "https://picsum.photos/300/400?random=72",
             "https://picsum.photos/300/400?random=73",
-          ]
+          ],
+          currency: 'TRY',
+          category: 'Spor',
+          location: 'İzmir',
+          seller_name: 'fitness_life',
+          condition: 'new' as const,
+          status: 'active' as const
         },
         {
           id: generateMockUUID("mock_8"),
-          title: "Striped casual dress",
-          description: "Navy and white striped casual dress",
-          price: 26,
+          title: "Kahve Makinesi Delonghi",
+          description: "Otomatik espresso kahve makinesi, az kullanılmış",
+          price: 1500,
           created_at: new Date().toISOString(),
           image_url: "https://picsum.photos/300/400?random=8",
           images: [
             "https://picsum.photos/300/400?random=8",
             "https://picsum.photos/300/400?random=81",
             "https://picsum.photos/300/400?random=82",
-          ]
+          ],
+          currency: 'TRY',
+          category: 'Ev & Yaşam',
+          location: 'Antalya',
+          seller_name: 'coffee_master',
+          condition: 'like_new' as const,
+          status: 'active' as const
         }
       ];
       
-      // Combine mock listings with newly created ones
+      // Combine user-created listings (newest first) with mock data
       const allListings = [...newListings, ...mockListings];
       
-      console.log("Mock: Returning mock listings data with", newListings.length, "new listings");
+      console.log(`Mock: Returning ${allListings.length} listings (${newListings.length} user-created, ${mockListings.length} mock)`);
+      console.log("Mock: User listings will appear first, showing real photos and data");
       return allListings;
     }
 
-    const { data, error } = await supabase.from("listings").select("id, title, description, price, created_at").order("created_at", { ascending: false }).limit(100);
+    const { data, error } = await supabase.from("listings").select(`
+      id, 
+      title, 
+      description, 
+      price, 
+      currency,
+      category,
+      location,
+      seller_name,
+      condition,
+      status,
+      images,
+      created_at
+    `).eq("status", "active").order("created_at", { ascending: false }).limit(100);
     if (error) throw error;
-    return data as Listing[];
+    
+    // Transform the data to include the primary image URL from the images array
+    const transformedData = data?.map(item => ({
+      ...item,
+      image_url: item.images && Array.isArray(item.images) && item.images.length > 0 
+        ? item.images[0] 
+        : `https://picsum.photos/300/400?random=${item.id.slice(-3)}`,
+      images: item.images || []
+    }));
+    
+    return transformedData as Listing[];
   }
 });
 
@@ -208,13 +286,48 @@ export const useListing = (id: string) => useQuery({
       return mockListing;
     }
 
-    const { data, error } = await supabase.from("listings").select("id, title, description, price, created_at").eq("id", id).single();
+    const { data, error } = await supabase.from("listings").select(`
+      id, 
+      title, 
+      description, 
+      price, 
+      currency,
+      category,
+      location,
+      seller_name,
+      condition,
+      status,
+      images,
+      created_at
+    `).eq("id", id).single();
     if (error) throw error;
-    return data as Listing;
+    if (!data) throw new Error("Listing not found");
+    
+    // Transform the data to include the primary image URL from the images array
+    const transformedListing = {
+      ...data,
+      image_url: data.images && Array.isArray(data.images) && data.images.length > 0 
+        ? data.images[0] 
+        : `https://picsum.photos/300/400?random=${data.id.slice(-3)}`,
+      images: data.images || []
+    };
+    
+    return transformedListing as Listing;
   }
 });
 
-export const createListing = async (input: { title: string; description: string; price: number | null; imageUris: string[]; }) => {
+export const createListing = async (
+  input: { 
+    title: string; 
+    description: string; 
+    price: number | null; 
+    imageUris: string[];
+    category?: string;
+    location?: string;
+    condition?: 'new' | 'like_new' | 'good' | 'fair' | 'poor';
+  },
+  onProgress?: (progress: number, message: string) => void
+) => {
   console.log("createListing called with input:", input);
   console.log("Supabase configuration:", {
     url: supabaseConfig.url,
@@ -224,59 +337,124 @@ export const createListing = async (input: { title: string; description: string;
   if (supabaseConfig.isPlaceholder) {
     // Mock implementation for development/testing
     console.log("Mock: Creating listing", input);
-    console.log("Mock: Simulating network delay...");
+    onProgress?.(10, "Listing oluşturuluyor...");
     
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Simulate network delay with progress updates
+    await new Promise(resolve => setTimeout(resolve, 500));
+    onProgress?.(50, "Görüntüler işleniyor...");
+    
+    await new Promise(resolve => setTimeout(resolve, 500));
+    onProgress?.(90, "Listing kaydediliyor...");
+    
+    await new Promise(resolve => setTimeout(resolve, 300));
+    onProgress?.(100, "Tamamlandı!");
     
     // Generate a mock listing ID
     const mockListingId = `user_${Date.now()}`;
     
-    // Create a new listing object with the user's data
+    // Create a new listing object with the user's real data
     const newListing: Listing = {
       id: mockListingId,
       title: input.title,
       description: input.description,
       price: input.price,
+      currency: 'TRY',
+      category: input.category || 'Genel',
+      location: input.location || 'İstanbul',
+      seller_name: 'Sen', // Current user
+      condition: input.condition || 'good',
+      status: 'active',
       created_at: new Date().toISOString(),
-      image_url: input.imageUris[0] || `https://picsum.photos/300/400?random=${mockListingId}`, // Use first image or fallback
-      images: input.imageUris.length > 0 ? input.imageUris : [`https://picsum.photos/300/400?random=${mockListingId}`] // Store all images
+      image_url: input.imageUris[0] || `https://picsum.photos/300/400?random=${mockListingId}`, 
+      images: input.imageUris.length > 0 ? input.imageUris : [`https://picsum.photos/300/400?random=${mockListingId}`]
     };
     
     // Add to our local storage (at the beginning so it appears first)
     newListings.unshift(newListing);
     
     console.log("Mock: Listing created successfully with ID:", mockListingId);
+    console.log("Mock: User data will be shown in listings");
     
     // Return immediately, don't proceed to real Supabase code
     return mockListingId;
   }
-  
+
   console.log("Real Supabase: Proceeding with actual database insertion...");
+  onProgress?.(5, "Başlıyor...");
 
   // Real Supabase implementation
   try {
-    // Test için geçici seller_id null ile oluşturuyoruz
+    // First upload images to storage and get URLs
+    const uploadedImageUrls: string[] = [];
+    const totalImages = input.imageUris.length;
+    
+    onProgress?.(10, `${totalImages} görüntü yükleniyor...`);
+    
+    for (let i = 0; i < input.imageUris.length; i++) {
+      const uri = input.imageUris[i];
+      const imageProgress = 10 + ((i / totalImages) * 70); // 10-80% for images
+      onProgress?.(imageProgress, `Görüntü ${i + 1}/${totalImages} yükleniyor...`);
+      
+      console.log(`Uploading image ${i + 1}/${input.imageUris.length}...`);
+      
+      try {
+        const base64 = await FileSystem.readAsStringAsync(uri, { 
+          encoding: FileSystem.EncodingType.Base64 
+        });
+        
+        // Generate unique filename
+        const fileExtension = uri.split('.').pop() || 'jpg';
+        const fileName = `${Date.now()}_${i}.${fileExtension}`;
+        const filePath = `listings/${fileName}`;
+        
+        // Upload to Supabase storage
+        const uploadResult = await supabase.storage
+          .from("listing-photos")
+          .upload(filePath, decode(base64), { 
+            contentType: `image/${fileExtension}`,
+            upsert: true 
+          });
+        
+        if (uploadResult.error) {
+          console.error(`Error uploading image ${i + 1}:`, uploadResult.error);
+          throw uploadResult.error;
+        }
+        
+        // Get public URL using config URL
+        const publicUrl = `${supabaseConfig.url}/storage/v1/object/public/listing-photos/${filePath}`;
+        uploadedImageUrls.push(publicUrl);
+        console.log(`Image ${i + 1} uploaded successfully`);
+      } catch (error) {
+        console.error(`Failed to upload image ${i + 1}:`, error);
+        // Continue with other images even if one fails
+      }
+    }
+
+    onProgress?.(85, "Listing kaydediliyor...");
+
+    // Create the listing with uploaded image URLs
     const { data, error } = await supabase.from("listings").insert({ 
       title: input.title, 
       description: input.description, 
       price: input.price,
-      seller_id: null // Test için - normalde gerçek user ID olacak
+      category: input.category || null,
+      location: input.location || null,
+      condition: input.condition || null,
+      currency: 'TRY',
+      status: 'active',
+      images: uploadedImageUrls, // Store array of image URLs
+      seller_id: null // TODO: Get from current user when auth is implemented
     }).select("id").single();
+    
     if (error) throw error;
-    const listingId = data.id;
-
-    // upload images to storage bucket "listing-photos"
-    for (let i = 0; i < input.imageUris.length; i++) {
-      const uri = input.imageUris[i];
-      const base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
-      const filePath = `${listingId}/${Date.now()}_${i}.jpg`;
-      const { error: upErr } = await supabase.storage.from("listing-photos").upload(filePath, decode(base64), { contentType: "image/jpeg", upsert: true });
-      if (upErr) throw upErr;
-      await supabase.from("listing_photos").insert({ listing_id: listingId, url: filePath, sort_order: i });
-    }
-
-    return listingId;
+    if (!data) throw new Error("Failed to create listing");
+    
+    onProgress?.(100, "Tamamlandı!");
+    
+    console.log("Listing created successfully with ID:", data.id);
+    console.log("Images uploaded:", uploadedImageUrls.length);
+    
+    return data.id;
   } catch (error) {
     console.error("Real Supabase error:", error);
     throw error;

@@ -1,9 +1,10 @@
-import { View, Text, Pressable, Image, StyleSheet, Dimensions } from "react-native";
+import { View, Text, Pressable, Image, StyleSheet, Dimensions, TextInput, ScrollView } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { useListings } from "../../src/services/listings";
 import CommentsModal from "../../src/components/CommentsModal";
 import { Link, useRouter } from "expo-router";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { Ionicons } from '@expo/vector-icons';
 
 const { width } = Dimensions.get('window');
 const cardWidth = width * 0.48; // Each card takes 48% of screen width - much wider!
@@ -11,6 +12,8 @@ const cardWidth = width * 0.48; // Each card takes 48% of screen width - much wi
 export default function FeedScreen() {
   const router = useRouter();
   const { data, isLoading, refetch } = useListings();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('Tümü');
   const [likedItems, setLikedItems] = useState<{[key: string]: boolean}>({});
   const [likeCounts, setLikeCounts] = useState<{[key: string]: number}>({});
   const [updateKey, setUpdateKey] = useState(Date.now());
@@ -19,6 +22,50 @@ export default function FeedScreen() {
     listingId: '',
     listingTitle: ''
   });
+
+  // Categories for filtering
+  const categories = ['Tümü', 'Giyim', 'Aksesuar', 'Ayakkabı', 'Çanta', 'Elektronik', 'Ev & Yaşam', 'Spor', 'Kitap'];
+
+  // Filter data based on search query and category
+  const filteredData = useMemo(() => {
+    if (!data) return [];
+
+    let filtered = data;
+
+    // Filter by category
+    if (selectedCategory !== 'Tümü') {
+      filtered = filtered.filter(item => 
+        item.category?.toLowerCase() === selectedCategory.toLowerCase() ||
+        (selectedCategory === 'Giyim' && (!item.category || item.category.toLowerCase().includes('dress') || item.category.toLowerCase().includes('giyim'))) ||
+        (selectedCategory === 'Aksesuar' && item.category?.toLowerCase().includes('aksesuar')) ||
+        (selectedCategory === 'Ayakkabı' && item.category?.toLowerCase().includes('ayakkabı')) ||
+        (selectedCategory === 'Çanta' && item.category?.toLowerCase().includes('çanta')) ||
+        (selectedCategory === 'Elektronik' && item.category?.toLowerCase().includes('elektronik')) ||
+        (selectedCategory === 'Ev & Yaşam' && item.category?.toLowerCase().includes('ev')) ||
+        (selectedCategory === 'Spor' && item.category?.toLowerCase().includes('spor')) ||
+        (selectedCategory === 'Kitap' && item.category?.toLowerCase().includes('kitap'))
+      );
+    }
+
+    // Filter by search query (searches through title, description, seller name, and category)
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter(item => 
+        item.title?.toLowerCase().includes(query) ||
+        item.description?.toLowerCase().includes(query) ||
+        item.seller_name?.toLowerCase().includes(query) ||
+        item.category?.toLowerCase().includes(query) ||
+        // Also search in auto-generated seller names
+        (item.id.includes('mock_1') && 'solo'.includes(query)) ||
+        (item.id.includes('mock_2') && '3dmake'.includes(query)) ||
+        (item.id.includes('mock_3') && 'solo'.includes(query)) ||
+        (item.id.includes('mock_4') && 'emirfashionn'.includes(query)) ||
+        (item.id.includes('user_') && 'sen'.includes(query))
+      );
+    }
+
+    return filtered;
+  }, [data, searchQuery, selectedCategory]);
 
   const handleLike = (itemId: string) => {
     console.log('Like button pressed for item:', itemId);
@@ -78,7 +125,7 @@ export default function FeedScreen() {
     if (index % 2 !== 0) return null; // Only render on even indices
     
     const currentItem = item;
-    const nextItem = data?.[index + 1];
+    const nextItem = filteredData?.[index + 1];
     
     return (
       <View style={styles.row}>
@@ -113,11 +160,13 @@ export default function FeedScreen() {
             />
             <View style={styles.sellerDetails}>
               <Text style={styles.sellerName}>
-                {item.id.includes('mock_1') ? 'solo' :
-                 item.id.includes('mock_2') ? '3dmake' :
-                 item.id.includes('mock_3') ? 'solo' :
-                 item.id.includes('mock_4') ? 'emirfashionn' :
-                 'user' + item.id.slice(-2)}
+                {item.seller_name || 
+                 (item.id.includes('mock_1') ? 'solo' :
+                  item.id.includes('mock_2') ? '3dmake' :
+                  item.id.includes('mock_3') ? 'solo' :
+                  item.id.includes('mock_4') ? 'emirfashionn' :
+                  item.id.includes('user_') ? 'Sen' :
+                  'user' + item.id.slice(-2))}
               </Text>
               <View style={styles.ratingRow}>
                 <View style={styles.ratingContainer}>
@@ -152,11 +201,17 @@ export default function FeedScreen() {
           <View style={styles.cardContent}>
             <Text style={styles.title} numberOfLines={1}>{item.title}</Text>
             <Text style={styles.category}>
-              {item.title.toLowerCase().includes('dress') ? 'Giyim' :
-               item.title.toLowerCase().includes('book') ? 'Edebiyat' :
-               item.title.toLowerCase().includes('tech') ? 'Elektronik' : 'Diğer'}
+              {item.category || 
+               (item.title.toLowerCase().includes('dress') ? 'Giyim' :
+                item.title.toLowerCase().includes('book') ? 'Edebiyat' :
+                item.title.toLowerCase().includes('tech') ? 'Elektronik' : 'Diğer')}
             </Text>
-            <Text style={styles.price}>{item.price} TL</Text>
+            {item.location && (
+              <Text style={styles.location}>📍 {item.location}</Text>
+            )}
+            <Text style={styles.price}>
+              {item.price ? `${item.price} ${item.currency || 'TL'}` : 'Takas'}
+            </Text>
           </View>
         </Pressable>
         
@@ -193,12 +248,72 @@ export default function FeedScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Keşfet</Text>
+      
+      {/* Search Section */}
+      <View style={styles.searchSection}>
+        {/* Search Input */}
+        <View style={styles.searchContainer}>
+          <Ionicons name="search" size={20} color="#666" style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Ürün, satıcı veya kategori ara..."
+            placeholderTextColor="#999"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            returnKeyType="search"
+          />
+          {searchQuery.length > 0 && (
+            <Pressable 
+              onPress={() => setSearchQuery('')}
+              style={styles.clearButton}
+            >
+              <Ionicons name="close-circle" size={20} color="#666" />
+            </Pressable>
+          )}
+        </View>
+
+        {/* Category Filter */}
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          style={styles.categoryScroll}
+          contentContainerStyle={styles.categoryContainer}
+        >
+          {categories.map((category) => (
+            <Pressable
+              key={category}
+              style={[
+                styles.categoryChip,
+                selectedCategory === category && styles.categoryChipActive
+              ]}
+              onPress={() => setSelectedCategory(category)}
+            >
+              <Text 
+                style={[
+                  styles.categoryChipText,
+                  selectedCategory === category && styles.categoryChipTextActive
+                ]}
+              >
+                {category}
+              </Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+
+        {/* Results Count */}
+        {(searchQuery.trim() || selectedCategory !== 'Tümü') && (
+          <Text style={styles.resultsCount}>
+            {filteredData?.length || 0} sonuç bulundu
+          </Text>
+        )}
+      </View>
+
       {isLoading ? (
         <Text style={styles.loading}>Yükleniyor…</Text>
       ) : (
         <FlashList
           estimatedItemSize={300}
-          data={data}
+          data={filteredData}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
           extraData={[likedItems, likeCounts, updateKey]}
@@ -358,6 +473,11 @@ const styles = StyleSheet.create({
     color: '#666',
     marginBottom: 6,
   },
+  location: {
+    fontSize: 12,
+    color: '#888',
+    marginBottom: 4,
+  },
   price: {
     fontSize: 18,
     fontWeight: '700',
@@ -403,5 +523,72 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 16,
+  },
+  // Search Section Styles
+  searchSection: {
+    marginBottom: 16,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#333',
+    paddingVertical: 4,
+  },
+  clearButton: {
+    padding: 4,
+  },
+  categoryScroll: {
+    marginBottom: 8,
+  },
+  categoryContainer: {
+    paddingHorizontal: 4,
+  },
+  categoryChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginRight: 8,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  categoryChipActive: {
+    backgroundColor: '#007AFF',
+    borderColor: '#007AFF',
+  },
+  categoryChipText: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '500',
+  },
+  categoryChipTextActive: {
+    color: 'white',
+    fontWeight: '600',
+  },
+  resultsCount: {
+    fontSize: 14,
+    color: '#666',
+    marginLeft: 4,
+    fontStyle: 'italic',
   },
 });

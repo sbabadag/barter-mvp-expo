@@ -8,9 +8,24 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "seed-db": "node scripts/seedDatabase.js",
+    "seed-basic": "node scripts/seedBasic.js",
+    "check-schema": "node scripts/checkSchema.js",
+    "setup-db": "echo 'Please run the SQL from sql/safe_complete_setup.sql in your Supabase SQL editor first, then run: npm run seed-db'",
+    "db-guide": "node scripts/setup_database.js",
+    "fix-rls": "node scripts/fix_profile_rls.js",
+    "fix-rls-policies": "echo 'Please run the SQL from sql/fix_rls_policies.sql in your Supabase SQL editor to fix Row Level Security policies'",
+    "fix-rls-error": "node scripts/fix_rls_error.js",
+    "fix-postal-codes": "node scripts/fix_postal_code_error.js",
+    "complete-setup": "echo 'Please run the SQL from sql/COMPLETE_SETUP_ALL.sql in your Supabase SQL editor - this fixes EVERYTHING!'",
+    "setup-guide": "node scripts/complete_setup_guide.js",
+    "fix-constraints": "echo 'Please run the SQL from sql/fix_constraints.sql in your Supabase SQL editor to fix constraint conflicts'",
+    "update-profiles": "node scripts/update_profiles_schema.js",
+    "fix-registration": "node scripts/fix_registration_error.js"
   },
   "dependencies": {
+    "@expo/vector-icons": "^14.1.0",
     "@react-native-async-storage/async-storage": "2.1.2",
     "@react-native-community/netinfo": "^11.4.1",
     "@shopify/flash-list": "1.7.6",
@@ -19,7 +34,6 @@
     "base64-arraybuffer": "^1.0.2",
     "expo": "53.0.22",
     "expo-constants": "~17.1.7",
-    "expo-dev-client": "~5.2.4",
     "expo-file-system": "~18.1.11",
     "expo-image": "~2.4.0",
     "expo-image-picker": "~16.1.4",
@@ -32,18 +46,24 @@
     "react-native-gesture-handler": "~2.24.0",
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
+    "react-native-screens": "~4.11.1",
     "react-native-svg": "15.11.2",
     "react-native-tab-view": "^3.5.2",
     "zod": "^3.23.8",
-    "zustand": "^4.5.5",
-    "react-native-screens": "~4.11.1"
+    "zustand": "^4.5.5"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@react-native/eslint-config": "^0.76.0",
+    "@types/cheerio": "^0.22.35",
+    "@types/node": "^20.0.0",
+    "@types/node-fetch": "^2.6.9",
     "@types/react": "~19.0.10",
     "ajv": "^8.12.0",
+    "cheerio": "^1.0.0",
     "eslint": "^9.9.0",
+    "node-fetch": "^3.3.2",
+    "ts-node": "^10.9.2",
     "typescript": "~5.8.3"
   }
 }

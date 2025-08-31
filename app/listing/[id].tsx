@@ -1,10 +1,10 @@
-import { View, Text, Pressable, ScrollView, Image, StyleSheet, Dimensions, Alert } from "react-native";
+import { View, Text, Pressable, ScrollView, Image, StyleSheet, Dimensions, Alert, PanResponder } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useListing } from "../../src/services/listings";
 import { useBidsForListing } from "../../src/services/bids";
 import { useAuth } from "../../src/state/AuthProvider";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import BiddingModal from "../../src/components/BiddingModal";
 import ErrorBoundary from "../../src/components/ErrorBoundary";
 
@@ -17,6 +17,47 @@ export default function ListingDetail(){
   const { user, isAuthenticated } = useAuth();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showBiddingModal, setShowBiddingModal] = useState(false);
+
+  // Create a simple panResponder with dynamic functions
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        // Only respond to horizontal swipes
+        return Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
+      },
+      onPanResponderMove: (evt, gestureState) => {
+        // Optional: You can add visual feedback here
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        const { dx, vx } = gestureState;
+        
+        // Determine if swipe was significant enough
+        const swipeThreshold = width * 0.25; // 25% of screen width
+        const velocityThreshold = 0.5;
+        
+        if (Math.abs(dx) > swipeThreshold || Math.abs(vx) > velocityThreshold) {
+          // Get current images from data
+          const currentImages = data?.images || [
+            data?.image_url || `https://picsum.photos/400/500?random=${data?.id}`,
+            `https://picsum.photos/400/500?random=${data?.id}2`,
+            `https://picsum.photos/400/500?random=${data?.id}3`,
+          ];
+          
+          if (dx > 0) {
+            // Swipe right - go to previous image
+            setCurrentImageIndex((prevIndex) => 
+              prevIndex === 0 ? currentImages.length - 1 : prevIndex - 1
+            );
+          } else {
+            // Swipe left - go to next image
+            setCurrentImageIndex((prevIndex) => 
+              prevIndex === currentImages.length - 1 ? 0 : prevIndex + 1
+            );
+          }
+        }
+      },
+    })
+  ).current;
 
   if (!data) return (
     <View style={styles.loadingContainer}>
@@ -31,6 +72,7 @@ export default function ListingDetail(){
     `https://picsum.photos/400/500?random=${data.id}3`,
   ];
 
+  // Helper functions for button navigation
   const nextImage = () => {
     setCurrentImageIndex((prevIndex) => 
       prevIndex === images.length - 1 ? 0 : prevIndex + 1
@@ -48,13 +90,15 @@ export default function ListingDetail(){
       <ScrollView style={styles.container}>
       {/* Image Gallery */}
       <View style={styles.imageGallery}>
-        <Image 
-          source={{ uri: images[currentImageIndex] }} 
-          style={styles.mainImage}
-          resizeMode="cover"
-        />
+        <View style={styles.imageContainer} {...panResponder.panHandlers}>
+          <Image 
+            source={{ uri: images[currentImageIndex] }} 
+            style={styles.mainImage}
+            resizeMode="cover"
+          />
+        </View>
         
-        {/* Image Navigation */}
+        {/* Image Navigation Buttons */}
         {images.length > 1 && (
           <>
             <Pressable style={styles.prevButton} onPress={prevImage}>
@@ -75,6 +119,11 @@ export default function ListingDetail(){
                   ]}
                 />
               ))}
+            </View>
+            
+            {/* Swipe Indicator */}
+            <View style={styles.swipeIndicator}>
+              <Text style={styles.swipeText}>← Fotoğraflar arasında kaydırın →</Text>
             </View>
           </>
         )}
@@ -247,6 +296,11 @@ const styles = StyleSheet.create({
     width: width,
     height: 400,
     position: 'relative',
+    overflow: 'hidden',
+  },
+  imageContainer: {
+    width: '100%',
+    height: '100%',
   },
   mainImage: {
     width: '100%',
@@ -292,6 +346,22 @@ const styles = StyleSheet.create({
   },
   activeDot: {
     backgroundColor: 'white',
+  },
+  swipeIndicator: {
+    position: 'absolute',
+    bottom: 40,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+  },
+  swipeText: {
+    fontSize: 12,
+    color: 'white',
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    overflow: 'hidden',
   },
   thumbnailContainer: {
     paddingHorizontal: 16,
