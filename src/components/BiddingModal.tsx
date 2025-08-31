@@ -13,7 +13,7 @@ import {
   Platform,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { createBid } from '../services/bids';
+import { useCreateOffer } from '../services/tekliflerim';
 import { useAuth } from '../state/AuthProvider';
 
 interface BiddingModalProps {
@@ -36,8 +36,8 @@ export default function BiddingModal({
   const [bidAmount, setBidAmount] = useState('');
   const [message, setMessage] = useState('');
   const [expires24h, setExpires24h] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const { user, isAuthenticated } = useAuth();
+  const createOfferMutation = useCreateOffer();
 
   const handleSubmit = async () => {
     // Check authentication first
@@ -72,39 +72,33 @@ export default function BiddingModal({
   };
 
   const submitBid = async (amount: number) => {
-    setIsSubmitting(true);
-    
     try {
-      console.log('About to call createBid with user:', user);
-      console.log('User object details:', JSON.stringify(user, null, 2));
-      
-      const result = await createBid(listingId, amount, message.trim() || undefined, expires24h, user);
-      
-      if (result.success) {
-        Alert.alert(
-          'Başarılı!',
-          'Teklifiniz gönderildi. Satıcı en kısa sürede cevap verecektir.',
-          [
-            {
-              text: 'Tamam',
-              onPress: () => {
-                setBidAmount('');
-                setMessage('');
-                setExpires24h(true);
-                onClose();
-                onBidSubmitted?.();
-              },
+      await createOfferMutation.mutateAsync({
+        listingId,
+        amount,
+        message: message.trim() || undefined,
+        expiresIn24h: expires24h,
+      });
+
+      Alert.alert(
+        'Başarılı!',
+        'Teklifiniz gönderildi. Satıcı en kısa sürede cevap verecektir.',
+        [
+          {
+            text: 'Tamam',
+            onPress: () => {
+              setBidAmount('');
+              setMessage('');
+              setExpires24h(true);
+              onClose();
+              onBidSubmitted?.();
             },
-          ]
-        );
-      } else {
-        Alert.alert('Hata', result.error || 'Teklif gönderilirken hata oluştu');
-      }
-    } catch (error) {
-      Alert.alert('Hata', 'Beklenmeyen bir hata oluştu');
+          },
+        ]
+      );
+    } catch (error: any) {
+      Alert.alert('Hata', error.message || 'Teklif gönderilirken hata oluştu');
       console.error('Bid submission error:', error);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -219,12 +213,12 @@ export default function BiddingModal({
           </Pressable>
           
           <Pressable
-            style={[styles.button, styles.submitButton, isSubmitting && styles.disabledButton]}
+            style={[styles.button, styles.submitButton, createOfferMutation.isPending && styles.disabledButton]}
             onPress={handleSubmit}
-            disabled={isSubmitting}
+            disabled={createOfferMutation.isPending}
           >
             <Text style={styles.submitButtonText}>
-              {isSubmitting ? 'Gönderiliyor...' : 'Teklif Gönder'}
+              {createOfferMutation.isPending ? 'Gönderiliyor...' : 'Teklif Gönder'}
             </Text>
           </Pressable>
         </View>

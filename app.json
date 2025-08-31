@@ -12,7 +12,11 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sbabadag.bartermvp",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -25,13 +29,14 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-router",
-      "expo-secure-store"
+      "expo-router"
     ],
     "extra": {
+      "router": {},
       "eas": {
-        "projectId": "CHANGE_ME"
+        "projectId": "0044881e-df69-4c63-817a-6869f9ec0bf8"
       }
-    }
+    },
+    "owner": "sbabadag"
   }
 }

@@ -7,9 +7,18 @@ export type User = {
   email?: string;
   phone?: string;
   display_name?: string;
+  first_name?: string;
+  last_name?: string;
   city?: string;
+  birth_date?: string;
+  gender?: string;
   avatar_url?: string;
+  home_address?: string;
+  home_postal_code?: string;
+  work_address?: string;
+  work_postal_code?: string;
   created_at: string;
+  updated_at?: string;
 };
 
 export type AuthState = {
@@ -187,8 +196,16 @@ export const useAuthService = () => {
 
   const initializeAuth = async () => {
     try {
+      console.log('=== AUTH INITIALIZATION START ===');
+      console.log('Supabase config:', { 
+        isPlaceholder: supabaseConfig.isPlaceholder,
+        url: supabaseConfig.url 
+      });
+      
       // First, try auto-login if enabled
       const autoLoginEnabled = await AsyncStorage.getItem(STORAGE_KEYS.AUTO_LOGIN);
+      console.log('Auto-login enabled:', autoLoginEnabled);
+      
       if (autoLoginEnabled === 'true') {
         console.log('Auto-login is enabled, attempting...');
         const autoLoginSuccess = await autoLogin();
@@ -203,17 +220,27 @@ export const useAuthService = () => {
       }
 
       if (supabaseConfig.isPlaceholder) {
+        console.log('Using mock mode - checking AsyncStorage for saved user');
         // Mock mode - check AsyncStorage for saved user
         const savedUser = await AsyncStorage.getItem(STORAGE_KEYS.MOCK_USER);
+        console.log('Saved user from storage:', savedUser ? 'Found' : 'Not found');
+        
         if (savedUser) {
           const user = JSON.parse(savedUser);
+          console.log('Parsed user data:', { 
+            id: user.id, 
+            display_name: user.display_name,
+            email: user.email 
+          });
           currentMockUser = user;
           setAuthState({
             user,
             isLoading: false,
             isAuthenticated: true,
           });
+          console.log('Mock user loaded successfully');
         } else {
+          console.log('No saved user found, setting unauthenticated state');
           setAuthState({
             user: null,
             isLoading: false,
@@ -256,6 +283,7 @@ export const useAuthService = () => {
           }
         });
       }
+      console.log('=== AUTH INITIALIZATION COMPLETE ===');
     } catch (error) {
       console.error('Error initializing auth:', error);
       setAuthState({
@@ -263,6 +291,7 @@ export const useAuthService = () => {
         isLoading: false,
         isAuthenticated: false,
       });
+      console.log('=== AUTH INITIALIZATION FAILED ===');
     }
   };
 
@@ -276,6 +305,21 @@ export const useAuthService = () => {
     }
 
     try {
+      // Get the current auth session to get email
+      const { data: { session } } = await supabase.auth.getSession();
+      const authEmail = session?.user?.email || undefined;
+      
+      // Also try to get email from saved credentials as fallback
+      let savedEmail = undefined;
+      try {
+        const credentials = await getSavedCredentials();
+        savedEmail = credentials?.email || undefined;
+      } catch (e) {
+        // Ignore errors getting saved credentials
+      }
+      
+      const userEmail = authEmail || savedEmail;
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -303,6 +347,7 @@ export const useAuthService = () => {
               return {
                 id: userId,
                 display_name: 'Yeni Kullanıcı',
+                email: userEmail,
                 created_at: new Date().toISOString(),
               };
             }
@@ -314,6 +359,7 @@ export const useAuthService = () => {
           return {
             id: userId,
             display_name: 'Yeni Kullanıcı',
+            email: userEmail,
             created_at: new Date().toISOString(),
           };
         }
@@ -322,7 +368,11 @@ export const useAuthService = () => {
         throw error;
       }
 
-      return data;
+      // Include email in the profile data
+      return {
+        ...data,
+        email: userEmail,
+      };
     } catch (error) {
       console.error('Error fetching profile:', error);
       console.warn('Falling back to basic user profile for:', userId);
@@ -331,6 +381,7 @@ export const useAuthService = () => {
       return {
         id: userId,
         display_name: 'Kullanıcı',
+        email: undefined,
         created_at: new Date().toISOString(),
       };
     }
@@ -342,10 +393,16 @@ export const useAuthService = () => {
       const newUser: User = {
         id: `user_${Date.now()}`,
         email,
-        display_name: userData.display_name || 'Yeni Kullanıcı',
+        display_name: userData.display_name || `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || 'Yeni Kullanıcı',
+        first_name: userData.first_name || '',
+        last_name: userData.last_name || '',
         city: userData.city || '',
+        phone: userData.phone || '',
+        birth_date: userData.birth_date || '',
+        gender: userData.gender || '',
         avatar_url: userData.avatar_url || `https://i.pravatar.cc/100?u=${email}`,
         created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       };
       
       mockUsers.push(newUser);
@@ -373,25 +430,87 @@ export const useAuthService = () => {
             .from('profiles')
             .insert([{
               id: data.user.id,
-              display_name: userData.display_name,
-              city: userData.city,
+              display_name: userData.display_name || `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || 'Yeni Kullanıcı',
+              first_name: userData.first_name || '',
+              last_name: userData.last_name || '',
+              email: email,
+              phone: userData.phone || '',
+              city: userData.city || '',
+              birth_date: userData.birth_date || null,
+              gender: userData.gender || null,
               avatar_url: userData.avatar_url || `https://i.pravatar.cc/100?u=${email}`,
             }]);
 
           if (profileError) {
             console.error('Error creating profile:', profileError);
             
-            // If it's an RLS policy error, provide specific guidance
-            if ('code' in profileError && profileError.code === '42501') {
-              console.error('RLS Policy Error: The database policies need to be updated to allow profile creation.');
-              console.error('Please run the SQL in sql/fix_profile_policies.sql on your Supabase database.');
+            // Handle specific PostgREST errors
+            if ('code' in profileError) {
+              if (profileError.code === 'PGRST204') {
+                console.warn('📋 Database schema not updated - missing new profile columns');
+                console.warn('Please run: npm run update-profiles OR manually add columns to profiles table');
+                console.warn('Falling back to mock mode for enhanced registration fields');
+              } else if (profileError.code === '42501') {
+                console.warn('📋 RLS Policy Error: The database policies need to be updated to allow profile creation.');
+                console.warn('Please run the SQL in sql/fix_rls_policies.sql on your Supabase database.');
+                console.warn('Continuing with user registration, profile can be updated later');
+              } else if (profileError.code === '23505') {
+                console.warn('📋 Profile already exists for this user - this is normal');
+              } else if (profileError.code === '22008') {
+                console.warn('📋 Date format error: Invalid birth date format');
+                console.warn('Expected format: YYYY-MM-DD (e.g., 1975-08-06)');
+                console.warn('User input may need better validation');
+              } else {
+                console.warn(`📋 Database error ${profileError.code}: ${profileError.message}`);
+              }
               
-              // For now, continue without throwing - the user registration was successful
-              // The profile will be created when they update their info later
-              console.warn('Continuing with user registration, profile can be created later');
+              // For schema errors, continue with basic profile creation
+              if (profileError.code === 'PGRST204') {
+                console.log('Attempting basic profile creation without new fields...');
+                const { error: basicProfileError } = await supabase
+                  .from('profiles')
+                  .insert([{
+                    id: data.user.id,
+                    display_name: userData.display_name || `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || 'Yeni Kullanıcı',
+                    avatar_url: userData.avatar_url || `https://i.pravatar.cc/100?u=${email}`,
+                  }]);
+                
+                if (basicProfileError) {
+                  console.warn('Basic profile creation also failed, continuing without profile');
+                } else {
+                  console.log('✅ Basic profile created successfully');
+                }
+              }
+              
+              // For date format errors, try creating profile without birth_date
+              if (profileError.code === '22008') {
+                console.log('Attempting profile creation without birth_date...');
+                const { error: noBirthDateError } = await supabase
+                  .from('profiles')
+                  .insert([{
+                    id: data.user.id,
+                    display_name: userData.display_name || `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || 'Yeni Kullanıcı',
+                    first_name: userData.first_name || '',
+                    last_name: userData.last_name || '',
+                    email: email,
+                    phone: userData.phone || '',
+                    city: userData.city || '',
+                    gender: userData.gender || null,
+                    avatar_url: userData.avatar_url || `https://i.pravatar.cc/100?u=${email}`,
+                  }]);
+                
+                if (noBirthDateError) {
+                  console.warn('Profile creation without birth_date also failed, continuing without profile');
+                } else {
+                  console.log('✅ Profile created successfully (without birth_date)');
+                }
+              }
             } else {
-              throw profileError;
+              console.warn('Unknown profile creation error:', profileError);
             }
+            
+            // Continue with user registration regardless of profile creation status
+            console.warn('Continuing with user registration, profile can be updated later');
           }
         }
       } catch (error) {
@@ -401,10 +520,16 @@ export const useAuthService = () => {
         const newUser: User = {
           id: `user_${Date.now()}`,
           email,
-          display_name: userData.display_name || 'Yeni Kullanıcı',
+          display_name: userData.display_name || `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || 'Yeni Kullanıcı',
+          first_name: userData.first_name || '',
+          last_name: userData.last_name || '',
           city: userData.city || '',
+          phone: userData.phone || '',
+          birth_date: userData.birth_date || '',
+          gender: userData.gender || '',
           avatar_url: userData.avatar_url || `https://i.pravatar.cc/100?u=${email}`,
           created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         };
         
         mockUsers.push(newUser);
@@ -609,13 +734,35 @@ export const useAuthService = () => {
       });
     } else {
       try {
+        // Clean up the data before sending to Supabase
+        const cleanedData: any = { ...userData };
+        
+        // Convert empty strings to null for date fields
+        if (cleanedData.birth_date === '') {
+          cleanedData.birth_date = null;
+        }
+        
+        // Convert empty strings to null for other fields that might cause issues
+        Object.keys(cleanedData).forEach(key => {
+          if (cleanedData[key] === '') {
+            cleanedData[key] = null;
+          }
+        });
+        
+        console.log('Updating profile with cleaned data:', cleanedData);
+        
         const { error } = await supabase
           .from('profiles')
-          .update(userData)
+          .update(cleanedData)
           .eq('id', authState.user.id);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Supabase update error:', error);
+          throw error;
+        }
 
+        console.log('Profile updated successfully in Supabase');
+        
         const updatedUser = { ...authState.user, ...userData };
         setAuthState({
           user: updatedUser,
