@@ -1,13 +1,14 @@
-import { View, Text, Pressable, Image, StyleSheet, Dimensions, TextInput, ScrollView } from "react-native";
+import { View, Text, Pressable, Image, StyleSheet, Dimensions, TextInput, ScrollView, SafeAreaView } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { useListings } from "../../src/services/listings";
 import CommentsModal from "../../src/components/CommentsModal";
+import { DepopCard } from "../../src/components/DepopCard";
+import { DepopTheme, DepopLayout } from "../../src/styles/DepopTheme";
 import { Link, useRouter } from "expo-router";
 import { useState, useMemo } from "react";
 import { Ionicons } from '@expo/vector-icons';
 
 const { width } = Dimensions.get('window');
-const cardWidth = width * 0.48; // Each card takes 48% of screen width - much wider!
 
 export default function FeedScreen() {
   const router = useRouter();
@@ -121,126 +122,45 @@ export default function FeedScreen() {
   };
 
   const renderItem = ({ item, index }: { item: any, index: number }) => {
-    // Group items in pairs for custom 2-column layout
+    // Group items in pairs for 2-column grid layout
     if (index % 2 !== 0) return null; // Only render on even indices
     
     const currentItem = item;
     const nextItem = filteredData?.[index + 1];
     
+    // Map current item to DepopCard format
+    const mapToDepopItem = (listingItem: any) => ({
+      id: listingItem.id,
+      title: listingItem.title,
+      price: listingItem.price ? `${listingItem.price} ${listingItem.currency || 'TL'}` : 'Takas',
+      seller: listingItem.seller_name || 
+        (listingItem.id.includes('mock_1') ? 'solo' :
+         listingItem.id.includes('mock_2') ? '3dmake' :
+         listingItem.id.includes('mock_3') ? 'solo' :
+         listingItem.id.includes('mock_4') ? 'emirfashionn' :
+         listingItem.id.includes('user_') ? 'Sen' :
+         'user' + listingItem.id.slice(-2)),
+      image_url: listingItem.image_url || `https://picsum.photos/300/400?random=${listingItem.id}`,
+      liked: likedItems[listingItem.id] || false,
+    });
+    
     return (
       <View style={styles.row}>
         {/* First Card */}
-        <CardItem key={`${currentItem.id}-${updateKey}-${likedItems[currentItem.id] || false}`} item={currentItem} />
+        <DepopCard
+          item={mapToDepopItem(currentItem)}
+          onPress={() => handleCardPress(currentItem.id)}
+          onLike={() => handleLike(currentItem.id)}
+        />
         
         {/* Second Card */}
-        {nextItem && <CardItem key={`${nextItem.id}-${updateKey}-${likedItems[nextItem.id] || false}`} item={nextItem} />}
-      </View>
-    );
-  };
-
-  const CardItem = ({ item }: { item: any }) => {
-    const isLiked = likedItems[item.id] || false;
-    const likeCount = likeCounts[item.id] || 5;
-    const commentCount = Math.floor(Math.random() * 5);
-    
-    console.log(`🔄 Rendering CardItem ${item.id}: isLiked=${isLiked}, updateKey=${updateKey}`);
-    
-    // Additional debug: log the background color that should be applied
-    const backgroundColor = isLiked ? '#FF0000' : '#EEEEEE';
-    console.log(`🎨 ${item.id} should have background: ${backgroundColor}`);
-    
-    return (
-      <View style={styles.card}>
-        {/* Seller Info Header */}
-        <View style={styles.sellerHeader}>
-          <View style={styles.sellerInfo}>
-            <Image 
-              source={{ uri: `https://i.pravatar.cc/40?u=${item.id}` }}
-              style={styles.sellerAvatar}
-            />
-            <View style={styles.sellerDetails}>
-              <Text style={styles.sellerName}>
-                {item.seller_name || 
-                 (item.id.includes('mock_1') ? 'solo' :
-                  item.id.includes('mock_2') ? '3dmake' :
-                  item.id.includes('mock_3') ? 'solo' :
-                  item.id.includes('mock_4') ? 'emirfashionn' :
-                  item.id.includes('user_') ? 'Sen' :
-                  'user' + item.id.slice(-2))}
-              </Text>
-              <View style={styles.ratingRow}>
-                <View style={styles.ratingContainer}>
-                  <Text style={styles.stars}>⭐⭐⭐⭐⭐</Text>
-                  <Text style={styles.ratingCount}>({Math.floor(Math.random() * 5000) + 100})</Text>
-                </View>
-                <Pressable 
-                  style={styles.followButton}
-                  onPress={() => handleFollow(item.id)}
-                >
-                  <Text style={styles.followButtonText}>👥+</Text>
-                </Pressable>
-              </View>
-            </View>
-          </View>
-        </View>
-
-        {/* Product Image with Badge */}
-        <Pressable onPress={() => handleCardPress(item.id)}>
-          <View style={styles.imageContainer}>
-            <Image 
-              source={{ uri: item.image_url || `https://picsum.photos/300/400?random=${item.id}` }}
-              style={styles.image}
-              resizeMode="cover"
-            />
-            <View style={styles.badgeContainer}>
-              <Text style={styles.badge}>Yeni &{'\n'}Etiketli</Text>
-            </View>
-          </View>
-
-          {/* Product Details */}
-          <View style={styles.cardContent}>
-            <Text style={styles.title} numberOfLines={1}>{item.title}</Text>
-            <Text style={styles.category}>
-              {item.category || 
-               (item.title.toLowerCase().includes('dress') ? 'Giyim' :
-                item.title.toLowerCase().includes('book') ? 'Edebiyat' :
-                item.title.toLowerCase().includes('tech') ? 'Elektronik' : 'Diğer')}
-            </Text>
-            {item.location && (
-              <Text style={styles.location}>📍 {item.location}</Text>
-            )}
-            <Text style={styles.price}>
-              {item.price ? `${item.price} ${item.currency || 'TL'}` : 'Takas'}
-            </Text>
-          </View>
-        </Pressable>
-        
-        {/* Interaction Row - Outside the navigation pressable */}
-        <View style={styles.interactionRow}>
-          <Pressable 
-            style={styles.likeContainer}
-            onPress={() => {
-              console.log('Like pressed for:', item.id);
-              handleLike(item.id);
-            }}
-          >
-            <Text style={[styles.likeIcon, { color: isLiked ? '#FF0000' : '#CCCCCC', fontSize: 16 }]}>
-              {isLiked ? '❤️' : '🤍'}
-            </Text>
-            <Text style={styles.likeCount}>{likeCount} Beğeni</Text>
-          </Pressable>
-          
-          <Pressable 
-            style={styles.commentContainer}
-            onPress={() => {
-              console.log('Comment pressed for:', item.id);
-              handleComment(item.id, item.title);
-            }}
-          >
-            <Text style={styles.commentIcon}>💬</Text>
-            <Text style={styles.commentCount}>{commentCount} Yorum</Text>
-          </Pressable>
-        </View>
+        {nextItem && (
+          <DepopCard
+            item={mapToDepopItem(nextItem)}
+            onPress={() => handleCardPress(nextItem.id)}
+            onLike={() => handleLike(nextItem.id)}
+          />
+        )}
       </View>
     );
   };
@@ -309,10 +229,12 @@ export default function FeedScreen() {
       </View>
 
       {isLoading ? (
-        <Text style={styles.loading}>Yükleniyor…</Text>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loading}>Yükleniyor…</Text>
+        </View>
       ) : (
         <FlashList
-          estimatedItemSize={300}
+          estimatedItemSize={200}
           data={filteredData}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
@@ -321,6 +243,7 @@ export default function FeedScreen() {
           refreshing={isLoading}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listContainer}
+          numColumns={1}
         />
       )}
       
@@ -337,20 +260,25 @@ export default function FeedScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: DepopTheme.colors.background,
+    paddingHorizontal: DepopLayout.screenPadding,
   },
   header: {
     fontSize: 28,
-    fontWeight: '700',
-    marginBottom: 16,
-    color: '#1a1a1a',
+    fontWeight: '700' as const,
+    marginBottom: 20,
+    marginTop: 10,
+    color: DepopTheme.colors.text.primary,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   loading: {
     fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginTop: 50,
+    color: DepopTheme.colors.text.secondary,
+    textAlign: 'center' as const,
   },
   listContainer: {
     paddingBottom: 20,
@@ -522,73 +450,67 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: DepopLayout.cardSpacing,
   },
   // Search Section Styles
   searchSection: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: DepopTheme.colors.surface,
     borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: DepopTheme.colors.border,
   },
   searchIcon: {
-    marginRight: 8,
+    marginRight: 12,
   },
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: '#333',
-    paddingVertical: 4,
+    color: DepopTheme.colors.text.primary,
+    paddingVertical: 0,
   },
   clearButton: {
     padding: 4,
   },
   categoryScroll: {
-    marginBottom: 8,
+    marginBottom: 12,
   },
   categoryContainer: {
-    paddingHorizontal: 4,
+    paddingHorizontal: 0,
   },
   categoryChip: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    marginRight: 8,
-    backgroundColor: '#f0f0f0',
+    marginRight: 12,
+    backgroundColor: DepopTheme.colors.surface,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: DepopTheme.colors.border,
   },
   categoryChipActive: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
+    backgroundColor: DepopTheme.colors.primary,
+    borderColor: DepopTheme.colors.primary,
   },
   categoryChipText: {
     fontSize: 14,
-    color: '#666',
-    fontWeight: '500',
+    color: DepopTheme.colors.text.secondary,
+    fontWeight: '500' as const,
   },
   categoryChipTextActive: {
-    color: 'white',
-    fontWeight: '600',
+    color: DepopTheme.colors.background,
+    fontWeight: '600' as const,
   },
   resultsCount: {
     fontSize: 14,
-    color: '#666',
+    color: DepopTheme.colors.text.secondary,
     marginLeft: 4,
-    fontStyle: 'italic',
+    fontStyle: 'italic' as const,
   },
 });
