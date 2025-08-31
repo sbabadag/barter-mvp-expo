@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ScrollView, Image, StyleSheet, Dimensions, Alert, PanResponder } from "react-native";
+import { View, Text, Pressable, ScrollView, StyleSheet, Dimensions, Alert, PanResponder } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useListing } from "../../src/services/listings";
 import { useBidsForListing } from "../../src/services/bids";
@@ -7,6 +7,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useState, useRef } from "react";
 import BiddingModal from "../../src/components/BiddingModal";
 import ErrorBoundary from "../../src/components/ErrorBoundary";
+import OptimizedImage from "../../src/components/OptimizedImage";
 
 const { width } = Dimensions.get('window');
 
@@ -72,6 +73,26 @@ export default function ListingDetail(){
     `https://picsum.photos/400/500?random=${data.id}3`,
   ];
 
+  // Get optimized image URLs for current image
+  const getCurrentOptimizedUrls = (index: number) => {
+    if (!data || !data.image_metadata?.images?.[index]) {
+      return {
+        thumbnailUrl: undefined,
+        mediumUrl: undefined,
+        fullUrl: images[index],
+        fallbackUrl: images[index]
+      };
+    }
+
+    const metadata = data.image_metadata.images[index];
+    return {
+      thumbnailUrl: metadata.thumbnail?.url,
+      mediumUrl: metadata.medium?.url,
+      fullUrl: metadata.full?.url,
+      fallbackUrl: images[index]
+    };
+  };
+
   // Helper functions for button navigation
   const nextImage = () => {
     setCurrentImageIndex((prevIndex) => 
@@ -91,10 +112,12 @@ export default function ListingDetail(){
       {/* Image Gallery */}
       <View style={styles.imageGallery}>
         <View style={styles.imageContainer} {...panResponder.panHandlers}>
-          <Image 
-            source={{ uri: images[currentImageIndex] }} 
+          <OptimizedImage 
+            {...getCurrentOptimizedUrls(currentImageIndex)}
             style={styles.mainImage}
-            resizeMode="cover"
+            progressive={true}
+            showPlaceholder={true}
+            accessibilityLabel={`${data?.title} - Image ${currentImageIndex + 1} of ${images.length}`}
           />
         </View>
         

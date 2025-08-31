@@ -2,6 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase, supabaseConfig } from "../utils/supabase";
 import * as FileSystem from "expo-file-system";
 import { decode } from "base64-arraybuffer";
+import { 
+  createOptimizedVersions, 
+  optimizeProfileImage,
+  ImageOptimizationResult,
+  calculateCompressionRatio,
+  formatFileSize 
+} from "./imageOptimization";
 
 // Utility function to generate UUID-like strings for mock data
 const generateMockUUID = (seed: string): string => {
@@ -28,8 +35,12 @@ export type Listing = {
   description: string;
   price: number | null;
   created_at: string;
-  image_url?: string; // Primary image URL
-  images?: string[]; // Array of all image URLs
+  image_url?: string; // Primary image URL (fallback)
+  images?: string[]; // Array of all image URLs (legacy)
+  thumbnail_url?: string; // Optimized thumbnail (150x150)
+  medium_url?: string; // Optimized medium (400x400) 
+  full_url?: string; // Optimized full size (800x800)
+  image_metadata?: any; // Image optimization metadata
   currency?: string; // Currency code (TRY, USD, EUR)
   category?: string; // Product category
   location?: string; // Seller location
@@ -384,49 +395,135 @@ export const createListing = async (
 
   // Real Supabase implementation
   try {
-    // First upload images to storage and get URLs
+    // First optimize and upload images to storage
     const uploadedImageUrls: string[] = [];
-    const totalImages = input.imageUris.length;
+    const optimizedThumbnails: string[] = [];
+    const optimizedMedium: string[] = [];
+    const optimizedFull: string[] = [];
+    let combinedMetadata: any[] = [];
     
-    onProgress?.(10, `${totalImages} görüntü yükleniyor...`);
+    const totalImages = input.imageUris.length;
+    onProgress?.(10, `${totalImages} görüntü optimize ediliyor...`);
     
     for (let i = 0; i < input.imageUris.length; i++) {
       const uri = input.imageUris[i];
-      const imageProgress = 10 + ((i / totalImages) * 70); // 10-80% for images
-      onProgress?.(imageProgress, `Görüntü ${i + 1}/${totalImages} yükleniyor...`);
-      
-      console.log(`Uploading image ${i + 1}/${input.imageUris.length}...`);
+      const baseProgress = 10 + ((i / totalImages) * 70); // 10-80% for images
       
       try {
-        const base64 = await FileSystem.readAsStringAsync(uri, { 
+        // Step 1: Optimize images (10% of this image's progress)
+        onProgress?.(baseProgress, `Görüntü ${i + 1}/${totalImages} optimize ediliyor...`);
+        
+        const optimizedResult = await createOptimizedVersions(uri, (progress, message) => {
+          const currentProgress = baseProgress + (progress * 0.1); // 10% for optimization
+          onProgress?.(currentProgress, `${message} (${i + 1}/${totalImages})`);
+        });
+
+        // Calculate compression ratio for metadata
+        const compressionRatio = calculateCompressionRatio(
+          optimizedResult.original.size,
+          optimizedResult.full.size
+        );
+
+        // Step 2: Upload optimized versions (60% of this image's progress)
+        const uploadProgress = baseProgress + 10;
+        onProgress?.(uploadProgress, `Görüntü ${i + 1}/${totalImages} yükleniyor...`);
+
+        // Generate unique filenames
+        const timestamp = Date.now();
+        const baseFileName = `${timestamp}_${i}`;
+
+        // Upload thumbnail
+        const thumbnailBase64 = await FileSystem.readAsStringAsync(optimizedResult.thumbnail.uri, { 
           encoding: FileSystem.EncodingType.Base64 
         });
+        const thumbnailPath = `listings/${baseFileName}_thumb.jpg`;
         
-        // Generate unique filename
-        const fileExtension = uri.split('.').pop() || 'jpg';
-        const fileName = `${Date.now()}_${i}.${fileExtension}`;
-        const filePath = `listings/${fileName}`;
-        
-        // Upload to Supabase storage
-        const uploadResult = await supabase.storage
+        const thumbnailUpload = await supabase.storage
           .from("listing-photos")
-          .upload(filePath, decode(base64), { 
-            contentType: `image/${fileExtension}`,
+          .upload(thumbnailPath, decode(thumbnailBase64), { 
+            contentType: "image/jpeg",
             upsert: true 
           });
+
+        if (thumbnailUpload.error) throw thumbnailUpload.error;
+
+        // Upload medium size
+        const mediumBase64 = await FileSystem.readAsStringAsync(optimizedResult.medium.uri, { 
+          encoding: FileSystem.EncodingType.Base64 
+        });
+        const mediumPath = `listings/${baseFileName}_med.jpg`;
         
-        if (uploadResult.error) {
-          console.error(`Error uploading image ${i + 1}:`, uploadResult.error);
-          throw uploadResult.error;
-        }
+        const mediumUpload = await supabase.storage
+          .from("listing-photos")
+          .upload(mediumPath, decode(mediumBase64), { 
+            contentType: "image/jpeg",
+            upsert: true 
+          });
+
+        if (mediumUpload.error) throw mediumUpload.error;
+
+        // Upload full size
+        const fullBase64 = await FileSystem.readAsStringAsync(optimizedResult.full.uri, { 
+          encoding: FileSystem.EncodingType.Base64 
+        });
+        const fullPath = `listings/${baseFileName}_full.jpg`;
         
-        // Get public URL using config URL
-        const publicUrl = `${supabaseConfig.url}/storage/v1/object/public/listing-photos/${filePath}`;
-        uploadedImageUrls.push(publicUrl);
-        console.log(`Image ${i + 1} uploaded successfully`);
+        const fullUpload = await supabase.storage
+          .from("listing-photos")
+          .upload(fullPath, decode(fullBase64), { 
+            contentType: "image/jpeg",
+            upsert: true 
+          });
+
+        if (fullUpload.error) throw fullUpload.error;
+
+        // Generate public URLs
+        const thumbnailUrl = `${supabaseConfig.url}/storage/v1/object/public/listing-photos/${thumbnailPath}`;
+        const mediumUrl = `${supabaseConfig.url}/storage/v1/object/public/listing-photos/${mediumPath}`;
+        const fullUrl = `${supabaseConfig.url}/storage/v1/object/public/listing-photos/${fullPath}`;
+
+        // Store URLs
+        optimizedThumbnails.push(thumbnailUrl);
+        optimizedMedium.push(mediumUrl);
+        optimizedFull.push(fullUrl);
+        uploadedImageUrls.push(fullUrl); // Use full URLs for legacy images array
+
+        // Store metadata
+        combinedMetadata.push({
+          original: optimizedResult.original,
+          thumbnail: { 
+            url: thumbnailUrl, 
+            width: optimizedResult.thumbnail.width,
+            height: optimizedResult.thumbnail.height,
+            size: optimizedResult.thumbnail.size
+          },
+          medium: { 
+            url: mediumUrl,
+            width: optimizedResult.medium.width,
+            height: optimizedResult.medium.height,
+            size: optimizedResult.medium.size
+          },
+          full: { 
+            url: fullUrl,
+            width: optimizedResult.full.width,
+            height: optimizedResult.full.height,
+            size: optimizedResult.full.size
+          },
+          compression_ratio: compressionRatio,
+          optimized_at: new Date().toISOString()
+        });
+
+        console.log(`Image ${i + 1} optimized and uploaded successfully`);
+        console.log(`- Original: ${formatFileSize(optimizedResult.original.size)}`);
+        console.log(`- Thumbnail: ${formatFileSize(optimizedResult.thumbnail.size)}`);
+        console.log(`- Medium: ${formatFileSize(optimizedResult.medium.size)}`);
+        console.log(`- Full: ${formatFileSize(optimizedResult.full.size)}`);
+        console.log(`- Compression: ${compressionRatio}%`);
+
       } catch (error) {
-        console.error(`Failed to upload image ${i + 1}:`, error);
+        console.error(`Failed to optimize/upload image ${i + 1}:`, error);
         // Continue with other images even if one fails
+        // For failed images, we'll skip adding to optimized arrays
       }
     }
 
@@ -442,7 +539,20 @@ export const createListing = async (
       condition: input.condition || null,
       currency: 'TRY',
       status: 'active',
-      images: uploadedImageUrls, // Store array of image URLs
+      images: uploadedImageUrls, // Store array of full URLs (legacy)
+      image_url: uploadedImageUrls[0] || null, // Primary image (legacy)
+      thumbnail_url: optimizedThumbnails[0] || null, // Primary thumbnail
+      medium_url: optimizedMedium[0] || null, // Primary medium image
+      full_url: optimizedFull[0] || null, // Primary full image
+      image_metadata: {
+        images: combinedMetadata,
+        total_images: combinedMetadata.length,
+        total_original_size: combinedMetadata.reduce((sum, meta) => sum + meta.original.size, 0),
+        total_optimized_size: combinedMetadata.reduce((sum, meta) => sum + meta.full.size, 0),
+        avg_compression_ratio: combinedMetadata.length > 0 
+          ? Math.round(combinedMetadata.reduce((sum, meta) => sum + meta.compression_ratio, 0) / combinedMetadata.length)
+          : 0
+      },
       seller_id: null // TODO: Get from current user when auth is implemented
     }).select("id").single();
     
