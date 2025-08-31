@@ -168,10 +168,16 @@ export default function ListingDetail(){
                 currentImageIndex === index && styles.activeThumbnail
               ]}
             >
-              <Image 
-                source={{ uri: imageUri }} 
+              <OptimizedImage 
+                thumbnailUrl={data?.image_metadata?.images?.[index]?.thumbnail?.url}
+                mediumUrl={data?.image_metadata?.images?.[index]?.medium?.url}
+                fullUrl={data?.image_metadata?.images?.[index]?.full?.url}
+                fallbackUrl={imageUri}
                 style={styles.thumbnailImage}
-                resizeMode="cover"
+                progressive={false}
+                showPlaceholder={true}
+                borderRadius={4}
+                accessibilityLabel={`Thumbnail ${index + 1}`}
               />
             </Pressable>
           ))}
