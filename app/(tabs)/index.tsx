@@ -1,7 +1,8 @@
-import { View, Text, Pressable, Image, StyleSheet, Dimensions, TextInput, ScrollView } from "react-native";
+import { View, Text, Pressable, StyleSheet, Dimensions, TextInput, ScrollView } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { useListings } from "../../src/services/listings";
 import CommentsModal from "../../src/components/CommentsModal";
+import OptimizedImage from "../../src/components/OptimizedImage";
 import { Link, useRouter } from "expo-router";
 import { useState, useMemo } from "react";
 import { Ionicons } from '@expo/vector-icons';
@@ -154,9 +155,18 @@ export default function FeedScreen() {
         {/* Seller Info Header */}
         <View style={styles.sellerHeader}>
           <View style={styles.sellerInfo}>
-            <Image 
-              source={{ uri: `https://i.pravatar.cc/40?u=${item.id}` }}
+            <OptimizedImage 
+              thumbnailUrl={item.thumbnail_url}
+              mediumUrl={item.medium_url}
+              fullUrl={item.full_url}
+              fallbackUrl={item.image_url || `https://i.pravatar.cc/40?u=${item.id}`}
               style={styles.sellerAvatar}
+              width={40}
+              height={40}
+              borderRadius={20}
+              progressive={false}
+              showPlaceholder={true}
+              accessibilityLabel={`${item.seller_name || 'Seller'} profile picture`}
             />
             <View style={styles.sellerDetails}>
               <Text style={styles.sellerName}>
@@ -187,10 +197,18 @@ export default function FeedScreen() {
         {/* Product Image with Badge */}
         <Pressable onPress={() => handleCardPress(item.id)}>
           <View style={styles.imageContainer}>
-            <Image 
-              source={{ uri: item.image_url || `https://picsum.photos/300/400?random=${item.id}` }}
+            <OptimizedImage 
+              thumbnailUrl={item.thumbnail_url}
+              mediumUrl={item.medium_url}
+              fullUrl={item.full_url}
+              fallbackUrl={item.image_url || `https://picsum.photos/300/400?random=${item.id}`}
               style={styles.image}
-              resizeMode="cover"
+              progressive={true}
+              lazy={true}
+              showPlaceholder={true}
+              borderRadius={8}
+              accessibilityLabel={item.title}
+              onPress={() => handleCardPress(item.id)}
             />
             <View style={styles.badgeContainer}>
               <Text style={styles.badge}>Yeni &{'\n'}Etiketli</Text>
