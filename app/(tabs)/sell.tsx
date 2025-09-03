@@ -1,10 +1,22 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { View, TextInput, Text, Pressable, Alert, ScrollView, Image, StyleSheet, Dimensions, Modal, ActivityIndicator } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import * as ImageManipulator from "expo-image-manipulator";
 import { useRouter } from "expo-router";
 import { createListing } from "../../src/services/listings";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
+import { Dropdown } from "../../src/components/Dropdown";
+import { LISTING_CATEGORIES } from "../../src/constants/categories";
+import LocationPicker from "../../src/components/LocationPickerSimple";
+
+// Konum tipi tanımı
+interface LocationData {
+  latitude: number;
+  longitude: number;
+  address?: string;
+  city?: string;
+}
 
 const { width } = Dimensions.get('window');
 
@@ -14,26 +26,95 @@ export default function SellScreen() {
   const [price, setPrice] = useState<string>("");
   const [category, setCategory] = useState<string>("");
   const [location, setLocation] = useState<string>("");
+  const [locationCoords, setLocationCoords] = useState<{ latitude: number; longitude: number } | null>(null);
   const [condition, setCondition] = useState<'new' | 'like_new' | 'good' | 'fair' | 'poor'>('good');
   const [images, setImages] = useState<string[]>([]);
+  const [showImageOptions, setShowImageOptions] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadMessage, setUploadMessage] = useState("");
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const pickImages = async () => {
+  // Resim optimize etme fonksiyonu - hızlı yükleme için
+  const optimizeImage = async (uri: string): Promise<string> => {
+    try {
+      const manipulatedImage = await ImageManipulator.manipulateAsync(
+        uri,
+        [
+          { resize: { width: 800 } }, // Maksimum genişlik 800px
+        ],
+        {
+          compress: 0.7, // %70 kalite - hızlı yükleme için optimize
+          format: ImageManipulator.SaveFormat.JPEG,
+        }
+      );
+      return manipulatedImage.uri;
+    } catch (error) {
+      console.log('Resim optimize edilemedi, orijinal kullanılıyor:', error);
+      return uri; // Hata durumunda orijinal resmi döndür
+    }
+  };
+
+  const pickImagesFromGallery = async () => {
     const res = await ImagePicker.launchImageLibraryAsync({
       allowsMultipleSelection: true,
       selectionLimit: 6,
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.8
+      quality: 0.5, // Daha hızlı yükleme için kaliteyi düşürdük
+      allowsEditing: false,
+      aspect: [4, 3],
+      base64: false
     });
-    if (!res.canceled) setImages(res.assets.map(a => a.uri));
+    if (!res.canceled) {
+      // Resimleri optimize et
+      const optimizedImages = await Promise.all(
+        res.assets.map(async (asset) => await optimizeImage(asset.uri))
+      );
+      setImages(prev => [...prev, ...optimizedImages].slice(0, 6));
+    }
+    setShowImageOptions(false);
+  };
+
+  const takePhotoWithCamera = async () => {
+    // Kamera iznini kontrol et
+    const cameraPermission = await ImagePicker.requestCameraPermissionsAsync();
+    if (!cameraPermission.granted) {
+      Alert.alert('Kamera İzni', 'Fotoğraf çekmek için kamera iznine ihtiyacımız var.');
+      setShowImageOptions(false);
+      return;
+    }
+
+    const res = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.5, // Daha hızlı yükleme için kaliteyi düşürdük
+      allowsEditing: false, // Editing'i kapattık, hızlı olması için
+      aspect: [4, 3],
+      base64: false // Base64'ü kapattık, memory usage için
+    });
+    
+    if (!res.canceled) {
+      // Çekilen fotoğrafı optimize et
+      const optimizedImage = await optimizeImage(res.assets[0].uri);
+      setImages(prev => [...prev, optimizedImage].slice(0, 6));
+    }
+    setShowImageOptions(false);
+  };
+
+  const pickImages = async () => {
+    setShowImageOptions(true);
   };
 
   const removeImage = (index: number) => {
     setImages(images.filter((_, i) => i !== index));
+  };
+
+  const handleLocationSelect = (locationData: LocationData) => {
+    setLocation(locationData.address || `${locationData.city || 'Seçilen konum'}`);
+    setLocationCoords({
+      latitude: locationData.latitude,
+      longitude: locationData.longitude
+    });
   };
 
   const onSubmit = async () => {
@@ -69,6 +150,7 @@ export default function SellScreen() {
         imageUris: images,
         category: category || undefined,
         location: location || undefined,
+        locationCoords: locationCoords || undefined,
         condition
       }, (progress, message) => {
         setUploadProgress(progress);
@@ -97,8 +179,10 @@ export default function SellScreen() {
               setPrice(""); 
               setCategory("");
               setLocation("");
+              setLocationCoords(null);
               setCondition('good');
               setImages([]);
+              setShowImageOptions(false);
               
               // Navigate to home tab
               router.push("/(tabs)/");
@@ -153,24 +237,20 @@ export default function SellScreen() {
       </View>
 
       <View style={styles.formGroup}>
-        <Text style={styles.label}>Kategori</Text>
-        <TextInput 
-          placeholder="Örn: Elektronik, Moda & Giyim, Ev & Bahçe" 
-          value={category} 
-          onChangeText={setCategory} 
-          style={styles.input} 
+        <Dropdown
+          label="Kategori"
+          options={LISTING_CATEGORIES}
+          selectedValue={category}
+          onValueChange={setCategory}
+          placeholder="Kategori seçin..."
         />
       </View>
 
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>Konum</Text>
-        <TextInput 
-          placeholder="Şehir/İlçe bilgisi girin" 
-          value={location} 
-          onChangeText={setLocation} 
-          style={styles.input} 
-        />
-      </View>
+      <LocationPicker
+        onLocationSelect={handleLocationSelect}
+        selectedLocation={location}
+        label="Konum"
+      />
 
       <View style={styles.formGroup}>
         <Text style={styles.label}>Durum</Text>
@@ -220,7 +300,7 @@ export default function SellScreen() {
         <Pressable onPress={pickImages} style={styles.imagePickerButton}>
           <MaterialIcons name="add-a-photo" size={24} color="#666" />
           <Text style={styles.imagePickerText}>
-            {images.length === 0 ? "Fotoğraf Ekle" : "Daha Fazla Fotoğraf Ekle"}
+            {images.length === 0 ? "📷 Fotoğraf Ekle (Kamera/Galeri)" : `📸 Daha Fazla Ekle (${images.length}/6)`}
           </Text>
         </Pressable>
       </View>
@@ -264,6 +344,45 @@ export default function SellScreen() {
               color="#f0a500" 
               style={styles.activityIndicator}
             />
+          </View>
+        </View>
+      </Modal>
+
+      {/* Fotoğraf Seçim Modal'ı */}
+      <Modal
+        visible={showImageOptions}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowImageOptions(false)}
+      >
+        <View style={styles.imageModalOverlay}>
+          <View style={styles.imageModalContainer}>
+            <Text style={styles.imageModalTitle}>Fotoğraf Ekle</Text>
+            
+            <Pressable
+              style={styles.imageOptionButton}
+              onPress={takePhotoWithCamera}
+            >
+              <MaterialIcons name="camera-alt" size={24} color="#007AFF" />
+              <Text style={styles.imageOptionText}>Kamera ile Çek</Text>
+              <MaterialIcons name="arrow-forward-ios" size={16} color="#ccc" />
+            </Pressable>
+
+            <Pressable
+              style={styles.imageOptionButton}
+              onPress={pickImagesFromGallery}
+            >
+              <MaterialIcons name="photo-library" size={24} color="#007AFF" />
+              <Text style={styles.imageOptionText}>Galeriden Seç</Text>
+              <MaterialIcons name="arrow-forward-ios" size={16} color="#ccc" />
+            </Pressable>
+
+            <Pressable
+              style={styles.imageModalCancelButton}
+              onPress={() => setShowImageOptions(false)}
+            >
+              <Text style={styles.imageModalCancelText}>İptal</Text>
+            </Pressable>
           </View>
         </View>
       </Modal>
@@ -440,5 +559,52 @@ const styles = StyleSheet.create({
   },
   activityIndicator: {
     marginTop: 10,
+  },
+  imageModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  imageModalContainer: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 30,
+  },
+  imageModalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  imageOptionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 15,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  imageOptionText: {
+    flex: 1,
+    marginLeft: 15,
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '500',
+  },
+  imageModalCancelButton: {
+    paddingVertical: 15,
+    backgroundColor: '#f1f1f1',
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  imageModalCancelText: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: '#666',
+    fontWeight: '500',
   },
 });

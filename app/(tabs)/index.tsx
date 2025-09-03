@@ -7,12 +7,16 @@ import { DepopTheme, DepopLayout } from "../../src/styles/DepopTheme";
 import { Link, useRouter } from "expo-router";
 import { useState, useMemo } from "react";
 import { Ionicons } from '@expo/vector-icons';
+import { useNotificationCounts } from "../../src/services/notifications";
+import NotificationBadge from "../../src/components/NotificationBadge";
+import { FILTER_CATEGORIES } from "../../src/constants/categories";
 
 const { width } = Dimensions.get('window');
 
 export default function FeedScreen() {
   const router = useRouter();
   const { data, isLoading, refetch } = useListings();
+  const { data: notificationCounts } = useNotificationCounts();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Tümü');
   const [likedItems, setLikedItems] = useState<{[key: string]: boolean}>({});
@@ -25,7 +29,7 @@ export default function FeedScreen() {
   });
 
   // Categories for filtering
-  const categories = ['Tümü', 'Giyim', 'Aksesuar', 'Ayakkabı', 'Çanta', 'Elektronik', 'Ev & Yaşam', 'Spor', 'Kitap'];
+  const categories = FILTER_CATEGORIES;
 
   // Filter data based on search query and category
   const filteredData = useMemo(() => {
@@ -171,25 +175,42 @@ export default function FeedScreen() {
       
       {/* Search Section */}
       <View style={styles.searchSection}>
-        {/* Search Input */}
-        <View style={styles.searchContainer}>
-          <Ionicons name="search" size={20} color="#666" style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Ürün, satıcı veya kategori ara..."
-            placeholderTextColor="#999"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            returnKeyType="search"
-          />
-          {searchQuery.length > 0 && (
-            <Pressable 
-              onPress={() => setSearchQuery('')}
-              style={styles.clearButton}
-            >
-              <Ionicons name="close-circle" size={20} color="#666" />
-            </Pressable>
-          )}
+        {/* Search Input with Notification */}
+        <View style={styles.searchRow}>
+          <View style={styles.searchContainer}>
+            <Ionicons name="search" size={20} color="#666" style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Ürün, satıcı veya kategori ara..."
+              placeholderTextColor="#999"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              returnKeyType="search"
+            />
+            {searchQuery.length > 0 && (
+              <Pressable 
+                onPress={() => setSearchQuery('')}
+                style={styles.clearButton}
+              >
+                <Ionicons name="close-circle" size={20} color="#666" />
+              </Pressable>
+            )}
+          </View>
+          
+          {/* Notification Icon with Badge */}
+          <Pressable 
+            style={styles.notificationButton}
+            onPress={() => router.push('/tekliflerim')}
+          >
+            <View style={styles.notificationContainer}>
+              <Ionicons name="notifications-outline" size={24} color="#666" />
+              <NotificationBadge 
+                count={notificationCounts?.total || 0} 
+                size="small"
+                color="#f0a500"
+              />
+            </View>
+          </Pressable>
         </View>
 
         {/* Category Filter */}
@@ -456,16 +477,32 @@ const styles = StyleSheet.create({
   searchSection: {
     marginBottom: 20,
   },
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 16,
+  },
   searchContainer: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: DepopTheme.colors.surface,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    marginBottom: 16,
     borderWidth: 1,
     borderColor: DepopTheme.colors.border,
+  },
+  notificationButton: {
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: DepopTheme.colors.surface,
+    borderWidth: 1,
+    borderColor: DepopTheme.colors.border,
+  },
+  notificationContainer: {
+    position: 'relative',
   },
   searchIcon: {
     marginRight: 12,
