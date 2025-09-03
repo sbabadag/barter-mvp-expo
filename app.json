@@ -15,13 +15,23 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.sbabadag.bartermvp",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSLocationWhenInUseUsageDescription": "Bu uygulama konum bilginizi ilanlarınızda konum seçimi için kullanır."
       }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ],
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyDJdx5Y9z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5"
+        }
       }
     },
     "web": {

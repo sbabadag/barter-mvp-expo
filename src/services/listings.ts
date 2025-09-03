@@ -22,6 +22,29 @@ const generateMockUUID = (seed: string): string => {
 // In-memory storage for new listings (in a real app, this would be in a database)
 let newListings: Listing[] = [];
 
+// Utility function to parse location string and extract coordinates
+const parseLocationWithCoords = (locationString: string | null | undefined): { address: string; coords?: { latitude: number; longitude: number } } => {
+  if (!locationString) return { address: '' };
+  
+  const coordsMarker = '|COORDS:';
+  const coordsIndex = locationString.indexOf(coordsMarker);
+  
+  if (coordsIndex === -1) {
+    return { address: locationString };
+  }
+  
+  const address = locationString.substring(0, coordsIndex);
+  const coordsJson = locationString.substring(coordsIndex + coordsMarker.length);
+  
+  try {
+    const coords = JSON.parse(coordsJson);
+    return { address, coords };
+  } catch (error) {
+    console.error('Error parsing coordinates:', error);
+    return { address };
+  }
+};
+
 export type Listing = {
   id: string;
   title: string;
@@ -32,7 +55,8 @@ export type Listing = {
   images?: string[]; // Array of all image URLs
   currency?: string; // Currency code (TRY, USD, EUR)
   category?: string; // Product category
-  location?: string; // Seller location
+  location?: string; // Seller location (address text)
+  locationCoords?: { latitude: number; longitude: number }; // GPS coordinates
   seller_name?: string; // Seller display name
   condition?: 'new' | 'like_new' | 'good' | 'fair' | 'poor'; // Item condition
   status?: 'active' | 'sold' | 'inactive'; // Listing status
@@ -225,14 +249,19 @@ export const useListings = () => useQuery({
     `).eq("status", "active").order("created_at", { ascending: false }).limit(100);
     if (error) throw error;
     
-    // Transform the data to include the primary image URL from the images array
-    const transformedData = data?.map(item => ({
-      ...item,
-      image_url: item.images && Array.isArray(item.images) && item.images.length > 0 
-        ? item.images[0] 
-        : `https://picsum.photos/300/400?random=${item.id.slice(-3)}`,
-      images: item.images || []
-    }));
+    // Transform the data to include the primary image URL from the images array and parse location coordinates
+    const transformedData = data?.map(item => {
+      const locationInfo = parseLocationWithCoords(item.location);
+      return {
+        ...item,
+        location: locationInfo.address, // Clean address without coordinates
+        locationCoords: locationInfo.coords, // Parsed coordinates
+        image_url: item.images && Array.isArray(item.images) && item.images.length > 0 
+          ? item.images[0] 
+          : `https://picsum.photos/300/400?random=${item.id.slice(-3)}`,
+        images: item.images || []
+      };
+    });
     
     return transformedData as Listing[];
   }
@@ -303,9 +332,12 @@ export const useListing = (id: string) => useQuery({
     if (error) throw error;
     if (!data) throw new Error("Listing not found");
     
-    // Transform the data to include the primary image URL from the images array
+    // Transform the data to include the primary image URL from the images array and parse location coordinates
+    const locationInfo = parseLocationWithCoords(data.location);
     const transformedListing = {
       ...data,
+      location: locationInfo.address, // Clean address without coordinates
+      locationCoords: locationInfo.coords, // Parsed coordinates
       image_url: data.images && Array.isArray(data.images) && data.images.length > 0 
         ? data.images[0] 
         : `https://picsum.photos/300/400?random=${data.id.slice(-3)}`,
@@ -324,6 +356,7 @@ export const createListing = async (
     imageUris: string[];
     category?: string;
     location?: string;
+    locationCoords?: { latitude: number; longitude: number };
     condition?: 'new' | 'like_new' | 'good' | 'fair' | 'poor';
   },
   onProgress?: (progress: number, message: string) => void
@@ -361,6 +394,7 @@ export const createListing = async (
       currency: 'TRY',
       category: input.category || 'Genel',
       location: input.location || 'İstanbul',
+      locationCoords: input.locationCoords,
       seller_name: 'Sen', // Current user
       condition: input.condition || 'good',
       status: 'active',
@@ -433,12 +467,19 @@ export const createListing = async (
     onProgress?.(85, "Listing kaydediliyor...");
 
     // Create the listing with uploaded image URLs
+    // LocationCoords'u location string'ine JSON formatında dahil et
+    let locationWithCoords = input.location || null;
+    if (input.locationCoords && input.location) {
+      // Location string'ine coordinates'ı ekle
+      locationWithCoords = `${input.location}|COORDS:${JSON.stringify(input.locationCoords)}`;
+    }
+
     const { data, error } = await supabase.from("listings").insert({ 
       title: input.title, 
       description: input.description, 
       price: input.price,
       category: input.category || null,
-      location: input.location || null,
+      location: locationWithCoords,
       condition: input.condition || null,
       currency: 'TRY',
       status: 'active',
