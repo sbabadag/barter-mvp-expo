@@ -8,7 +8,8 @@ import {
   StyleSheet,
   Alert,
   RefreshControl,
-  Dimensions
+  Dimensions,
+  Platform
 } from 'react-native';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import {
@@ -102,11 +103,13 @@ export default function TekliflerimScreen() {
     }
   };
 
-  const getStatusText = (status: string) => {
+  const getStatusText = (status: string, isMyOffer = false) => {
     switch (status) {
       case 'pending': return 'Bekliyor';
       case 'accepted': return 'Kabul Edildi';
-      case 'rejected': return 'Reddedildi';
+      case 'rejected': 
+        // Kendi teklifimizse "Geri Çekildi", başkasının teklifiyse "Reddedildi"
+        return isMyOffer ? 'Geri Çekildi' : 'Reddedildi';
       case 'countered': return 'Karşı Teklif';
       case 'expired': return 'Süresi Doldu';
       default: return status;
@@ -129,7 +132,7 @@ export default function TekliflerimScreen() {
         </View>
         <View style={styles.statusContainer}>
           <View style={[styles.statusBadge, { backgroundColor: getStatusColor(offer.status) }]}>
-            <Text style={styles.statusText}>{getStatusText(offer.status)}</Text>
+            <Text style={styles.statusText}>{getStatusText(offer.status, true)}</Text>
           </View>
           {offer.time_left && !offer.is_expired && (
             <Text style={styles.timeLeft}>{offer.time_left}</Text>
@@ -201,7 +204,7 @@ export default function TekliflerimScreen() {
         </View>
         <View style={styles.statusContainer}>
           <View style={[styles.statusBadge, { backgroundColor: getStatusColor(offer.status) }]}>
-            <Text style={styles.statusText}>{getStatusText(offer.status)}</Text>
+            <Text style={styles.statusText}>{getStatusText(offer.status, false)}</Text>
           </View>
           {offer.time_left && !offer.is_expired && (
             <Text style={styles.timeLeft}>{offer.time_left}</Text>
@@ -385,6 +388,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+    // Web responsive tasarımı
+    ...(Platform.OS === 'web' && {
+      maxWidth: 480,
+      alignSelf: 'center',
+      width: '100%',
+      borderLeftWidth: 1,
+      borderRightWidth: 1,
+      borderColor: '#e1e1e1',
+      backgroundColor: '#ffffff',
+    }),
   },
   header: {
     backgroundColor: '#fff',
@@ -429,14 +442,14 @@ const styles = StyleSheet.create({
   },
   offerCard: {
     backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 20,
+    padding: 20,
     marginBottom: 16,
-    elevation: 2,
+    elevation: 3,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
   },
   offerHeader: {
     flexDirection: 'row',
@@ -500,8 +513,8 @@ const styles = StyleSheet.create({
   },
   messageContainer: {
     backgroundColor: '#f8f9fa',
-    padding: 12,
-    borderRadius: 8,
+    padding: 16,
+    borderRadius: 12,
     marginBottom: 12,
   },
   messageLabel: {
@@ -517,8 +530,8 @@ const styles = StyleSheet.create({
   },
   counterOfferContainer: {
     backgroundColor: '#e3f2fd',
-    padding: 12,
-    borderRadius: 8,
+    padding: 16,
+    borderRadius: 12,
     marginBottom: 12,
   },
   counterOfferLabel: {
@@ -617,8 +630,14 @@ const styles = StyleSheet.create({
   },
   statsContainer: {
     backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
+    borderRadius: 20,
+    padding: 24,
+    margin: 16,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
   },
   statsTitle: {
     fontSize: 20,
@@ -635,10 +654,15 @@ const styles = StyleSheet.create({
   statCard: {
     width: (width - 64) / 2,
     backgroundColor: '#f8f9fa',
-    padding: 16,
-    borderRadius: 8,
+    padding: 20,
+    borderRadius: 16,
     alignItems: 'center',
     marginBottom: 12,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
   },
   statNumber: {
     fontSize: 24,

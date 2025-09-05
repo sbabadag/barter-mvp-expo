@@ -436,7 +436,7 @@ const styles = StyleSheet.create({
   messageButton: {
     flex: 1,
     backgroundColor: '#333',
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
@@ -451,7 +451,7 @@ const styles = StyleSheet.create({
   offerButton: {
     flex: 1,
     backgroundColor: '#f0a500',
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
@@ -466,20 +466,20 @@ const styles = StyleSheet.create({
   // Bidding styles
   bidsContainer: {
     backgroundColor: '#f8f9fa',
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 16,
+    padding: 20,
     marginTop: 8,
   },
   bidItem: {
     backgroundColor: 'white',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 8,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
   bidHeader: {
     flexDirection: 'row',

@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase, supabaseConfig } from "../utils/supabase";
+import { Platform } from "react-native";
 import * as FileSystem from "expo-file-system";
 import { decode } from "base64-arraybuffer";
 
@@ -65,8 +66,9 @@ export type Listing = {
 export const useListings = () => useQuery({
   queryKey: ["listings"],
   queryFn: async () => {
+    // Sadece placeholder config'de mock data kullan - web'de artık gerçek veri
     if (supabaseConfig.isPlaceholder) {
-      // Return mock data for development/testing
+      // Return mock data for development/testing when Supabase not configured
       const mockListings: Listing[] = [
         {
           id: generateMockUUID("mock_1"),
@@ -233,6 +235,7 @@ export const useListings = () => useQuery({
       return allListings;
     }
 
+    // Mobil platformlarda Supabase kullan
     const { data, error } = await supabase.from("listings").select(`
       id, 
       title, 

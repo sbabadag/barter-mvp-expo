@@ -16,7 +16,9 @@
       "bundleIdentifier": "com.sbabadag.bartermvp",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSLocationWhenInUseUsageDescription": "Bu uygulama konum bilginizi ilanlarınızda konum seçimi için kullanır."
+        "NSLocationWhenInUseUsageDescription": "Bu uygulama konum bilginizi ilanlarınızda konum seçimi için kullanır.",
+        "NSCameraUsageDescription": "Bu uygulama fotoğraf çekmek için kamerayı kullanır.",
+        "NSPhotoLibraryUsageDescription": "Bu uygulama galeri fotoğraflarını seçmek için kullanır."
       }
     },
     "android": {
@@ -26,7 +28,12 @@
       },
       "permissions": [
         "ACCESS_COARSE_LOCATION",
-        "ACCESS_FINE_LOCATION"
+        "ACCESS_FINE_LOCATION",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "RECORD_AUDIO",
+        "VIBRATE"
       ],
       "config": {
         "googleMaps": {
@@ -36,11 +43,42 @@
     },
     "web": {
       "bundler": "metro",
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "name": "Barter MVP - Al-Sat Platformu",
+      "shortName": "Barter MVP",
+      "lang": "tr",
+      "scope": "/",
+      "themeColor": "#f0a500",
+      "backgroundColor": "#ffffff",
+      "display": "standalone",
+      "orientation": "portrait",
+      "startUrl": "/",
+      "meta": {
+        "apple-mobile-web-app-capable": "yes",
+        "apple-mobile-web-app-status-bar-style": "default",
+        "apple-mobile-web-app-title": "Barter MVP",
+        "mobile-web-app-capable": "yes",
+        "msapplication-TileColor": "#f0a500"
+      }
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#f0a500",
+          "defaultChannel": "default"
+        }
+      ]
     ],
+    "notification": {
+      "icon": "./assets/icon.png",
+      "color": "#f0a500",
+      "iosDisplayInForeground": true,
+      "androidMode": "default",
+      "androidCollapsedTitle": "#{unread_notifications} yeni bildirim"
+    },
     "extra": {
       "router": {},
       "eas": {

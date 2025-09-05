@@ -10,7 +10,8 @@ import {
   Image,
   TouchableOpacity,
   Modal,
-  ActivityIndicator
+  ActivityIndicator,
+  Platform
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../src/state/AuthProvider';
@@ -883,6 +884,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    // Web responsive tasarımı
+    ...(Platform.OS === 'web' && {
+      maxWidth: 480,
+      alignSelf: 'center',
+      width: '100%',
+      borderLeftWidth: 1,
+      borderRightWidth: 1,
+      borderColor: '#e1e1e1',
+    }),
   },
   scrollContainer: {
     flex: 1,

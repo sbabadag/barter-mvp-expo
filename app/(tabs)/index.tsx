@@ -1,4 +1,4 @@
-import { View, Text, Pressable, Image, StyleSheet, Dimensions, TextInput, ScrollView, SafeAreaView } from "react-native";
+import { View, Text, Pressable, Image, StyleSheet, Dimensions, TextInput, ScrollView, SafeAreaView, Platform } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { useListings } from "../../src/services/listings";
 import CommentsModal from "../../src/components/CommentsModal";
@@ -283,6 +283,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: DepopTheme.colors.background,
     paddingHorizontal: DepopLayout.screenPadding,
+    // Web için responsive tasarım
+    ...(Platform.OS === 'web' && {
+      maxWidth: 480, // Mobil app genişliği simülasyonu
+      alignSelf: 'center',
+      width: '100%',
+      borderLeftWidth: 1,
+      borderRightWidth: 1,
+      borderColor: '#e1e1e1',
+      backgroundColor: '#ffffff',
+    }),
   },
   header: {
     fontSize: 28,

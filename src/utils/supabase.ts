@@ -8,7 +8,7 @@ const SUPABASE_ANON_KEY = Constants.expoConfig?.extra?.supabaseAnonKey || proces
 export const supabaseConfig = {
   url: SUPABASE_URL,
   key: SUPABASE_ANON_KEY,
-  isPlaceholder: SUPABASE_URL.includes("placeholder") || SUPABASE_URL.includes("your-project") || SUPABASE_ANON_KEY.includes("your-anon-key")
+  isPlaceholder: false // FORCE REAL CLIENT - Mock mode completely disabled
 };
 
 // Create a mock client for development to avoid network requests
@@ -58,6 +58,4 @@ const createMockSupabaseClient = () => {
 };
 
 // Note: Replace with your actual Supabase URL and anon key in .env file
-export const supabase = supabaseConfig.isPlaceholder 
-  ? createMockSupabaseClient() 
-  : createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY); // ALWAYS USE REAL CLIENT

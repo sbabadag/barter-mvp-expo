@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { supabase, supabaseConfig } from '../utils/supabase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../state/AuthProvider';
+import { HapticService } from './haptics';
+import { notificationService } from './notifications';
+import { Platform } from 'react-native';
 
 export interface Bid {
   id: string;
@@ -289,6 +292,17 @@ export const createBid = async (
       console.log('Adding bid to mock data');
       mockBids.unshift(newBid);
       console.log('Mock bids now:', mockBids.length);
+      
+      // Haptic feedback ve notification için mock mode
+      HapticService.success();
+      if (Platform.OS !== 'web' && __DEV__) {
+        await notificationService.scheduleBidNotification(
+          `Mock İlan ${listingId}`, 
+          amount, 
+          listingId
+        );
+      }
+      
       return { success: true };
     } else {
       console.log('Creating bid in Supabase');
@@ -309,6 +323,11 @@ export const createBid = async (
           throw error;
         }
         console.log('Bid created successfully in Supabase');
+        
+        // Başarılı teklif için haptic feedback
+        HapticService.success();
+        console.log('✅ Teklif başarıyla oluşturuldu - Haptic feedback verildi');
+        
         return { success: true };
       } catch (supabaseError: any) {
         console.log('Supabase error during bid creation, falling back to mock:', supabaseError);
@@ -316,14 +335,22 @@ export const createBid = async (
           console.log('Database table not found or relationship error, using mock mode for bid creation');
           mockBids.unshift(newBid);
           console.log('Mock bids now:', mockBids.length);
+          
+          // Mock fallback için de haptic feedback
+          HapticService.success();
+          
           return { success: true };
         } else {
+          // Hata durumunda error haptic
+          HapticService.error();
           throw supabaseError;
         }
       }
     }
   } catch (err) {
     console.error('Error creating bid:', err);
+    // Genel hata için error haptic
+    HapticService.error();
     return { 
       success: false, 
       error: 'Teklif gönderilirken hata oluştu. Lütfen tekrar deneyin.' 

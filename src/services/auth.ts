@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
+import { Platform } from 'react-native';
 import { supabase, supabaseConfig } from '../utils/supabase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -197,12 +198,13 @@ export const useAuthService = () => {
   const initializeAuth = async () => {
     try {
       console.log('=== AUTH INITIALIZATION START ===');
+      console.log('Platform:', Platform.OS);
       console.log('Supabase config:', { 
         isPlaceholder: supabaseConfig.isPlaceholder,
         url: supabaseConfig.url 
       });
       
-      // First, try auto-login if enabled
+      // Mobil ve web platformlarda aynı auth flow kullan
       const autoLoginEnabled = await AsyncStorage.getItem(STORAGE_KEYS.AUTO_LOGIN);
       console.log('Auto-login enabled:', autoLoginEnabled);
       

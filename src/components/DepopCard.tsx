@@ -6,12 +6,20 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { DepopTheme, DepopLayout } from '../styles/DepopTheme';
 
 const { width: screenWidth } = Dimensions.get('window');
-const cardWidth = (screenWidth - (DepopLayout.screenPadding * 2) - DepopLayout.cardSpacing) / 2;
+// Web'de daha küçük kart boyutu
+const getCardWidth = () => {
+  if (Platform.OS === 'web') {
+    return (480 - (DepopLayout.screenPadding * 2) - DepopLayout.cardSpacing) / 2; // 480px max genişlik
+  }
+  return (screenWidth - (DepopLayout.screenPadding * 2) - DepopLayout.cardSpacing) / 2;
+};
+const cardWidth = getCardWidth();
 
 interface DepopCardProps {
   item: {
@@ -84,7 +92,13 @@ const styles = StyleSheet.create({
     width: cardWidth,
     backgroundColor: DepopTheme.colors.surface,
     marginBottom: DepopLayout.cardSpacing,
-    // No border radius for more minimal look
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   
   imageContainer: {
