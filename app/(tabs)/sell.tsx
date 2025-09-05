@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, TextInput, Text, Pressable, Alert, ScrollView, Image, StyleSheet, Dimensions, Modal, ActivityIndicator } from "react-native";
+import { View, TextInput, Text, Pressable, Alert, ScrollView, Image, StyleSheet, Dimensions, Modal, ActivityIndicator, Platform } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
 import { useRouter } from "expo-router";
@@ -9,6 +9,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Dropdown } from "../../src/components/Dropdown";
 import { LISTING_CATEGORIES } from "../../src/constants/categories";
 import LocationPicker from "../../src/components/LocationPickerSimple";
+import LocationPickerWeb from "../../src/components/LocationPickerWeb";
+import { HapticService } from "../../src/services/haptics";
+import { notificationService } from "../../src/services/notifications";
 
 // Konum tipi tanımı
 interface LocationData {
@@ -57,6 +60,7 @@ export default function SellScreen() {
   };
 
   const pickImagesFromGallery = async () => {
+    HapticService.light();
     const res = await ImagePicker.launchImageLibraryAsync({
       allowsMultipleSelection: true,
       selectionLimit: 6,
@@ -72,14 +76,24 @@ export default function SellScreen() {
         res.assets.map(async (asset) => await optimizeImage(asset.uri))
       );
       setImages(prev => [...prev, ...optimizedImages].slice(0, 6));
+      HapticService.success(); // Fotoğraf seçimi başarılı
     }
     setShowImageOptions(false);
   };
 
   const takePhotoWithCamera = async () => {
+    HapticService.light();
+    // Web platformunda kamera desteği sınırlı
+    if (Platform.OS === 'web') {
+      Alert.alert('Bilgi', 'Web platformunda sadece galeri seçimi desteklenmektedir.');
+      pickImagesFromGallery();
+      return;
+    }
+
     // Kamera iznini kontrol et
     const cameraPermission = await ImagePicker.requestCameraPermissionsAsync();
     if (!cameraPermission.granted) {
+      HapticService.error();
       Alert.alert('Kamera İzni', 'Fotoğraf çekmek için kamera iznine ihtiyacımız var.');
       setShowImageOptions(false);
       return;
@@ -97,15 +111,20 @@ export default function SellScreen() {
       // Çekilen fotoğrafı optimize et
       const optimizedImage = await optimizeImage(res.assets[0].uri);
       setImages(prev => [...prev, optimizedImage].slice(0, 6));
+      HapticService.success(); // Fotoğraf çekimi başarılı
+    } else {
+      HapticService.light(); // İptal edildi
     }
     setShowImageOptions(false);
   };
 
   const pickImages = async () => {
+    HapticService.light();
     setShowImageOptions(true);
   };
 
   const removeImage = (index: number) => {
+    HapticService.medium();
     setImages(images.filter((_, i) => i !== index));
   };
 
@@ -119,16 +138,19 @@ export default function SellScreen() {
 
   const onSubmit = async () => {
     if (!title.trim()) {
+      HapticService.error();
       Alert.alert("Hata", "Lütfen bir başlık girin");
       return;
     }
     
     if (images.length === 0) {
+      HapticService.error();
       Alert.alert("Hata", "Lütfen en az bir fotoğraf ekleyin");
       return;
     }
 
     try {
+      HapticService.light(); // Başlangıç feedback
       setIsUploading(true);
       setUploadProgress(0);
       setUploadMessage("Başlıyor...");
@@ -165,6 +187,19 @@ export default function SellScreen() {
       // Hide progress modal
       setIsUploading(false);
       
+      // Success haptic feedback
+      HapticService.success();
+      
+      // Mobil için listing created notification (sadece test için)
+      if (Platform.OS !== 'web' && __DEV__) {
+        // Sadece development modunda test notification
+        await notificationService.scheduleReminderNotification(
+          "İlan Oluşturuldu! 🎉", 
+          `${title} ilanınız başarıyla yayınlandı`,
+          5 // 5 saniye sonra test notification
+        );
+      }
+      
       // Show success alert with more details
       Alert.alert(
         "✅ Başarılı!", 
@@ -194,6 +229,7 @@ export default function SellScreen() {
     } catch (e: any) {
       console.error("Error creating listing:", e);
       setIsUploading(false);
+      HapticService.error(); // Error haptic feedback
       Alert.alert("Hata", e.message || "Bilinmeyen bir hata oluştu");
     }
   };
@@ -246,11 +282,21 @@ export default function SellScreen() {
         />
       </View>
 
-      <LocationPicker
-        onLocationSelect={handleLocationSelect}
-        selectedLocation={location}
-        label="Konum"
-      />
+      {Platform.OS === 'web' ? (
+        <LocationPickerWeb
+          onLocationSelect={(location, coords) => {
+            setLocation(location);
+            setLocationCoords(coords);
+          }}
+          currentLocation={location}
+        />
+      ) : (
+        <LocationPicker
+          onLocationSelect={handleLocationSelect}
+          selectedLocation={location}
+          label="Konum"
+        />
+      )}
 
       <View style={styles.formGroup}>
         <Text style={styles.label}>Durum</Text>
@@ -395,6 +441,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
     padding: 16,
+    // Web responsive tasarımı
+    ...(Platform.OS === 'web' && {
+      maxWidth: 480,
+      alignSelf: 'center',
+      width: '100%',
+      paddingHorizontal: 24,
+      borderLeftWidth: 1,
+      borderRightWidth: 1,
+      borderColor: '#e1e1e1',
+    }),
   },
   header: {
     fontSize: 28,

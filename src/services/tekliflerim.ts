@@ -9,7 +9,15 @@ const isMockDataId = (id: string): boolean => {
 
 // Helper function to determine if we should use mock mode
 const shouldUseMockMode = (id?: string): boolean => {
-  return supabaseConfig.isPlaceholder || (id ? isMockDataId(id) : false);
+  // GEÇICI OLARAK MOCK MODU DEVRE DIŞI - HER ZAMAN GERÇEK VERİ KULLAN
+  const result = false; // supabaseConfig.isPlaceholder || (id ? isMockDataId(id) : false);
+  console.log('📊 Mock mode check (FORCED REAL):', {
+    isPlaceholder: supabaseConfig.isPlaceholder,
+    url: supabaseConfig.url,
+    mockDataId: id ? isMockDataId(id) : false,
+    result: result
+  });
+  return result;
 };
 
 // Enhanced types for tekliflerim (my offers/bids)
@@ -310,68 +318,87 @@ export const useMyOffers = () => {
       
       console.log('Using real Supabase for my offers');
       
-      // Real Supabase implementation
+      // Real Supabase implementation - SIMPLIFIED QUERY
       try {
-        const { data, error } = await supabase
+        console.log('📝 Fetching my bids with user ID:', user.id);
+        
+        // Önce sadece bids tablosundan veriyi çek
+        const { data: bids, error: bidsError } = await supabase
           .from('bids')
-          .select(`
-            *,
-            listings!bids_listing_id_fkey (
-              id,
-              title,
-              description,
-              price,
-              status,
-              image_url,
-              images,
-              category,
-              location,
-              condition,
-              seller_id,
-              profiles!listings_seller_id_fkey (
-                display_name,
-                avatar_url
-              )
-            )
-          `)
+          .select('*')
           .eq('bidder_id', user.id)
           .order('created_at', { ascending: false });
         
-        if (error) throw error;
+        if (bidsError) {
+          console.error('❌ Bids query error:', bidsError);
+          throw bidsError;
+        }
         
-        // Transform Supabase data to MyOffer format
-        const offers: MyOffer[] = (data || []).map((bid: any) => ({
-          id: bid.id,
-          listing_id: bid.listing_id,
-          bidder_id: bid.bidder_id,
-          amount: bid.amount,
-          message: bid.message,
-          status: bid.status,
-          created_at: bid.created_at,
-          expires_at: bid.expires_at,
-          counter_offer_amount: bid.counter_offer_amount,
-          counter_offer_message: bid.counter_offer_message,
-          
-          listing_title: bid.listings?.title || 'Ürün',
-          listing_description: bid.listings?.description,
-          listing_price: bid.listings?.price || 0,
-          listing_image: bid.listings?.image_url || bid.listings?.images?.[0] || '',
-          listing_images: bid.listings?.images || [],
-          listing_category: bid.listings?.category,
-          listing_location: bid.listings?.location,
-          listing_condition: bid.listings?.condition,
-          listing_status: bid.listings?.status || 'active',
-          
-          seller_id: bid.listings?.seller_id || '',
-          seller_name: bid.listings?.profiles?.display_name || 'Satıcı',
-          seller_avatar: bid.listings?.profiles?.avatar_url,
-          
-          is_expired: false, // Will be calculated in enhanceOffers
-          time_left: '', // Will be calculated in enhanceOffers
-          price_difference: 0, // Will be calculated in enhanceOffers
-          price_difference_percentage: 0 // Will be calculated in enhanceOffers
-        }));
+        console.log('✅ My bids fetched:', bids?.length || 0);
         
+        if (!bids || bids.length === 0) {
+          console.log('📭 No bids found for user');
+          return [];
+        }
+        
+        // Her bid için listing bilgilerini ayrı ayrı çek
+        const offers: MyOffer[] = [];
+        
+        for (const bid of bids) {
+          try {
+            // Listing bilgilerini çek
+            const { data: listing, error: listingError } = await supabase
+              .from('listings')
+              .select('*')
+              .eq('id', bid.listing_id)
+              .single();
+            
+            if (listingError || !listing) {
+              console.warn('⚠️ Listing not found for bid:', bid.id);
+              continue;
+            }
+            
+            // Offer objesini oluştur
+            const offer: MyOffer = {
+              id: bid.id,
+              listing_id: bid.listing_id,
+              bidder_id: bid.bidder_id,
+              amount: bid.amount,
+              message: bid.message,
+              status: bid.status,
+              created_at: bid.created_at,
+              expires_at: bid.expires_at,
+              counter_offer_amount: bid.counter_offer_amount,
+              counter_offer_message: bid.counter_offer_message,
+              
+              listing_title: listing.title || 'Ürün',
+              listing_description: listing.description,
+              listing_price: listing.price || 0,
+              listing_image: listing.image_url || 'https://picsum.photos/300/400?random=default',
+              listing_images: listing.images || [],
+              listing_category: listing.category,
+              listing_location: listing.location,
+              listing_condition: listing.condition,
+              listing_status: listing.status || 'active',
+              
+              seller_id: listing.seller_id || '',
+              seller_name: 'Satıcı', // Profil bilgisi olmadan basit isim
+              seller_avatar: undefined,
+              
+              is_expired: false,
+              time_left: '',
+              price_difference: 0,
+              price_difference_percentage: 0
+            };
+            
+            offers.push(offer);
+            
+          } catch (error) {
+            console.error('❌ Error processing bid:', bid.id, error);
+          }
+        }
+        
+        console.log('✅ Processed offers:', offers.length);
         return enhanceOffers(offers);
       } catch (error) {
         // This is expected behavior when database is not configured
@@ -408,57 +435,107 @@ export const useReceivedOffers = () => {
       
       console.log('Using real Supabase for received offers');
       
-      // Real Supabase implementation
+      // Real Supabase implementation - SIMPLIFIED
       try {
-        const { data, error } = await supabase
-          .from('bids')
-          .select(`
-            *,
-            listings!bids_listing_id_fkey (
-              id,
-              title,
-              price,
-              image_url,
-              category,
-              seller_id
-            ),
-            profiles!bids_bidder_id_fkey (
-              display_name,
-              avatar_url
-            )
-          `)
-          .eq('listings.seller_id', user.id)
-          .order('created_at', { ascending: false });
+        console.log('📝 Fetching received offers for user:', user.id);
         
-        if (error) throw error;
+        // Önce kullanıcının sahip olduğu listingleri bul
+        const { data: myListings, error: listingsError } = await supabase
+          .from('listings')
+          .select('id')
+          .eq('seller_id', user.id);
         
-        // Transform to ReceivedOffer format
-        const offers: ReceivedOffer[] = (data || []).map((bid: any) => ({
-          id: bid.id,
-          listing_id: bid.listing_id,
-          bidder_id: bid.bidder_id,
-          amount: bid.amount,
-          message: bid.message,
-          status: bid.status,
-          created_at: bid.created_at,
-          expires_at: bid.expires_at,
-          counter_offer_amount: bid.counter_offer_amount,
-          counter_offer_message: bid.counter_offer_message,
-          
-          bidder_name: bid.profiles?.display_name || 'Kullanıcı',
-          bidder_avatar: bid.profiles?.avatar_url,
-          
-          listing_title: bid.listings?.title || 'Ürünüm',
-          listing_price: bid.listings?.price || 0,
-          listing_image: bid.listings?.image_url || '',
-          listing_category: bid.listings?.category,
-          
-          is_expired: false,
-          time_left: '',
-          price_difference: 0,
-          price_difference_percentage: 0
-        }));
+        if (listingsError) {
+          console.error('❌ Listings query error:', listingsError);
+          throw listingsError;
+        }
         
+        if (!myListings || myListings.length === 0) {
+          console.log('📭 No listings found for user');
+          return [];
+        }
+        
+        const listingIds = myListings.map(l => l.id);
+        console.log('📋 Found listings:', listingIds.length);
+        
+        // Bu listinglere yapılan teklifleri bul
+        const allBids: any[] = [];
+        
+        for (const listingId of listingIds) {
+          const { data: bids, error: bidsError } = await supabase
+            .from('bids')
+            .select('*')
+            .eq('listing_id', listingId);
+          
+          if (bidsError) {
+            console.error('❌ Bids query error for listing:', listingId, bidsError);
+            continue;
+          }
+          
+          if (bids) {
+            allBids.push(...bids);
+          }
+        }
+        
+        // Tarihe göre sırala
+        allBids.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        
+        console.log('✅ Received bids fetched:', allBids?.length || 0);
+        
+        if (!allBids || allBids.length === 0) {
+          return [];
+        }
+        
+        // Her bid için listing bilgilerini ekle
+        const offers: ReceivedOffer[] = [];
+        
+        for (const bid of allBids) {
+          try {
+            const { data: listing, error: listingError } = await supabase
+              .from('listings')
+              .select('*')
+              .eq('id', bid.listing_id)
+              .single();
+            
+            if (listingError || !listing) {
+              console.warn('⚠️ Listing not found for bid:', bid.id);
+              continue;
+            }
+            
+            const offer: ReceivedOffer = {
+              id: bid.id,
+              listing_id: bid.listing_id,
+              bidder_id: bid.bidder_id,
+              amount: bid.amount,
+              message: bid.message,
+              status: bid.status,
+              created_at: bid.created_at,
+              expires_at: bid.expires_at,
+              counter_offer_amount: bid.counter_offer_amount,
+              counter_offer_message: bid.counter_offer_message,
+              
+              bidder_name: 'Kullanıcı', // Profil bilgisi olmadan basit isim
+              bidder_avatar: undefined,
+              
+              listing_title: listing.title || 'Ürünüm',
+              listing_price: listing.price || 0,
+              listing_image: listing.image_url || 'https://picsum.photos/300/400?random=listing',
+              listing_category: listing.category,
+              
+              is_expired: false,
+              time_left: '',
+              price_difference: 0,
+              price_difference_percentage: 0
+            };
+            
+            offers.push(offer);
+            
+          } catch (error) {
+            console.error('❌ Error processing received bid:', bid.id, error);
+          }
+        }
+        
+        console.log('✅ Processed received offers:', offers.length);
         return enhanceOffers(offers);
       } catch (error) {
         // This is expected behavior when database is not configured
@@ -744,14 +821,15 @@ export const useWithdrawOffer = () => {
       
       console.log('Withdrawing offer in real Supabase');
       
-      // Real Supabase - update status to cancelled
+      // Real Supabase - Status'u rejected yap (valid constraint)
       try {
         const { error } = await supabase
           .from('bids')
-          .update({ status: 'cancelled' })
+          .update({ status: 'rejected' })
           .eq('id', offerId);
         
         if (error) throw error;
+        console.log('✅ Offer status updated to rejected (withdrawn)');
         return { success: true };
       } catch (error) {
         console.error('Error withdrawing offer in Supabase:', error);

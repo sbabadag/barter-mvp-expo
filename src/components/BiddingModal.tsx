@@ -254,9 +254,14 @@ const styles = StyleSheet.create({
   },
   listingInfo: {
     backgroundColor: '#f8f9fa',
-    padding: 16,
-    borderRadius: 12,
+    padding: 20,
+    borderRadius: 16,
     marginBottom: 24,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
   },
   listingTitle: {
     fontSize: 16,
@@ -285,8 +290,8 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
+    borderRadius: 12,
+    padding: 16,
     fontSize: 16,
     backgroundColor: '#fff',
   },
@@ -348,7 +353,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: '#f8f9fa',
     padding: 16,
-    borderRadius: 8,
+    borderRadius: 12,
     gap: 12,
   },
   infoText: {
