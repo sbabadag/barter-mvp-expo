@@ -17,6 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../src/state/AuthProvider';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
+import UserRatingDisplay from '../../src/components/UserRatingDisplayOptimized';
 
 export default function ProfileTab() {
   const { user, signOut, isLoading, updateProfile } = useAuth();
@@ -194,248 +195,6 @@ export default function ProfileTab() {
       Alert.alert('Hata', 'Profil güncellenirken bir hata oluştu.');
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  // Working implementation copied exactly from sell.tsx
-  const pickImageWorking = async () => {
-    console.log('Using exact working picker from sell page...');
-    setIsUploadingPhoto(true);
-    setShowImagePicker(false);
-    
-    const res = await ImagePicker.launchImageLibraryAsync({
-      allowsMultipleSelection: false, // Single selection for profile
-      mediaTypes: ImagePicker.MediaTypeOptions.Images, // Keep exactly as sell.tsx
-      quality: 0.8 // Keep exactly as sell.tsx
-    });
-    
-    console.log('Working picker result:', res);
-    
-    if (!res.canceled && res.assets && res.assets[0]) {
-      const imageUri = res.assets[0].uri;
-      console.log('Working picker - Image selected:', imageUri);
-      
-      setFormData(prev => ({ ...prev, avatar_url: imageUri }));
-      
-      if (!isEditing) {
-        await updateProfile({ avatar_url: imageUri });
-        Alert.alert('Başarılı', 'Profil fotoğrafınız güncellendi.');
-      }
-    }
-    
-    setIsUploadingPhoto(false);
-  };
-
-  // Ultra minimal image picker for maximum compatibility
-  const pickImageMinimal = async () => {
-    console.log('Using ultra minimal image picker...');
-    
-    try {
-      setIsUploadingPhoto(true);
-      setShowImagePicker(false);
-      
-      console.log('Launching ultra minimal picker...');
-      
-      // No timeout, no special configuration - just the basics
-      const result: any = await ImagePicker.launchImageLibraryAsync({
-        quality: 0.1,
-      });
-      
-      console.log('Minimal picker result:', result);
-      
-      if (result && !result.canceled && result.assets && result.assets[0]) {
-        const imageUri = result.assets[0].uri;
-        console.log('Minimal picker - Image selected:', imageUri);
-        
-        setFormData(prev => ({ ...prev, avatar_url: imageUri }));
-        
-        if (!isEditing) {
-          try {
-            await updateProfile({ avatar_url: imageUri });
-            Alert.alert('Başarılı', 'Profil fotoğrafınız güncellendi.');
-          } catch (updateError) {
-            console.error('Error updating profile:', updateError);
-            Alert.alert('Hata', 'Fotoğraf kaydedilirken bir hata oluştu.');
-            setFormData(prev => ({ ...prev, avatar_url: user?.avatar_url || '' }));
-          }
-        }
-      }
-    } catch (error: any) {
-      console.error('Minimal picker error:', error);
-      Alert.alert('Hata', 'En basit galeri erişimi de başarısız. Cihazınızı yeniden başlatın.');
-    } finally {
-      setIsUploadingPhoto(false);
-    }
-  };
-
-  // Check permission status without requesting
-  const checkPermissions = async () => {
-    try {
-      console.log('Checking current permission status...');
-      const { status } = await ImagePicker.getMediaLibraryPermissionsAsync();
-      console.log('Current permission status:', status);
-      return status === 'granted';
-    } catch (error) {
-      console.error('Error checking permissions:', error);
-      return false;
-    }
-  };
-
-  // Super simple image picker that bypasses permission issues
-  const pickImageDirect = async () => {
-    console.log('Using direct image picker (no permission check)...');
-    
-    try {
-      setIsUploadingPhoto(true);
-      setShowImagePicker(false);
-      
-      // Longer timeout for direct picker
-      const directTimeout = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Direct picker timeout')), 10000); // 10 seconds
-      });
-      
-      console.log('Launching direct image picker...');
-      const result: any = await Promise.race([
-        ImagePicker.launchImageLibraryAsync({
-          mediaTypes: 'images', // Use lowercase string format
-          quality: 0.1,
-          allowsEditing: false,
-          base64: false,
-          exif: false,
-        }),
-        directTimeout
-      ]);
-      
-      console.log('Direct picker result:', result);
-      
-      if (result && !result.canceled && result.assets && result.assets[0]) {
-        const imageUri = result.assets[0].uri;
-        console.log('Direct picker - Image selected:', imageUri);
-        
-        setFormData(prev => ({ ...prev, avatar_url: imageUri }));
-        
-        if (!isEditing) {
-          try {
-            await updateProfile({ avatar_url: imageUri });
-            Alert.alert('Başarılı', 'Profil fotoğrafınız güncellendi.');
-          } catch (updateError) {
-            console.error('Error updating profile:', updateError);
-            Alert.alert('Hata', 'Fotoğraf kaydedilirken bir hata oluştu.');
-            setFormData(prev => ({ ...prev, avatar_url: user?.avatar_url || '' }));
-          }
-        }
-      }
-    } catch (error: any) {
-      console.error('Direct picker error:', error);
-      if (error?.message === 'Direct picker timeout') {
-        Alert.alert('Zaman Aşımı', 'Galeri açılması uzun sürdü. Cihazınızı yeniden başlatmayı deneyin.');
-      } else {
-        Alert.alert('Hata', 'Direkt galeri erişimi başarısız. İzinleri kontrol edin.');
-      }
-    } finally {
-      setIsUploadingPhoto(false);
-    }
-  };
-
-  // Alternative simplified image picker with timeout protection for permissions
-  const pickImageSimple = async () => {
-    console.log('Using simplified image picker...');
-    
-    try {
-      setIsUploadingPhoto(true);
-      setShowImagePicker(false);
-      
-      // Timeout for permission request - increased timeout
-      const permissionTimeout = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Permission timeout')), 15000); // 15 seconds for permission
-      });
-      
-      console.log('Requesting library permissions with timeout...');
-      let permission: any;
-      try {
-        permission = await Promise.race([
-          ImagePicker.requestMediaLibraryPermissionsAsync(),
-          permissionTimeout
-        ]);
-        console.log('Permission result:', permission);
-      } catch (permError) {
-        console.error('Permission request timed out or failed:', permError);
-        Alert.alert('İzin Hatası', 'İzin istemi zaman aşımına uğradı. Telefon ayarlarından manuel olarak izin verin.');
-        setIsUploadingPhoto(false);
-        return;
-      }
-      
-      if (!permission.granted) {
-        console.log('Permission not granted:', permission);
-        
-        // Show detailed permission instructions
-        Alert.alert(
-          'İzin Gerekli', 
-          'Galeri erişimi için izin gereklidir.\n\n1. Telefon Ayarları > Uygulamalar\n2. Expo Go/Uygulamanızı bulun\n3. İzinler > Depolama/Medya izni verin\n4. Uygulamayı yeniden başlatın',
-          [
-            { text: 'İptal', style: 'cancel' },
-            { 
-              text: 'Direkt Dene', 
-              onPress: () => {
-                console.log('Trying direct picker without permission check');
-                pickImageDirect();
-                return;
-              } 
-            }
-          ]
-        );
-        setIsUploadingPhoto(false);
-        return;
-      }
-      
-      // Quick timeout for image picker
-      const pickerTimeout = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Picker timeout')), 8000); // 8 seconds for picker
-      });
-      
-      console.log('Launching minimal image picker...');
-      const result: any = await Promise.race([
-        ImagePicker.launchImageLibraryAsync({
-          mediaTypes: 'images', // Fixed deprecated MediaTypeOptions
-          quality: 0.1, // Extremely low quality to prevent memory issues
-          allowsEditing: false,
-          aspect: undefined,
-          base64: false,
-          exif: false,
-        }),
-        pickerTimeout
-      ]);
-      
-      console.log('Simple picker result:', result);
-      
-      if (result && !result.canceled && result.assets && result.assets[0]) {
-        const imageUri = result.assets[0].uri;
-        console.log('Simple picker - Image selected:', imageUri);
-        
-        setFormData(prev => ({ ...prev, avatar_url: imageUri }));
-        
-        if (!isEditing) {
-          try {
-            await updateProfile({ avatar_url: imageUri });
-            Alert.alert('Başarılı', 'Profil fotoğrafınız güncellendi.');
-          } catch (updateError) {
-            console.error('Error updating profile:', updateError);
-            Alert.alert('Hata', 'Fotoğraf kaydedilirken bir hata oluştu.');
-            setFormData(prev => ({ ...prev, avatar_url: user?.avatar_url || '' }));
-          }
-        }
-      }
-    } catch (error: any) {
-      console.error('Simple picker error:', error);
-      if (error?.message === 'Permission timeout') {
-        Alert.alert('İzin Zaman Aşımı', 'İzin istemi dondu. Telefonu yeniden başlatın veya ayarlardan manuel izin verin.');
-      } else if (error?.message === 'Picker timeout') {
-        Alert.alert('Galeri Zaman Aşımı', 'Galeri açılması çok uzun sürdü. Tekrar deneyin.');
-      } else {
-        Alert.alert('Hata', 'Fotoğraf seçilemedi. Lütfen tekrar deneyin.');
-      }
-    } finally {
-      setIsUploadingPhoto(false);
     }
   };
 
@@ -647,9 +406,9 @@ export default function ProfileTab() {
                 onPress={() => {
                   console.log('Photo container pressed, uploading:', isUploadingPhoto);
                   if (!isUploadingPhoto) {
-                    // Use direct approach like sell page - no modal
-                    console.log('Calling pickImageWorking directly...');
-                    pickImageWorking();
+                    // Show modal for camera/gallery selection
+                    console.log('Opening image picker modal...');
+                    setShowImagePicker(true);
                   }
                 }}
                 style={styles.photoContainer}
@@ -725,6 +484,16 @@ export default function ProfileTab() {
               </View>
             )}
 
+            {/* Ratings Section */}
+            <Text style={styles.sectionTitle}>Değerlendirmeler</Text>
+            <View style={styles.ratingsContainer}>
+              <UserRatingDisplay 
+                userId={user.id}
+                compact={false}
+                showRecentReviews={true}
+              />
+            </View>
+
             {/* Action Buttons */}
             {isEditing ? (
               <View style={styles.editActions}>
@@ -778,20 +547,6 @@ export default function ProfileTab() {
             <Text style={styles.modalTitle}>Profil Fotoğrafı Seç</Text>
             
             <TouchableOpacity
-              style={[styles.modalButton, { backgroundColor: isUploadingPhoto ? "#f0f0f0" : "#2196F3" }]}
-              onPress={() => {
-                console.log('Working gallery button pressed (from sell page)');
-                pickImageWorking();
-              }}
-              disabled={isUploadingPhoto}
-            >
-              <Ionicons name="checkmark-circle" size={24} color={isUploadingPhoto ? "#999" : "white"} />
-              <Text style={[styles.modalButtonText, { color: isUploadingPhoto ? "#999" : "white" }]}>
-                {isUploadingPhoto ? 'Yükleniyor...' : 'Çalışan Galeri (Sell Sayfası Gibi)'}
-              </Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
               style={styles.modalButton}
               onPress={() => {
                 console.log('Camera button pressed');
@@ -804,6 +559,7 @@ export default function ProfileTab() {
                 {isUploadingPhoto ? 'Yükleniyor...' : 'Kamera'}
               </Text>
             </TouchableOpacity>
+            
             <TouchableOpacity
               style={styles.modalButton}
               onPress={() => {
@@ -818,47 +574,6 @@ export default function ProfileTab() {
               </Text>
             </TouchableOpacity>
             
-            <TouchableOpacity
-              style={[styles.modalButton, { backgroundColor: isUploadingPhoto ? "#f0f0f0" : "#4CAF50" }]}
-              onPress={() => {
-                console.log('Simple gallery button pressed');
-                pickImageSimple();
-              }}
-              disabled={isUploadingPhoto}
-            >
-              <Ionicons name="image" size={24} color={isUploadingPhoto ? "#999" : "white"} />
-              <Text style={[styles.modalButtonText, { color: isUploadingPhoto ? "#999" : "white" }]}>
-                {isUploadingPhoto ? 'Yükleniyor...' : 'Basit Galeri'}
-              </Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={[styles.modalButton, { backgroundColor: isUploadingPhoto ? "#f0f0f0" : "#FF9800" }]}
-              onPress={() => {
-                console.log('Direct gallery button pressed');
-                pickImageDirect();
-              }}
-              disabled={isUploadingPhoto}
-            >
-              <Ionicons name="folder" size={24} color={isUploadingPhoto ? "#999" : "white"} />
-              <Text style={[styles.modalButtonText, { color: isUploadingPhoto ? "#999" : "white" }]}>
-                {isUploadingPhoto ? 'Yükleniyor...' : 'Direkt Galeri'}
-              </Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={[styles.modalButton, { backgroundColor: isUploadingPhoto ? "#f0f0f0" : "#9C27B0" }]}
-              onPress={() => {
-                console.log('Minimal gallery button pressed');
-                pickImageMinimal();
-              }}
-              disabled={isUploadingPhoto}
-            >
-              <Ionicons name="document" size={24} color={isUploadingPhoto ? "#999" : "white"} />
-              <Text style={[styles.modalButtonText, { color: isUploadingPhoto ? "#999" : "white" }]}>
-                {isUploadingPhoto ? 'Yükleniyor...' : 'Ultra Basit'}
-              </Text>
-            </TouchableOpacity>
             <TouchableOpacity
               style={[styles.modalButton, styles.modalCancelButton]}
               onPress={() => {
@@ -1141,5 +856,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     textAlign: 'center',
+  },
+  ratingsContainer: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    overflow: 'hidden',
   },
 });

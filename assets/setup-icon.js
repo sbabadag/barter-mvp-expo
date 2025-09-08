@@ -6,7 +6,7 @@ const fs = require('fs');
 console.log('Creating app icon...');
 
 // Read the SVG content
-const svgContent = fs.readFileSync('barter-icon.svg', 'utf8');
+const svgContent = fs.readFileSync('imece-icon.svg', 'utf8');
 console.log('✅ SVG icon created successfully');
 
 // Let's also update the app.json to ensure our icon is properly configured
@@ -37,11 +37,11 @@ if (fs.existsSync(appJsonPath)) {
     console.log('✅ Updated app.json with icon configuration');
 }
 
-console.log('\n🎨 Custom Komşudanal icon created!');
+console.log('\n🎨 Custom İmece icon created!');
 console.log('📱 Icon features:');
 console.log('   • Orange gradient background');
 console.log('   • White exchange arrows');
-console.log('   • "KOMŞUDANal" text');
+console.log('   • "İMECE" text');
 console.log('   • Professional look');
 
 console.log('\n📋 Next steps:');

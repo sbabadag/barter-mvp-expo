@@ -39,17 +39,41 @@ export default function FeedScreen() {
 
     // Filter by category
     if (selectedCategory !== 'Tümü') {
-      filtered = filtered.filter(item => 
-        item.category?.toLowerCase() === selectedCategory.toLowerCase() ||
-        (selectedCategory === 'Giyim' && (!item.category || item.category.toLowerCase().includes('dress') || item.category.toLowerCase().includes('giyim'))) ||
-        (selectedCategory === 'Aksesuar' && item.category?.toLowerCase().includes('aksesuar')) ||
-        (selectedCategory === 'Ayakkabı' && item.category?.toLowerCase().includes('ayakkabı')) ||
-        (selectedCategory === 'Çanta' && item.category?.toLowerCase().includes('çanta')) ||
-        (selectedCategory === 'Elektronik' && item.category?.toLowerCase().includes('elektronik')) ||
-        (selectedCategory === 'Ev & Yaşam' && item.category?.toLowerCase().includes('ev')) ||
-        (selectedCategory === 'Spor' && item.category?.toLowerCase().includes('spor')) ||
-        (selectedCategory === 'Kitap' && item.category?.toLowerCase().includes('kitap'))
-      );
+      filtered = filtered.filter(item => {
+        const itemCategory = item.category?.toLowerCase() || '';
+        const selectedCat = selectedCategory.toLowerCase();
+        
+        // Direct match
+        if (itemCategory === selectedCat) return true;
+        
+        // Category mapping for backwards compatibility and flexible matching
+        switch (selectedCategory) {
+          case 'Araçlar':
+            return itemCategory.includes('araç') || itemCategory.includes('otomobil') || itemCategory.includes('araba');
+          case 'Emlak':
+            return itemCategory.includes('emlak') || itemCategory.includes('ev') || itemCategory.includes('daire');
+          case 'Elektronik':
+            return itemCategory.includes('elektronik') || itemCategory.includes('macbook') || itemCategory.includes('tablet');
+          case 'Giyim & Aksesuar':
+            return itemCategory.includes('giyim') || itemCategory.includes('aksesuar') || itemCategory.includes('dress');
+          case 'Ev & Bahçe':
+            return itemCategory.includes('ev & bahçe') || itemCategory.includes('bahçe') || itemCategory.includes('yaşam');
+          case 'Spor, Outdoor':
+            return itemCategory.includes('spor') || itemCategory.includes('outdoor') || itemCategory.includes('yoga');
+          case 'Telefon & Tablet':
+            return itemCategory.includes('telefon') || itemCategory.includes('tablet') || itemCategory.includes('phone') || itemCategory.includes('bilgisayar');
+          case 'Hobi & Oyuncak':
+            return itemCategory.includes('hobi') || itemCategory.includes('oyun') || itemCategory.includes('oyuncak');
+          case 'Bebek & Çocuk':
+            return itemCategory.includes('bebek') || itemCategory.includes('çocuk') || itemCategory.includes('kid');
+          case 'Kitap & Müzik':
+            return itemCategory.includes('kitap') || itemCategory.includes('müzik') || itemCategory.includes('book') || itemCategory.includes('dergi');
+          case 'Saat & Mücevher':
+            return itemCategory.includes('saat') || itemCategory.includes('mücevher') || itemCategory.includes('takı') || itemCategory.includes('ayakkabı') || itemCategory.includes('çanta');
+          default:
+            return itemCategory.includes(selectedCat);
+        }
+      });
     }
 
     // Filter by search query (searches through title, description, seller name, and category)

@@ -1,0 +1,233 @@
+const fs = require('fs');
+
+// Create a simple HTML file that can generate a PNG splash screen using canvas
+function createSplashGenerator() {
+    const htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+    <title>İmece Splash Generator</title>
+    <style>
+        body { 
+            margin: 0; 
+            padding: 20px;
+            background: #f0f0f0; 
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #canvas {
+            border: 2px solid #333;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        button {
+            background: #f0a500;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 0 10px;
+        }
+        button:hover {
+            background: #ff8c00;
+        }
+        .preview-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .preview {
+            text-align: center;
+        }
+        .preview canvas {
+            width: 150px;
+            height: 300px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>İmece Splash Screen Generator</h1>
+    
+    <canvas id="canvas" width="1242" height="2688"></canvas>
+    
+    <div class="controls">
+        <button onclick="generateSplash()">Generate Splash</button>
+        <button onclick="downloadSplash()">Download PNG</button>
+        <button onclick="showPreview()">Show Preview</button>
+    </div>
+    
+    <div class="preview-container" id="previewContainer" style="display: none;">
+        <div class="preview">
+            <h3>Phone Preview</h3>
+            <canvas id="phonePreview" width="150" height="300"></canvas>
+        </div>
+        <div class="preview">
+            <h3>Tablet Preview</h3>
+            <canvas id="tabletPreview" width="200" height="300"></canvas>
+        </div>
+    </div>
+
+    <script>
+        function generateSplash() {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size for high resolution
+            canvas.width = 1242;
+            canvas.height = 2688;
+            
+            // Create gradient background
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, '#f0a500');
+            gradient.addColorStop(0.5, '#ff8c00');
+            gradient.addColorStop(1, '#f0a500');
+            
+            // Fill background
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Center coordinates
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            // Draw main logo circle
+            ctx.beginPath();
+            ctx.arc(centerX, centerY - 200, 240, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+            ctx.shadowBlur = 20;
+            ctx.shadowOffsetY = 8;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetY = 0;
+            
+            // Draw exchange arrows
+            ctx.strokeStyle = '#f0a500';
+            ctx.lineWidth = 16;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            // Right arrow (top)
+            ctx.beginPath();
+            ctx.moveTo(centerX - 120, centerY - 240);
+            ctx.lineTo(centerX + 120, centerY - 240);
+            ctx.moveTo(centerX + 80, centerY - 280);
+            ctx.lineTo(centerX + 120, centerY - 240);
+            ctx.lineTo(centerX + 80, centerY - 200);
+            ctx.stroke();
+            
+            // Left arrow (bottom)
+            ctx.beginPath();
+            ctx.moveTo(centerX + 120, centerY - 160);
+            ctx.lineTo(centerX - 120, centerY - 160);
+            ctx.moveTo(centerX - 80, centerY - 120);
+            ctx.lineTo(centerX - 120, centerY - 160);
+            ctx.lineTo(centerX - 80, centerY - 200);
+            ctx.stroke();
+            
+            // Draw decorative circles
+            ctx.fillStyle = '#f0a500';
+            ctx.beginPath();
+            ctx.arc(centerX - 80, centerY - 240, 16, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(centerX + 80, centerY - 160, 16, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Draw main title
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 144px Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetY = 4;
+            ctx.fillText('İMECE', centerX, centerY + 160);
+            
+            // Draw subtitle
+            ctx.font = '48px Arial, sans-serif';
+            ctx.shadowBlur = 5;
+            ctx.fillText('Komşular Arası Platform', centerX, centerY + 260);
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetY = 0;
+            
+            // Draw loading dots
+            const dotY = centerY + 400;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            
+            ctx.beginPath();
+            ctx.arc(centerX - 60, dotY, 16, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(centerX, dotY, 16, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(centerX + 60, dotY, 16, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Draw bottom text
+            ctx.font = '36px Arial, sans-serif';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.fillText('Güvenli • Kolay • Komşuluk', centerX, canvas.height - 300);
+            
+            console.log('✅ Splash screen generated!');
+        }
+        
+        function downloadSplash() {
+            const canvas = document.getElementById('canvas');
+            const link = document.createElement('a');
+            link.download = 'splash.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            console.log('📥 Splash screen downloaded as splash.png');
+        }
+        
+        function showPreview() {
+            const sourceCanvas = document.getElementById('canvas');
+            const phoneCanvas = document.getElementById('phonePreview');
+            const tabletCanvas = document.getElementById('tabletPreview');
+            
+            // Phone preview
+            const phoneCtx = phoneCanvas.getContext('2d');
+            phoneCtx.drawImage(sourceCanvas, 0, 0, 150, 300);
+            
+            // Tablet preview
+            const tabletCtx = tabletCanvas.getContext('2d');
+            tabletCtx.drawImage(sourceCanvas, 0, 0, 200, 300);
+            
+            document.getElementById('previewContainer').style.display = 'flex';
+        }
+        
+        // Auto-generate on page load
+        window.onload = function() {
+            generateSplash();
+            showPreview();
+        };
+    </script>
+</body>
+</html>`;
+
+    fs.writeFileSync('splash-generator.html', htmlContent);
+    console.log('✅ Splash generator created: splash-generator.html');
+    console.log('📋 Instructions:');
+    console.log('1. Open splash-generator.html in your browser');
+    console.log('2. Click "Download PNG" button');
+    console.log('3. Save as splash.png in assets folder');
+    console.log('4. Restart your app to see the new splash screen');
+}
+
+createSplashGenerator();
+
+console.log('\n🎨 Splash generator ready!');
+console.log('🚀 This will create a perfect PNG splash screen for your app!');

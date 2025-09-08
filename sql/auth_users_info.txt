@@ -1,0 +1,58 @@
+-- AUTH USERS CREATION INSTRUCTIONS FOR İMECE MARKETPLACE
+-- Since auth users need to be created through Supabase Auth API, this file contains the user details
+
+/*
+IMPORTANT: You need to create these users through Supabase Auth Dashboard or API first, 
+then run the populate_real_users_and_goods.sql script.
+
+Here are the users to create in Supabase Auth Dashboard:
+
+1. User ID: 11111111-1111-1111-1111-111111111111
+   Email: ahmet.yilmaz@email.com
+   Password: AhmetImece123!
+   
+2. User ID: 22222222-2222-2222-2222-222222222222
+   Email: ayse.demir@email.com  
+   Password: AyseImece123!
+   
+3. User ID: 33333333-3333-3333-3333-333333333333
+   Email: mehmet.kaya@email.com
+   Password: MehmetImece123!
+   
+4. User ID: 44444444-4444-4444-4444-444444444444
+   Email: zeynep.ozkan@email.com
+   Password: ZeynepImece123!
+   
+5. User ID: 55555555-5555-5555-5555-555555555555
+   Email: can.sahin@email.com
+   Password: CanImece123!
+   
+6. User ID: 66666666-6666-6666-6666-666666666666
+   Email: elif.arslan@email.com
+   Password: ElifImece123!
+   
+7. User ID: 77777777-7777-7777-7777-777777777777
+   Email: emre.yildiz@email.com
+   Password: EmreImece123!
+   
+8. User ID: 88888888-8888-8888-8888-888888888888
+   Email: selin.dogan@email.com
+   Password: SelinImece123!
+
+ALTERNATIVE: Use Supabase API to create users programmatically
+You can also use the Supabase Admin API to create these users with the exact UUIDs.
+*/
+
+-- For testing login credentials, here's a summary:
+/*
+TEST USERS FOR İMECE MARKETPLACE:
+
+1. ahmet.yilmaz@email.com / AhmetImece123! (İstanbul - Electronics)
+2. ayse.demir@email.com / AyseImece123! (Ankara - Fashion & Home)  
+3. mehmet.kaya@email.com / MehmetImece123! (İzmir - Sports & Auto)
+4. zeynep.ozkan@email.com / ZeynepImece123! (Bursa - Books & Art)
+5. can.sahin@email.com / CanImece123! (Antalya - Gaming & Music)
+6. elif.arslan@email.com / ElifImece123! (Trabzon - Baby & Kids)
+7. emre.yildiz@email.com / EmreImece123! (Adana - Tools & Garden)
+8. selin.dogan@email.com / SelinImece123! (Gaziantep - Beauty & Health)
+*/
