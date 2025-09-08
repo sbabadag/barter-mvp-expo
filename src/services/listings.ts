@@ -375,6 +375,16 @@ export const createListing = async (
     console.log("Mock: Creating listing", input);
     onProgress?.(10, "Listing oluşturuluyor...");
     
+    // Get current user for mock mode too
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: profile } = user ? await supabase
+      .from('profiles')
+      .select('display_name')
+      .eq('id', user.id)
+      .single() : { data: null };
+      
+    const displayName = profile?.display_name || user?.email?.split('@')[0] || 'Kullanıcı';
+    
     // Simulate network delay with progress updates
     await new Promise(resolve => setTimeout(resolve, 500));
     onProgress?.(50, "Görüntüler işleniyor...");
@@ -398,7 +408,7 @@ export const createListing = async (
       category: input.category || 'Genel',
       location: input.location || 'İstanbul',
       locationCoords: input.locationCoords,
-      seller_name: 'Sen', // Current user
+      seller_name: displayName, // Real user display name
       condition: input.condition || 'good',
       status: 'active',
       created_at: new Date().toISOString(),
@@ -421,6 +431,21 @@ export const createListing = async (
 
   // Real Supabase implementation
   try {
+    // Get current user info
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      throw new Error("Kullanıcı girişi gerekli");
+    }
+
+    // Get user profile for display name
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('display_name')
+      .eq('id', user.id)
+      .single();
+
+    const displayName = profile?.display_name || user.email?.split('@')[0] || 'Kullanıcı';
+
     // First upload images to storage and get URLs
     const uploadedImageUrls: string[] = [];
     const totalImages = input.imageUris.length;
@@ -469,7 +494,7 @@ export const createListing = async (
 
     onProgress?.(85, "Listing kaydediliyor...");
 
-    // Create the listing with uploaded image URLs
+    // Create the listing with uploaded image URLs and user info
     // LocationCoords'u location string'ine JSON formatında dahil et
     let locationWithCoords = input.location || null;
     if (input.locationCoords && input.location) {
@@ -487,7 +512,8 @@ export const createListing = async (
       currency: 'TRY',
       status: 'active',
       images: uploadedImageUrls, // Store array of image URLs
-      seller_id: null // TODO: Get from current user when auth is implemented
+      seller_id: user.id, // Current user ID
+      seller_name: displayName // User's display name
     }).select("id").single();
     
     if (error) throw error;
@@ -497,6 +523,7 @@ export const createListing = async (
     
     console.log("Listing created successfully with ID:", data.id);
     console.log("Images uploaded:", uploadedImageUrls.length);
+    console.log("Seller:", displayName, "ID:", user.id);
     
     return data.id;
   } catch (error) {
