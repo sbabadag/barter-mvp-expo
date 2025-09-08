@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { supabase } from '../utils/supabase';
 
 interface UserStats {
@@ -84,16 +85,24 @@ const UserRatingDisplay: React.FC<UserRatingDisplayProps> = memo(({
       <View style={styles.starsContainer}>
         {/* Full stars */}
         {Array(fullStars).fill(0).map((_, i) => (
-          <Text key={`full-${i}`} style={[styles.star, { fontSize: size, color: '#FFD700' }]}>
-            ⭐
-          </Text>
+          <MaterialIcons 
+            key={`full-${i}`} 
+            name="star" 
+            size={size} 
+            color="#FFD700" 
+            style={styles.star}
+          />
         ))}
         
         {/* Empty stars */}
         {Array(emptyStars).fill(0).map((_, i) => (
-          <Text key={`empty-${i}`} style={[styles.star, { fontSize: size, color: '#E0E0E0' }]}>
-            ⭐
-          </Text>
+          <MaterialIcons 
+            key={`empty-${i}`} 
+            name="star-border" 
+            size={size} 
+            color="#E0E0E0" 
+            style={styles.star}
+          />
         ))}
         
         <Text style={[styles.ratingNumber, { fontSize: size - 2, marginLeft: 4 }]}>

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { supabase } from '../utils/supabase';
 
 interface Rating {
@@ -129,23 +130,34 @@ const UserRatingDisplay: React.FC<UserRatingDisplayProps> = ({
       <View style={styles.starsContainer}>
         {/* Full stars */}
         {Array(fullStars).fill(0).map((_, i) => (
-          <Text key={`full-${i}`} style={[styles.star, { fontSize: size, color: '#FFD700' }]}>
-            ⭐
-          </Text>
+          <MaterialIcons 
+            key={`full-${i}`} 
+            name="star" 
+            size={size} 
+            color="#FFD700" 
+            style={styles.star}
+          />
         ))}
         
         {/* Half star */}
         {hasHalfStar && (
-          <Text style={[styles.star, { fontSize: size, color: '#FFD700' }]}>
-            ⭐
-          </Text>
+          <MaterialIcons 
+            name="star-half" 
+            size={size} 
+            color="#FFD700" 
+            style={styles.star}
+          />
         )}
         
         {/* Empty stars */}
         {Array(emptyStars).fill(0).map((_, i) => (
-          <Text key={`empty-${i}`} style={[styles.star, { fontSize: size, color: '#E0E0E0' }]}>
-            ⭐
-          </Text>
+          <MaterialIcons 
+            key={`empty-${i}`} 
+            name="star-border" 
+            size={size} 
+            color="#E0E0E0" 
+            style={styles.star}
+          />
         ))}
         
         <Text style={[styles.ratingNumber, { fontSize: size - 2 }]}>
@@ -154,39 +166,6 @@ const UserRatingDisplay: React.FC<UserRatingDisplayProps> = ({
       </View>
     );
   }, []);
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
-    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-
-    return (
-      <View style={styles.starsContainer}>
-        {/* Full stars */}
-        {Array(fullStars).fill(0).map((_, i) => (
-          <Text key={`full-${i}`} style={[styles.star, { fontSize: size, color: '#FFD700' }]}>
-            ⭐
-          </Text>
-        ))}
-        
-        {/* Half star */}
-        {hasHalfStar && (
-          <Text style={[styles.star, { fontSize: size, color: '#FFD700' }]}>
-            ⭐
-          </Text>
-        )}
-        
-        {/* Empty stars */}
-        {Array(emptyStars).fill(0).map((_, i) => (
-          <Text key={`empty-${i}`} style={[styles.star, { fontSize: size, color: '#E0E0E0' }]}>
-            ⭐
-          </Text>
-        ))}
-        
-        <Text style={[styles.ratingNumber, { fontSize: size - 2 }]}>
-          ({rating.toFixed(1)})
-        </Text>
-      </View>
-    );
-  };
 
   const renderRatingItem = ({ item }: { item: Rating }) => (
     <View style={styles.ratingItem}>
@@ -268,7 +247,10 @@ const UserRatingDisplay: React.FC<UserRatingDisplayProps> = ({
               
               return (
                 <View key={star} style={styles.ratingRow}>
-                  <Text style={styles.starLabel}>{star} ⭐</Text>
+                  <View style={styles.starLabel}>
+                    <Text style={{ fontSize: 12, color: '#333333' }}>{star} </Text>
+                    <MaterialIcons name="star" size={12} color="#FFD700" />
+                  </View>
                   <View style={styles.progressBar}>
                     <View 
                       style={[
@@ -404,8 +386,8 @@ const styles = StyleSheet.create({
   },
   starLabel: {
     width: 40,
-    fontSize: 12,
-    color: '#333333',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   progressBar: {
     flex: 1,
