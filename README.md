@@ -1,6 +1,6 @@
-# Barter MVP (React Native + Expo + Supabase)
+# İmece - Komşular Arası Al-Sat Platformu
 
-Bu proje, **Dolap** benzeri bir ilan/takas pazar yeri uygulaması için hazır bir başlangıç iskeletidir.
+Bu proje, komşular arasında güvenli alışveriş ve paylaşım için tasarlanmış mobil bir platformdur.
 - Mobil: React Native (Expo), Expo Router, React Query, Zustand
 - Backend: Supabase (Postgres + Auth + Storage + Realtime)
 

@@ -1,19 +1,19 @@
 {
   "expo": {
-    "name": "Barter MVP",
-    "slug": "barter-mvp-expo",
-    "scheme": "bartermvp",
+    "name": "İmece",
+    "slug": "imece-app",
+    "scheme": "imece",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "resizeMode": "cover",
+      "backgroundColor": "#f0a500"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.sbabadag.bartermvp",
+      "bundleIdentifier": "com.sbabadag.imece",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSLocationWhenInUseUsageDescription": "Bu uygulama konum bilginizi ilanlarınızda konum seçimi için kullanır.",
@@ -45,8 +45,8 @@
     "web": {
       "bundler": "metro",
       "favicon": "./assets/favicon.png",
-      "name": "Barter MVP - Al-Sat Platformu",
-      "shortName": "Barter MVP",
+      "name": "İmece - Komşular Arası Al-Sat Platformu",
+      "shortName": "İmece",
       "lang": "tr",
       "scope": "/",
       "themeColor": "#f0a500",
@@ -57,7 +57,7 @@
       "meta": {
         "apple-mobile-web-app-capable": "yes",
         "apple-mobile-web-app-status-bar-style": "default",
-        "apple-mobile-web-app-title": "Barter MVP",
+        "apple-mobile-web-app-title": "İmece",
         "mobile-web-app-capable": "yes",
         "msapplication-TileColor": "#f0a500"
       }

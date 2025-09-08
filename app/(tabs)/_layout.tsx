@@ -29,6 +29,13 @@ export default function TabsLayout() {
         }} 
       />
       <Tabs.Screen 
+        name="store" 
+        options={{ 
+          tabBarLabel: "Mağaza", 
+          tabBarIcon: ({color, size}) => <MaterialIcons name="store" color={color} size={size} /> 
+        }} 
+      />
+      <Tabs.Screen 
         name="sell" 
         options={{ 
           tabBarLabel: "İlan Ver", 

@@ -6,12 +6,12 @@ async function convertSvgToPng() {
     console.log('Converting SVG to PNG formats...');
     
     // Alternative method using online converter or manual process
-    console.log('\n📝 SVG icon created at: assets/barter-icon.svg');
+    console.log('\n📝 SVG icon created at: assets/imece-icon.svg');
     console.log('\n🔧 To convert to PNG, you can:');
     console.log('1. Open the SVG file in a browser');
     console.log('2. Take a screenshot or use browser dev tools to save as PNG');
     console.log('3. Or use an online SVG to PNG converter');
-    console.log('4. Or install ImageMagick and use: magick assets/barter-icon.svg assets/icon.png');
+    console.log('4. Or install ImageMagick and use: magick assets/imece-icon.svg assets/icon.png');
     
     console.log('\n📐 Required sizes:');
     console.log('- icon.png: 1024x1024px');
@@ -23,7 +23,7 @@ async function convertSvgToPng() {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Barter Icon Preview</title>
+    <title>İmece Icon Preview</title>
     <style>
         body { 
             display: flex; 
@@ -55,8 +55,8 @@ async function convertSvgToPng() {
 </head>
 <body>
     <div class="container">
-        <h1>Barter App Icon</h1>
-        <img src="barter-icon.svg" alt="Barter Icon" class="icon">
+        <h1>İmece App Icon</h1>
+        <img src="imece-icon.svg" alt="İmece Icon" class="icon">
         <div class="instructions">
             <h3>To save as PNG:</h3>
             <p>1. Right-click on the icon above</p>

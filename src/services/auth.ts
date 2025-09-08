@@ -64,7 +64,7 @@ const STORAGE_KEYS = {
   REMEMBER_ME: 'remember_me',
   AUTO_LOGIN: 'auto_login_enabled',
   MOCK_USER: 'mock_user',
-  ENCRYPTION_SALT: 'barter_app_salt_2024',
+  ENCRYPTION_SALT: 'imece_app_salt_2024',
 };
 
 // Simple encryption/decryption (for demo - use proper encryption in production)

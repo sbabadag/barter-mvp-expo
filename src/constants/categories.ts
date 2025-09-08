@@ -1,28 +1,83 @@
-// Categories used throughout the app
+// Categories used throughout the app - Based on popular marketplace platforms
 export const CATEGORIES = [
-  'Giyim',
-  'Aksesuar', 
-  'Ayakkabı',
-  'Çanta',
-  'Elektronik',
-  'Ev & Yaşam',
-  'Spor',
-  'Kitap',
+  // Ana Kategoriler
+  'Araçlar',
+  'Vasıta Yedek Parça, Aksesuar, Donanım & Tuning',
+  'Emlak',
   'Ev & Bahçe',
-  'Moda & Giyim',
-  'Otomobil',
-  'Hobi & Oyun',
-  'Spor & Outdoor',
-  'Kitap & Müzik',
+  'Elektronik',
+  'Bilgisayar & Tablet',
+  'Cep Telefonu & Telefon',
+  'Fotoğraf & Kamera',
+  'TV, Ses & Görüntü Sistemleri',
+  
+  // Moda & Giyim
+  'Giyim & Aksesuar',
+  'Ayakkabı & Çanta',
+  'Saat & Mücevher',
+  'Kozmetik & Kişisel Bakım',
+  
+  // Hobiler & Spor
+  'Spor, Outdoor',
+  'Hobi & Oyuncak',
+  'Müzik & Enstrüman',
+  'Kitap, Dergi & Gazete',
+  'Film & Müzik',
+  'Sanat & Antika',
+  
+  // Yaşam
   'Bebek & Çocuk',
-  'Antika & Sanat'
+  'Ev & Yaşam',
+  'Bahçe & Yapı Market',
+  'Hayvanlar Alemi',
+  'Gıda & İçecek',
+  'Tarım & Endüstri',
+  
+  // Hizmetler
+  'İş & Sanayi',
+  'Eğitim & Kurslar',
+  'Hizmetler',
+  'Yedek Parça & Aksesuar'
 ];
 
 // Filter categories for the main feed (includes "All" option)
-export const FILTER_CATEGORIES = ['Tümü', ...CATEGORIES.slice(0, 8)]; // Use the first 8 main categories
+export const FILTER_CATEGORIES = [
+  'Tümü',
+  'Araçlar', 
+  'Emlak',
+  'Elektronik',
+  'Giyim & Aksesuar',
+  'Ev & Bahçe',
+  'Spor, Outdoor',
+  'Telefon & Tablet',
+  'Hobi & Oyuncak',
+  'Bebek & Çocuk',
+  'Kitap & Müzik',
+  'Saat & Mücevher'
+];
 
-// Extended categories for listing creation
-export const LISTING_CATEGORIES = CATEGORIES;
+// Simplified categories for listing creation (most popular ones)
+export const LISTING_CATEGORIES = [
+  'Araçlar',
+  'Emlak',
+  'Elektronik',
+  'Cep Telefonu & Telefon',
+  'Bilgisayar & Tablet',
+  'Giyim & Aksesuar',
+  'Ayakkabı & Çanta',
+  'Ev & Bahçe',
+  'Ev & Yaşam',
+  'Spor, Outdoor',
+  'Hobi & Oyuncak',
+  'Kitap, Dergi & Gazete',
+  'Müzik & Enstrüman',
+  'Bebek & Çocuk',
+  'Kozmetik & Kişisel Bakım',
+  'Saat & Mücevher',
+  'Hayvanlar Alemi',
+  'Sanat & Antika',
+  'Diğer'
+];
 
 export default {
   CATEGORIES,

@@ -1,0 +1,82 @@
+<svg width="1242" height="2688" viewBox="0 0 1242 2688" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f0a500;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#ff8c00;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f0a500;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f5f5f5;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1242" height="2688" fill="url(#bgGradient)"/>
+  
+  <!-- Center content area -->
+  <g transform="translate(621, 1344)">
+    <!-- Main logo circle -->
+    <circle cx="0" cy="-100" r="120" fill="url(#textGradient)" filter="url(#shadow)"/>
+    
+    <!-- Exchange arrows inside circle -->
+    <!-- Right arrow (top) -->
+    <path d="M-60 -120 L60 -120 L40 -140 L60 -120 L40 -100" 
+          stroke="#f0a500" 
+          stroke-width="8" 
+          stroke-linecap="round" 
+          stroke-linejoin="round" 
+          fill="none"/>
+    
+    <!-- Left arrow (bottom) -->
+    <path d="M60 -80 L-60 -80 L-40 -60 L-60 -80 L-40 -100" 
+          stroke="#f0a500" 
+          stroke-width="8" 
+          stroke-linecap="round" 
+          stroke-linejoin="round" 
+          fill="none"/>
+    
+    <!-- Decorative circles -->
+    <circle cx="-40" cy="-120" r="8" fill="#f0a500"/>
+    <circle cx="40" cy="-80" r="8" fill="#f0a500"/>
+    
+    <!-- App name -->
+    <text x="0" y="80" text-anchor="middle" fill="url(#textGradient)" 
+          font-family="Arial, sans-serif" font-size="72" font-weight="bold"
+          filter="url(#shadow)">
+      İMECE
+    </text>
+    
+    <!-- Subtitle -->
+    <text x="0" y="130" text-anchor="middle" fill="url(#textGradient)" 
+          font-family="Arial, sans-serif" font-size="24" font-weight="normal"
+          opacity="0.9">
+      Komşular Arası Platform
+    </text>
+    
+    <!-- Loading indicator area -->
+    <g transform="translate(0, 200)">
+      <!-- Loading dots -->
+      <circle cx="-30" cy="0" r="8" fill="url(#textGradient)" opacity="0.7">
+        <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite" begin="0s"/>
+      </circle>
+      <circle cx="0" cy="0" r="8" fill="url(#textGradient)" opacity="0.7">
+        <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite" begin="0.5s"/>
+      </circle>
+      <circle cx="30" cy="0" r="8" fill="url(#textGradient)" opacity="0.7">
+        <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite" begin="1s"/>
+      </circle>
+    </g>
+  </g>
+  
+  <!-- Bottom text -->
+  <text x="621" y="2500" text-anchor="middle" fill="url(#textGradient)" 
+        font-family="Arial, sans-serif" font-size="18" font-weight="normal"
+        opacity="0.8">
+    Güvenli • Kolay • Komşuluk
+  </text>
+</svg>

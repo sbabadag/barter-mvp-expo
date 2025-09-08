@@ -59,8 +59,17 @@ export type Listing = {
   location?: string; // Seller location (address text)
   locationCoords?: { latitude: number; longitude: number }; // GPS coordinates
   seller_name?: string; // Seller display name
+  seller_id?: string; // Seller user ID for ratings
   condition?: 'new' | 'like_new' | 'good' | 'fair' | 'poor'; // Item condition
   status?: 'active' | 'sold' | 'inactive'; // Listing status
+  seller?: { // Seller profile information
+    id: string;
+    display_name?: string;
+    first_name?: string;
+    last_name?: string;
+    city?: string;
+    avatar_url?: string;
+  };
 };
 
 export const useListings = () => useQuery({
@@ -330,7 +339,8 @@ export const useListing = (id: string) => useQuery({
       condition,
       status,
       images,
-      created_at
+      created_at,
+      seller_id
     `).eq("id", id).single();
     if (error) throw error;
     if (!data) throw new Error("Listing not found");

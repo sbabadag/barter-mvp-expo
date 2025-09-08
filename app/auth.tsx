@@ -229,11 +229,11 @@ export default function WelcomeScreen() {
   const renderWelcomeScreen = () => (
     <View style={styles.container}>
       <View style={styles.logoContainer}>
-        <Text style={styles.logoText}>Barter</Text>
-        <Text style={styles.logoSubtext}>Turkish Marketplace</Text>
-        <Text style={styles.title}>BarterTürk'e Hoş Geldiniz!</Text>
+        <Text style={styles.logoText}>İmece</Text>
+        <Text style={styles.logoSubtext}>Komşular Arası Platform</Text>
+        <Text style={styles.title}>İmece'ye Hoş Geldiniz!</Text>
         <Text style={styles.subtitle}>
-          Türkiye'nin en büyük takas ve alışveriş platformu
+          Komşular arasında güvenli alışveriş ve paylaşım platformu
         </Text>
       </View>
 

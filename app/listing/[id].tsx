@@ -1,22 +1,54 @@
 import { View, Text, Pressable, ScrollView, Image, StyleSheet, Dimensions, Alert, PanResponder } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useListing } from "../../src/services/listings";
+import { useSellerInfo } from "../../src/services/seller";
 import { useBidsForListing } from "../../src/services/bids";
 import { useAuth } from "../../src/state/AuthProvider";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import BiddingModal from "../../src/components/BiddingModal";
+import RatingModal from "../../src/components/RatingModal";
+import UserRatingDisplay from "../../src/components/UserRatingDisplayOptimized";
 import ErrorBoundary from "../../src/components/ErrorBoundary";
+import LoadingSkeleton from "../../src/components/LoadingSkeleton";
 
 const { width } = Dimensions.get('window');
 
 export default function ListingDetail(){
   const { id } = useLocalSearchParams<{id: string}>();
   const { data } = useListing(id!);
-  const { bids, isLoading, error, refetch: refetchBids } = useBidsForListing(id!);
   const { user, isAuthenticated } = useAuth();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showBiddingModal, setShowBiddingModal] = useState(false);
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [loadBids, setLoadBids] = useState(false);
+  const [loadSeller, setLoadSeller] = useState(false);
+  
+  // Lazy load seller info only when needed
+  const { data: sellerInfo } = useSellerInfo(loadSeller ? data?.seller_id : undefined);
+  
+  // Lazy load bids only when needed
+  const { bids, isLoading, error, refetch: refetchBids } = useBidsForListing(loadBids ? id! : '');
+  
+  // Load secondary content after a delay to prioritize listing display
+  useEffect(() => {
+    if (data) {
+      // Load seller info first after 1 second
+      const sellerTimer = setTimeout(() => {
+        setLoadSeller(true);
+      }, 1000);
+      
+      // Load bids after 2 seconds
+      const bidsTimer = setTimeout(() => {
+        setLoadBids(true);
+      }, 2000);
+      
+      return () => {
+        clearTimeout(sellerTimer);
+        clearTimeout(bidsTimer);
+      };
+    }
+  }, [data]);
 
   // Create a simple panResponder with dynamic functions
   const panResponder = useRef(
@@ -59,11 +91,7 @@ export default function ListingDetail(){
     })
   ).current;
 
-  if (!data) return (
-    <View style={styles.loadingContainer}>
-      <Text style={styles.loadingText}>Yükleniyor...</Text>
-    </View>
-  );
+  if (!data) return <LoadingSkeleton type="listing" />;
 
   // Get images from listing data or fallback to generated ones
   const images = data.images || [
@@ -110,7 +138,7 @@ export default function ListingDetail(){
             
             {/* Image Dots Indicator */}
             <View style={styles.dotsContainer}>
-              {images.map((_, index) => (
+              {images.map((_: string, index: number) => (
                 <View
                   key={index}
                   style={[
@@ -136,7 +164,7 @@ export default function ListingDetail(){
           showsHorizontalScrollIndicator={false}
           style={styles.thumbnailContainer}
         >
-          {images.map((imageUri, index) => (
+          {images.map((imageUri: string, index: number) => (
             <Pressable
               key={index}
               onPress={() => setCurrentImageIndex(index)}
@@ -181,60 +209,106 @@ export default function ListingDetail(){
           </Text>
         </View>
 
-        {/* Bidding Section */}
-        {bids && bids.length > 0 && (
+        {/* Seller Information - Lazy loaded */}
+        {loadSeller && data ? (
           <>
-            <Text style={styles.sectionTitle}>Teklifler ({bids.length})</Text>
-            <View style={styles.bidsContainer}>
-              {bids.slice(0, 3).map((bid, index) => (
-                <View key={bid.id} style={styles.bidItem}>
-                  <View style={styles.bidHeader}>
-                    <Text style={styles.bidAmount}>{bid.amount} TL</Text>
-                    <View style={[
-                      styles.bidStatus,
-                      { backgroundColor: 
-                        bid.status === 'accepted' ? '#4CAF50' :
-                        bid.status === 'rejected' ? '#F44336' :
-                        bid.status === 'countered' ? '#FF9800' : '#9E9E9E'
-                      }
-                    ]}>
-                      <Text style={styles.bidStatusText}>
-                        {bid.status === 'pending' ? 'Bekliyor' :
-                         bid.status === 'accepted' ? 'Kabul' :
-                         bid.status === 'rejected' ? 'Red' : 'Karşı Teklif'}
-                      </Text>
-                    </View>
-                  </View>
-                  {bid.message && (
-                    <Text style={styles.bidMessage} numberOfLines={2}>
-                      "{bid.message}"
-                    </Text>
+            <Text style={styles.sectionTitle}>Satıcı Bilgileri</Text>
+            <View style={styles.sellerContainer}>
+              <View style={styles.sellerHeader}>
+                <View style={styles.sellerInfo}>
+                  {sellerInfo?.avatar_url && (
+                    <Image source={{ uri: sellerInfo.avatar_url }} style={styles.sellerAvatar} />
                   )}
-                  <Text style={styles.bidDate}>
-                    {new Date(bid.created_at).toLocaleDateString('tr-TR')}
-                  </Text>
+                  <View style={styles.sellerDetails}>
+                    <Text style={styles.sellerName}>
+                      {sellerInfo?.display_name || `${sellerInfo?.first_name} ${sellerInfo?.last_name}` || data.seller_name || "İsimsiz Satıcı"}
+                    </Text>
+                    {sellerInfo?.city && (
+                      <Text style={styles.sellerLocation}>{sellerInfo.city}</Text>
+                    )}
+                  </View>
                 </View>
-              ))}
-              {bids.length > 3 && (
-                <Text style={styles.moreBidsText}>
-                  +{bids.length - 3} teklif daha
-                </Text>
-              )}
+              </View>
             </View>
           </>
+        ) : data && (
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>Satıcı bilgileri yükleniyor...</Text>
+          </View>
         )}
 
-        {/* Debug info */}
-        {__DEV__ && (
-          <View style={styles.debugContainer}>
-            <Text style={styles.debugTitle}>Debug Info:</Text>
-            <Text style={styles.debugText}>Listing ID: {id}</Text>
-            <Text style={styles.debugText}>User: {user ? user.display_name || user.id : 'null'}</Text>
-            <Text style={styles.debugText}>Authenticated: {isAuthenticated ? 'true' : 'false'}</Text>
-            <Text style={styles.debugText}>Bids count: {bids ? bids.length : 'undefined'}</Text>
-            <Text style={styles.debugText}>Is loading: {isLoading ? 'true' : 'false'}</Text>
-            <Text style={styles.debugText}>Error: {error || 'none'}</Text>
+        {/* Always show rating display separately when seller_id exists */}
+        {data?.seller_id && (
+          <View style={styles.sellerRatingContainer}>
+            <View style={styles.ratingHeader}>
+              <Text style={styles.sectionTitle}>Satıcı Değerlendirmeleri</Text>
+              {user && data.seller_id && user.id !== data.seller_id && (
+                <Pressable 
+                  style={styles.rateSellerButton}
+                  onPress={() => setShowRatingModal(true)}
+                >
+                  <MaterialIcons name="star" size={16} color="#FFD700" />
+                  <Text style={styles.rateSellerText}>Değerlendir</Text>
+                </Pressable>
+              )}
+            </View>
+            <UserRatingDisplay 
+              userId={data.seller_id}
+              compact={false}
+              showRecentReviews={true}
+            />
           </View>
+        )}
+
+        {/* Bidding Section - Load lazily */}
+        {loadBids ? (
+          <>
+            {isLoading ? (
+              <LoadingSkeleton type="bids" />
+            ) : bids && bids.length > 0 ? (
+              <>
+                <Text style={styles.sectionTitle}>Teklifler ({bids.length})</Text>
+                <View style={styles.bidsContainer}>
+                  {bids.slice(0, 3).map((bid, index) => (
+                    <View key={bid.id} style={styles.bidItem}>
+                      <View style={styles.bidHeader}>
+                        <Text style={styles.bidAmount}>{bid.amount} TL</Text>
+                        <View style={[
+                          styles.bidStatus,
+                          { backgroundColor: 
+                            bid.status === 'accepted' ? '#4CAF50' :
+                            bid.status === 'rejected' ? '#F44336' :
+                            bid.status === 'countered' ? '#FF9800' : '#9E9E9E'
+                          }
+                        ]}>
+                          <Text style={styles.bidStatusText}>
+                            {bid.status === 'pending' ? 'Bekliyor' :
+                             bid.status === 'accepted' ? 'Kabul' :
+                             bid.status === 'rejected' ? 'Red' : 'Karşı Teklif'}
+                          </Text>
+                        </View>
+                      </View>
+                      {bid.message && (
+                        <Text style={styles.bidMessage} numberOfLines={2}>
+                          "{bid.message}"
+                        </Text>
+                      )}
+                      <Text style={styles.bidDate}>
+                        {new Date(bid.created_at).toLocaleDateString('tr-TR')}
+                      </Text>
+                    </View>
+                  ))}
+                  {bids.length > 3 && (
+                    <Text style={styles.moreBidsText}>
+                      +{bids.length - 3} teklif daha
+                    </Text>
+                  )}
+                </View>
+              </>
+            ) : null}
+          </>
+        ) : (
+          <LoadingSkeleton type="bids" />
         )}
       </View>
 
@@ -273,6 +347,22 @@ export default function ListingDetail(){
         currentPrice={data.price || 0}
         onBidSubmitted={refetchBids}
       />
+
+      {/* Rating Modal - Fully functional */}
+      {data?.seller_id && (
+        <RatingModal
+          visible={showRatingModal}
+          onClose={() => setShowRatingModal(false)}
+          reviewedUserId={data.seller_id}
+          listingId={id!}
+          transactionType="seller"
+          reviewedUserName={sellerInfo?.display_name || `${sellerInfo?.first_name} ${sellerInfo?.last_name}` || data.seller_name || "Satıcı"}
+          onSuccess={() => {
+            console.log('Rating submitted successfully');
+            // Refresh rating data - no need to reload everything
+          }}
+        />
+      )}
     </ScrollView>
     </ErrorBoundary>
   );
@@ -518,25 +608,72 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     textAlign: 'center',
   },
-  // Debug styles
-  debugContainer: {
-    backgroundColor: '#f0f0f0',
-    padding: 12,
-    marginTop: 16,
-    borderRadius: 8,
-  },
-  debugTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
-  },
-  debugText: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 4,
-  },
   disabledButton: {
     opacity: 0.6,
+  },
+  // Seller styles
+  sellerContainer: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 16,
+    padding: 16,
+    marginTop: 8,
+  },
+  sellerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  sellerInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  sellerAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 12,
+    backgroundColor: '#e9ecef',
+  },
+  sellerDetails: {
+    flex: 1,
+  },
+  sellerName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  sellerLocation: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 2,
+  },
+  rateSellerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    gap: 4,
+  },
+  rateSellerText: {
+    fontSize: 12,
+    color: '#333',
+    fontWeight: '500',
+  },
+  sellerRatingContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  ratingHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
   },
 });
