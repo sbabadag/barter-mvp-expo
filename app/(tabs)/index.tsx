@@ -146,6 +146,8 @@ export default function FeedScreen() {
          'user' + listingItem.id.slice(-2)),
       image_url: listingItem.image_url || `https://picsum.photos/300/400?random=${listingItem.id}`,
       liked: likedItems[listingItem.id] || false,
+      location: listingItem.location || 'İstanbul',
+      created_at: listingItem.created_at || new Date().toISOString(),
     });
     
     return (

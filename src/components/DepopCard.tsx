@@ -29,6 +29,8 @@ interface DepopCardProps {
     seller: string;
     image_url: string;
     liked?: boolean;
+    location?: string;
+    created_at?: string;
   };
   onPress: () => void;
   onLike: () => void;
@@ -40,6 +42,23 @@ export const DepopCard: React.FC<DepopCardProps> = ({ item, onPress, onLike }) =
   const handleLike = () => {
     setLiked(!liked);
     onLike();
+  };
+
+  // Format date to show time passed
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '';
+    
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return 'Şimdi';
+    if (diffInHours < 24) return `${diffInHours}s`;
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `${diffInDays}g`;
+    
+    return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
   };
 
   return (
@@ -80,8 +99,21 @@ export const DepopCard: React.FC<DepopCardProps> = ({ item, onPress, onLike }) =
         
         {/* Price - Bold and prominent */}
         <Text style={styles.price}>
-          ${item.price}
+          {item.price}
         </Text>
+        
+        {/* Location and Date Footer */}
+        <View style={styles.footer}>
+          <View style={styles.locationContainer}>
+            <Ionicons name="location-outline" size={12} color={DepopTheme.colors.text.tertiary} />
+            <Text style={styles.location} numberOfLines={1}>
+              {item.location || 'Konum belirtilmemiş'}
+            </Text>
+          </View>
+          <Text style={styles.date}>
+            {formatDate(item.created_at)}
+          </Text>
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -149,5 +181,32 @@ const styles = StyleSheet.create({
     fontSize: DepopTheme.typography.sizes.base,
     color: DepopTheme.colors.text.primary,
     fontWeight: DepopTheme.typography.weights.bold,
+  },
+  
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 6,
+  },
+  
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 8,
+  },
+  
+  location: {
+    fontSize: DepopTheme.typography.sizes.xs,
+    color: DepopTheme.colors.text.tertiary,
+    marginLeft: 2,
+    flex: 1,
+  },
+  
+  date: {
+    fontSize: DepopTheme.typography.sizes.xs,
+    color: DepopTheme.colors.text.tertiary,
+    fontWeight: DepopTheme.typography.weights.normal,
   },
 });

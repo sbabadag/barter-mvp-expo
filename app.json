@@ -19,12 +19,13 @@
         "NSLocationWhenInUseUsageDescription": "Bu uygulama konum bilginizi ilanlarınızda konum seçimi için kullanır.",
         "NSCameraUsageDescription": "Bu uygulama fotoğraf çekmek için kamerayı kullanır.",
         "NSPhotoLibraryUsageDescription": "Bu uygulama galeri fotoğraflarını seçmek için kullanır."
-      }
+      },
+      "icon": "./assets/icon.png"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#f0a500"
       },
       "permissions": [
         "ACCESS_COARSE_LOCATION",
