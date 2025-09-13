@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": ">= 7.8.0"
+    "version": ">= 7.8.0",
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
@@ -19,7 +20,14 @@
     },
     "production": {
       "ios": {
-        "resourceClass": "default"
+        "resourceClass": "default",
+        "autoIncrement": true,
+        "buildConfiguration": "Release"
+      },
+      "android": {
+        "resourceClass": "default",
+        "autoIncrement": true,
+        "buildType": "app-bundle"
       }
     },
     "adhoc": {
@@ -35,6 +43,12 @@
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "appleId": "sbabadag@gmail.com",
+        "ascAppId": "6752503885",
+        "appleTeamId": "5PH75H5VQN"
+      }
+    }
   }
 }

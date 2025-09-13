@@ -1,26 +1,36 @@
 {
   "expo": {
-    "name": "İmece",
-    "slug": "imece-app",
-    "scheme": "imece",
-    "version": "0.1.0",
+    "name": "ESKICI",
+    "slug": "barter-mvp-expo",
+    "scheme": "eskici",
+    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "cover",
       "backgroundColor": "#f0a500"
     },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.sbabadag.imece",
+      "buildNumber": "1",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSLocationWhenInUseUsageDescription": "Bu uygulama konum bilginizi ilanlarınızda konum seçimi için kullanır.",
         "NSCameraUsageDescription": "Bu uygulama fotoğraf çekmek için kamerayı kullanır.",
-        "NSPhotoLibraryUsageDescription": "Bu uygulama galeri fotoğraflarını seçmek için kullanır."
+        "NSPhotoLibraryUsageDescription": "Bu uygulama galeri fotoğraflarını seçmek için kullanır.",
+        "NSMicrophoneUsageDescription": "Bu uygulama sesli mesaj göndermek için mikrofonu kullanır."
       },
-      "icon": "./assets/icon.png"
+      "icon": "./assets/icon.png",
+      "requireFullScreen": false,
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -45,8 +55,8 @@
     "web": {
       "bundler": "metro",
       "favicon": "./assets/favicon.png",
-      "name": "İmece - Komşular Arası Al-Sat Platformu",
-      "shortName": "İmece",
+      "name": "ESKICI - Komşular Arası Al-Sat Platformu",
+      "shortName": "ESKICI",
       "lang": "tr",
       "scope": "/",
       "themeColor": "#f0a500",

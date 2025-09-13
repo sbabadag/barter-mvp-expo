@@ -70,10 +70,8 @@ export default function ListingDetail(){
         if (Math.abs(dx) > swipeThreshold || Math.abs(vx) > velocityThreshold) {
           // Get current images from data
           const currentImages = data?.images || [
-            data?.image_url || `https://picsum.photos/400/500?random=${data?.id}`,
-            `https://picsum.photos/400/500?random=${data?.id}2`,
-            `https://picsum.photos/400/500?random=${data?.id}3`,
-          ];
+            data?.image_url || '',
+          ].filter(img => img); // Filter out empty strings
           
           if (dx > 0) {
             // Swipe right - go to previous image
@@ -93,12 +91,10 @@ export default function ListingDetail(){
 
   if (!data) return <LoadingSkeleton type="listing" />;
 
-  // Get images from listing data or fallback to generated ones
+  // Get images from listing data - only use real images
   const images = data.images || [
-    data.image_url || `https://picsum.photos/400/500?random=${data.id}`,
-    `https://picsum.photos/400/500?random=${data.id}2`,
-    `https://picsum.photos/400/500?random=${data.id}3`,
-  ];
+    data.image_url || '',
+  ].filter(img => img); // Filter out empty strings
 
   // Helper functions for button navigation
   const nextImage = () => {
