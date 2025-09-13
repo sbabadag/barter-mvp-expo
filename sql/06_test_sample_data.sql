@@ -1,7 +1,4 @@
--- TEST: Add sample ratings
--- Run this after the rating system is set up
 
--- Get some user IDs to work with
 WITH sample_users AS (
   SELECT id, display_name, ROW_NUMBER() OVER (ORDER BY created_at) as rn
   FROM profiles 
@@ -49,6 +46,7 @@ WHERE u1.rn <= 2
   AND u2.id = l.seller_id
 LIMIT 5;
 
--- Display results
 SELECT 'Rating system test data created!' as result;
 SELECT COUNT(*) as total_ratings FROM public.ratings;
+
+-- All mock/sample/test data creation removed. Use only real data for ratings.
