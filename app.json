@@ -30,7 +30,8 @@
       "requireFullScreen": false,
       "config": {
         "usesNonExemptEncryption": false
-      }
+      },
+      "category": "shopping"
     },
     "android": {
       "adaptiveIcon": {
@@ -45,12 +46,7 @@
         "WRITE_EXTERNAL_STORAGE",
         "RECORD_AUDIO",
         "VIBRATE"
-      ],
-      "config": {
-        "googleMaps": {
-          "apiKey": "AIzaSyDJdx5Y9z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5"
-        }
-      }
+      ]
     },
     "web": {
       "bundler": "metro",

@@ -15,14 +15,23 @@
     "preview": {
       "distribution": "internal",
       "ios": {
-        "resourceClass": "default"
+        "resourceClass": "default",
+        "simulator": false,
+        "buildConfiguration": "Release"
       }
     },
     "production": {
       "ios": {
         "resourceClass": "default",
         "autoIncrement": true,
-        "buildConfiguration": "Release"
+        "buildConfiguration": "Release",
+        "scheme": "eskici",
+        "cache": {
+          "disabled": false
+        },
+        "env": {
+          "NODE_ENV": "production"
+        }
       },
       "android": {
         "resourceClass": "default",
