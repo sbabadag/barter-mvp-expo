@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, Dimensions, FlatList, SafeAreaView, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useListings } from "../../src/services/listings";
 import { useNotificationCounts } from "../../src/services/notifications";
@@ -110,17 +110,17 @@ export default function FeedScreen() {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.loadingContainer}>
+      <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#3B82F6" />
         <Text style={styles.loadingText}>İlanlar yükleniyor...</Text>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <Header
-        cartItemCount={notificationCounts?.total_unread || 0}
+        cartItemCount={notificationCounts?.total || 0}
         onCartClick={handleCartClick}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -180,7 +180,7 @@ export default function FeedScreen() {
           />
         )}
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 

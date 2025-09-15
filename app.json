@@ -18,7 +18,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.sbabadag.imece",
-      "buildNumber": "1",
+      "buildNumber": "16",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSLocationWhenInUseUsageDescription": "Bu uygulama konum bilginizi ilanlarınızda konum seçimi için kullanır.",
@@ -82,6 +82,13 @@
           "icon": "./assets/icon.png",
           "color": "#f0a500",
           "defaultChannel": "default"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Bu uygulama fotoğraf çekmek için kamerayı kullanır.",
+          "photosPermission": "Bu uygulama galeri fotoğraflarını seçmek için kullanır."
         }
       ]
     ],
