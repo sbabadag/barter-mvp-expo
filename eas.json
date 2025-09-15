@@ -36,7 +36,7 @@
       "android": {
         "resourceClass": "default",
         "autoIncrement": true,
-        "buildType": "app-bundle"
+        "buildType": "apk"
       }
     },
     "adhoc": {

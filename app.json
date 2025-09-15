@@ -30,14 +30,15 @@
       "requireFullScreen": false,
       "config": {
         "usesNonExemptEncryption": false
-      },
-      "category": "shopping"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#f0a500"
       },
+      "package": "com.sbabadag.imece",
+      "versionCode": 1,
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
@@ -46,7 +47,12 @@
         "WRITE_EXTERNAL_STORAGE",
         "RECORD_AUDIO",
         "VIBRATE"
-      ]
+      ],
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyB0VA45VjT4YnAKdYOb61XVA5vaOdlY7eA"
+        }
+      }
     },
     "web": {
       "bundler": "metro",
