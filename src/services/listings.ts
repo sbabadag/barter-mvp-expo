@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase, supabaseConfig } from "../utils/supabase";
 import { Platform } from "react-native";
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import { decode } from "base64-arraybuffer";
 
 // Utility function to generate UUID-like strings for mock data

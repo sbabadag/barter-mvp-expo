@@ -8,7 +8,8 @@ const SUPABASE_ANON_KEY = Constants.expoConfig?.extra?.supabaseAnonKey || proces
 // Export these values so we can check them in other files
 export const supabaseConfig = {
   url: SUPABASE_URL,
-  key: SUPABASE_ANON_KEY
+  key: SUPABASE_ANON_KEY,
+  isPlaceholder: SUPABASE_URL.includes('placeholder') || SUPABASE_ANON_KEY.includes('placeholder')
 };
 
 

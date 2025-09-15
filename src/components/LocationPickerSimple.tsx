@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, Modal, StyleSheet, Alert, ScrollView, TextInput, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { LocationData, TURKISH_CITIES, getCurrentLocation } from '../utils/locationUtils';
+import { LocationData, TURKISH_CITIES, getCurrentLocation, CityData } from '../utils/locationUtils';
 
 interface LocationPickerProps {
   onLocationSelect: (locationData: LocationData) => void;
@@ -26,7 +26,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
     tarif: ''
   });
 
-  const selectCity = (city: typeof TURKISH_CITIES[0]) => {
+  const selectCity = (city: CityData) => {
     setSelectedCity(city.name);
     // Şehir seçildiğinde adres detaylarını sıfırla
     setAddressDetails({
@@ -182,17 +182,21 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
 
                 <View style={styles.section}>
                   <Text style={styles.sectionTitle}>🏙️ Şehir Seçin</Text>
-                  {TURKISH_CITIES.map((city, index) => (
-                    <Pressable
-                      key={index}
-                      style={styles.cityButton}
-                      onPress={() => selectCity(city)}
-                    >
-                      <MaterialIcons name="location-city" size={20} color="#007AFF" />
-                      <Text style={styles.cityName}>{city.name}</Text>
-                      <MaterialIcons name="arrow-forward-ios" size={16} color="#ccc" />
-                    </Pressable>
-                  ))}
+                  {TURKISH_CITIES && TURKISH_CITIES.length > 0 ? (
+                    TURKISH_CITIES.map((city, index) => (
+                      <Pressable
+                        key={index}
+                        style={styles.cityButton}
+                        onPress={() => selectCity(city)}
+                      >
+                        <MaterialIcons name="location-city" size={20} color="#007AFF" />
+                        <Text style={styles.cityName}>{city.name}</Text>
+                        <MaterialIcons name="arrow-forward-ios" size={16} color="#ccc" />
+                      </Pressable>
+                    ))
+                  ) : (
+                    <Text style={styles.errorText}>Şehir listesi yüklenemiyor</Text>
+                  )}
                 </View>
               </View>
             ) : (
@@ -439,6 +443,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,
+  },
+  errorText: {
+    color: '#dc3545',
+    fontSize: 16,
+    textAlign: 'center',
+    padding: 20,
+    fontStyle: 'italic',
   },
 });
 
