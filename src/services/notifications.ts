@@ -6,6 +6,7 @@ import { TimeIntervalTriggerInput } from 'expo-notifications';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
+import { isFirebaseAvailable } from '../utils/firebase';
 
 // Bildirim davranışını ayarla
 Notifications.setNotificationHandler({
@@ -71,30 +72,42 @@ class NotificationService {
 
   async initialize(): Promise<string | null> {
     try {
+      // Check if Firebase is available for push notifications
+      if (Platform.OS === 'android' && !isFirebaseAvailable()) {
+        console.log('⚠️ Firebase not available - push notifications will use Expo Push service only');
+        console.log('📝 To enable FCM push notifications, configure google-services.json');
+      }
+
       // Sadece fiziksel cihazlarda çalışır
       if (!Device.isDevice) {
-        console.log('Push notifications only work on physical devices');
+        console.log('📱 Push notifications only work on physical devices (using simulator/emulator)');
         return null;
       }
 
       // İzin kontrolü
-      const { status: existingStatus } = await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
-      
-      if (existingStatus !== 'granted') {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
+      let finalStatus: string;
+      try {
+        const { status: existingStatus } = await Notifications.getPermissionsAsync();
+        finalStatus = existingStatus;
+        
+        if (existingStatus !== 'granted') {
+          const { status } = await Notifications.requestPermissionsAsync();
+          finalStatus = status;
+        }
+      } catch (permissionError) {
+        console.log('📱 Permission check failed, notifications will be disabled:', permissionError);
+        return null;
       }
       
       if (finalStatus !== 'granted') {
-        console.log('Push notification permission denied');
+        console.log('📱 Push notification permission denied by user');
         return null;
       }
 
       // Token al
       const projectId = Constants.expoConfig?.extra?.eas?.projectId;
       if (!projectId) {
-        console.log('No project ID found for push notifications');
+        console.log('📱 No project ID found for push notifications (this is normal in development)');
         return null;
       }
 
@@ -103,11 +116,15 @@ class NotificationService {
       });
       
       this.expoPushToken = token.data;
-      console.log('📱 Push token:', this.expoPushToken);
+      console.log('📱 Push token obtained successfully:', this.expoPushToken);
+      console.log('🔥 FIREBASE TOKEN FOR TESTING:', this.expoPushToken);
+      console.log('📋 COPY THIS TOKEN FOR FIREBASE CONSOLE TESTING ⬆️');
       
       return this.expoPushToken;
     } catch (error) {
-      console.error('Error initializing notifications:', error);
+      // Don't log as error - this is expected in development
+      console.log('📱 Notification initialization completed without push token (this is normal):', error instanceof Error ? error.message : String(error));
+      // Continue gracefully - app should work without push notifications
       return null;
     }
   }
@@ -206,22 +223,28 @@ class NotificationService {
   // Android için bildirim kanalları
   async setupAndroidChannels() {
     if (Platform.OS === 'android') {
-      await Notifications.setNotificationChannelAsync('bids', {
-        name: 'Teklifler',
-        importance: Notifications.AndroidImportance.HIGH,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#FF231F7C',
-      });
+      try {
+        await Notifications.setNotificationChannelAsync('bids', {
+          name: 'Teklifler',
+          importance: Notifications.AndroidImportance.HIGH,
+          vibrationPattern: [0, 250, 250, 250],
+          lightColor: '#FF231F7C',
+        });
 
-      await Notifications.setNotificationChannelAsync('messages', {
-        name: 'Mesajlar',
-        importance: Notifications.AndroidImportance.DEFAULT,
-      });
+        await Notifications.setNotificationChannelAsync('messages', {
+          name: 'Mesajlar',
+          importance: Notifications.AndroidImportance.DEFAULT,
+        });
 
-      await Notifications.setNotificationChannelAsync('general', {
-        name: 'Genel',
-        importance: Notifications.AndroidImportance.DEFAULT,
-      });
+        await Notifications.setNotificationChannelAsync('general', {
+          name: 'Genel',
+          importance: Notifications.AndroidImportance.DEFAULT,
+        });
+        
+        console.log('📱 Android notification channels configured successfully');
+      } catch (error) {
+        console.log('📱 Android notification channels setup failed (app continues normally):', error);
+      }
     }
   }
 }

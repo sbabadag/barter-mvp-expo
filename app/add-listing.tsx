@@ -180,7 +180,10 @@ export default function AddListingScreen() {
   };
   
   const tryLaunchCamera = async (retryCount = 0) => {
-    const maxRetries = Platform.OS === 'ios' ? 3 : 1; // iOS'ta daha fazla retry
+    const isDevBuild = __DEV__ || process.env.NODE_ENV === 'development';
+    const maxRetries = isDevBuild 
+      ? (Platform.OS === 'ios' ? 5 : 3) // More retries for dev builds
+      : (Platform.OS === 'ios' ? 3 : 1); // Original retry logic for production
     
     try {
       // Step 1: Check permission
@@ -197,10 +200,12 @@ export default function AddListingScreen() {
       // Step 2: Platform-specific camera launch
       console.log(`Step 2 (Attempt ${retryCount + 1}): Launching camera...`);
       
+      // Development build optimized camera options
+      
       // iOS specific options
       const iOSCameraOptions = {
-        mediaTypes: ['images'] as any, // Type assertion for new format
-        quality: 0.5, // iOS için düşük kalite
+        mediaTypes: ['images'] as any,
+        quality: isDevBuild ? 0.3 : 0.5, // Lower quality for dev builds to reduce load
         allowsEditing: false,
         base64: false,
         exif: false,
@@ -208,11 +213,16 @@ export default function AddListingScreen() {
       
       // Android specific options  
       const androidCameraOptions = {
-        mediaTypes: ['images'] as any, // Type assertion for new format
-        quality: 0.8, // Android için biraz daha yüksek
+        mediaTypes: ['images'] as any,
+        quality: isDevBuild ? 0.6 : 0.8, // Slightly lower quality for dev builds
         allowsEditing: false,
         base64: false,
         exif: false,
+        // Additional Android options for development builds
+        ...(isDevBuild && {
+          aspect: [4, 3] as [number, number], // Standard aspect ratio for faster processing
+          videoMaxDuration: 1, // Minimal video duration to speed up camera init
+        })
       };
       
       // Web fallback
@@ -224,13 +234,15 @@ export default function AddListingScreen() {
       const cameraOptions = Platform.OS === 'ios' ? iOSCameraOptions : androidCameraOptions;
       const cameraPromise = ImagePicker.launchCameraAsync(cameraOptions);
       
-      // Platform-specific timeout
-      const timeoutDuration = Platform.OS === 'ios' ? 8000 : 15000; // iOS için daha kısa
+      // Platform-specific timeout - longer for development builds
+      const baseTimeout = Platform.OS === 'ios' ? 12000 : 25000; // Increased base timeouts
+      const timeoutDuration = isDevBuild ? baseTimeout * 2 : baseTimeout; // Double timeout for dev builds
+      
       const timeoutPromise = new Promise((_, reject) => 
         setTimeout(() => reject(new Error(`Camera timeout after ${timeoutDuration/1000} seconds`)), timeoutDuration)
       );
       
-      console.log(`Step 2.1: Starting ${Platform.OS} camera with ${timeoutDuration/1000}s timeout...`);
+      console.log(`Step 2.1: Starting ${Platform.OS} camera with ${timeoutDuration/1000}s timeout ${isDevBuild ? '(dev build)' : '(production)'}...`);
       const result = await Promise.race([cameraPromise, timeoutPromise]) as any;
       
       console.log('Camera result:', result);
@@ -261,16 +273,20 @@ export default function AddListingScreen() {
       // Max retry'a ulaştıysak veya başka hata varsa
       if (retryCount >= maxRetries) {
         const platformMessage = Platform.OS === 'ios' 
-          ? 'iOS Expo Go kamera problemi yaşanıyor.' 
-          : 'Kamera açılmadı.';
+          ? 'iOS kamera problemi yaşanıyor.' 
+          : 'Android kamera açılmadı.';
+        
+        const devMessage = isDevBuild 
+          ? '\n\n🔧 Geliştirme modu: Kamera zaman aşımı normal bir durumdur. Galeri kullanmayı deneyin.' 
+          : '';
           
         Alert.alert(
           "Kamera Problemi", 
-          `${platformMessage} ${maxRetries} deneme yapıldı. Galeri kullanmak ister misiniz?`,
+          `${platformMessage} ${maxRetries} deneme yapıldı.${devMessage}\n\nGaleri kullanmak ister misiniz?`,
           [
             { text: "İptal", style: "cancel" },
-            { text: "Manuel Tekrar Dene", onPress: () => tryLaunchCamera(0) },
-            { text: "Galeri Aç", onPress: () => pickImagesFromGallery() }
+            { text: "Tekrar Dene", onPress: () => tryLaunchCamera(0) },
+            { text: "Galeri Kullan", onPress: () => pickImagesFromGallery() }
           ]
         );
       } else {

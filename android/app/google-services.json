@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "920106141191",
+    "project_id": "eskici-b4403",
+    "storage_bucket": "eskici-b4403.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:920106141191:android:505784d0ec5bff5a470ca2",
+        "android_client_info": {
+          "package_name": "com.sbabadag.imece"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgZI5EwlbbUdoqxzooTBIJUIGneij-sf4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

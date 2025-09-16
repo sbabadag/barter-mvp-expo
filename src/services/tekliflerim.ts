@@ -9,9 +9,9 @@ const isMockDataId = (id: string): boolean => {
 
 // Helper function to determine if we should use mock mode
 const shouldUseMockMode = (id?: string): boolean => {
-  // GEÇICI OLARAK MOCK MODU DEVRE DIŞI - HER ZAMAN GERÇEK VERİ KULLAN
-  const result = false; // supabaseConfig.isPlaceholder || (id ? isMockDataId(id) : false);
-  console.log('📊 Mock mode check (FORCED REAL):', {
+  // Use real Supabase data when valid credentials are provided
+  const result = supabaseConfig.isPlaceholder || (id ? isMockDataId(id) : false);
+  console.log('📊 Mock mode check:', {
     isPlaceholder: supabaseConfig.isPlaceholder,
     url: supabaseConfig.url,
     mockDataId: id ? isMockDataId(id) : false,

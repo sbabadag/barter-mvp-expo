@@ -21,28 +21,36 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        {/* Top Row - Logo and Icons */}
-        <View style={styles.topRow}>
-          <View style={styles.logoContainer}>
-            <Text style={styles.logoText}>ESKICI</Text>
-            <Text style={styles.logoSubtext}>Komşular Arası Takas</Text>
+        {/* Single Row - Search and Icons */}
+        <View style={styles.mainRow}>
+          {/* Search Bar */}
+          <View style={styles.searchContainer}>
+            <Ionicons name="search" size={16} color="#9CA3AF" style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search for anything"
+              placeholderTextColor="#9CA3AF"
+              value={searchQuery}
+              onChangeText={onSearchChange}
+            />
           </View>
           
+          {/* Icons Container */}
           <View style={styles.iconsContainer}>
-            {/* Notifications */}
+            {/* Favorites/Heart */}
             <TouchableOpacity 
               style={styles.iconButton}
               onPress={onNotificationPress}
             >
-              <Ionicons name="notifications-outline" size={24} color="#374151" />
+              <Ionicons name="heart-outline" size={24} color="#374151" />
             </TouchableOpacity>
             
-            {/* Cart/Offers */}
+            {/* Shopping Bag */}
             <TouchableOpacity 
               style={styles.iconButton}
               onPress={onCartClick}
             >
-              <Ionicons name="chatbubble-ellipses-outline" size={24} color="#374151" />
+              <Ionicons name="bag-outline" size={24} color="#374151" />
               {cartItemCount > 0 && (
                 <View style={styles.badge}>
                   <Text style={styles.badgeText}>{cartItemCount}</Text>
@@ -50,18 +58,6 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </TouchableOpacity>
           </View>
-        </View>
-
-        {/* Search Bar */}
-        <View style={styles.searchContainer}>
-          <Ionicons name="search" size={20} color="#9CA3AF" style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Ne arıyorsunuz?"
-            placeholderTextColor="#9CA3AF"
-            value={searchQuery}
-            onChangeText={onSearchChange}
-          />
         </View>
       </View>
     </SafeAreaView>
@@ -79,24 +75,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
   },
-  topRow: {
+  mainRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
-  },
-  logoContainer: {
-    flex: 1,
-  },
-  logoText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#3B82F6',
-  },
-  logoSubtext: {
-    fontSize: 12,
-    color: '#6B7280',
-    marginTop: 2,
   },
   iconsContainer: {
     flexDirection: 'row',
@@ -124,21 +106,24 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   searchContainer: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F9FAFB',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    borderRadius: 19,
+    paddingHorizontal: 12,
+    height: 32,
     borderWidth: 1,
     borderColor: '#E5E7EB',
+    marginRight: 12,
   },
   searchIcon: {
-    marginRight: 12,
+    marginRight: 8,
   },
   searchInput: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 14,
     color: '#1F2937',
+    paddingVertical: 0,
   },
 });

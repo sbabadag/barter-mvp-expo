@@ -60,13 +60,13 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   categoryButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
     backgroundColor: '#F3F4F6',
     borderWidth: 1,
     borderColor: '#E5E7EB',
-    minWidth: 80,
+    minWidth: 45,
     alignItems: 'center',
   },
   selectedCategoryButton: {
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     borderColor: '#3B82F6',
   },
   categoryText: {
-    fontSize: 14,
+    fontSize: 11,
     fontWeight: '500',
     color: '#6B7280',
   },

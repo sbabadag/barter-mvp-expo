@@ -39,6 +39,7 @@
       },
       "package": "com.sbabadag.imece",
       "versionCode": 1,
+      "googleServicesFile": "./android/app/google-services.json",
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
@@ -85,6 +86,9 @@
         }
       ],
       [
+        "@react-native-firebase/app"
+      ],
+      [
         "expo-image-picker",
         {
           "cameraPermission": "Bu uygulama fotoğraf çekmek için kamerayı kullanır.",
@@ -103,7 +107,8 @@
       "router": {},
       "eas": {
         "projectId": "0044881e-df69-4c63-817a-6869f9ec0bf8"
-      }
+      },
+      "firebaseVapidKey": "hhEN1uzby_gXhXDKGtxJMNw-g729whBWnf-5gF6hgQ4"
     },
     "owner": "sbabadag"
   }
