@@ -40,8 +40,8 @@
     "@tanstack/react-query": "^5.56.0",
     "@types/react": "19.1.10",
     "base64-arraybuffer": "^1.0.2",
-    "expo": "54",
-    "expo-camera": "~17.0.7",
+    "expo": "54.0.8",
+    "expo-camera": "~17.0.8",
     "expo-constants": "~18.0.8",
     "expo-dev-client": "~6.0.12",
     "expo-device": "~8.0.7",
@@ -54,7 +54,7 @@
     "expo-linking": "~8.0.8",
     "expo-location": "~19.0.7",
     "expo-notifications": "~0.32.11",
-    "expo-router": "~6.0.4",
+    "expo-router": "~6.0.6",
     "expo-secure-store": "~15.0.7",
     "expo-splash-screen": "~31.0.10",
     "react": "19.1.0",
@@ -80,13 +80,13 @@
     "@types/cheerio": "^0.22.35",
     "@types/node": "^20.0.0",
     "@types/node-fetch": "^2.6.9",
-    "@types/react": "^19.1.0",
+    "@types/react": "~19.1.10",
     "ajv": "^8.12.0",
     "cheerio": "^1.0.0",
     "eslint": "^8.57.0",
     "node-fetch": "^3.3.2",
     "prettier": "^3.6.2",
     "ts-node": "^10.9.2",
-    "typescript": "~5.8.3"
+    "typescript": "~5.9.2"
   }
 }
