@@ -296,10 +296,9 @@ export const createBid = async (
       // Haptic feedback ve notification için mock mode
       HapticService.success();
       if (Platform.OS !== 'web' && __DEV__) {
-        await notificationService.scheduleBidNotification(
+        await notificationService.sendLocalNotification(
           `Mock İlan ${listingId}`, 
-          amount, 
-          listingId
+          `${amount} TL teklif verildi!`
         );
       }
       

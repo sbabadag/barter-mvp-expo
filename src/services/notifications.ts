@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../state/AuthProvider';
 import { useReceivedOffers } from './tekliflerim';
 import * as Notifications from 'expo-notifications';
@@ -6,247 +6,298 @@ import { TimeIntervalTriggerInput } from 'expo-notifications';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
-import { isFirebaseAvailable } from '../utils/firebase';
+import { supabase } from '../utils/supabase';
 
 // Bildirim davranışını ayarla
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
     shouldPlaySound: true,
-    shouldSetBadge: false,
+    shouldSetBadge: true,
     shouldShowBanner: true,
     shouldShowList: true,
   }),
 });
 
-export interface NotificationCounts {
-  pendingOffers: number;
-  newMessages: number; // for future implementation
-  total: number;
-}
+// Bildirim kanallarını kurulum (Android için)
+const setupNotificationChannels = async () => {
+  if (Platform.OS === 'android') {
+    await Notifications.setNotificationChannelAsync('default', {
+      name: 'default',
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#FF231F7C',
+    });
 
-export interface NotificationData {
-  type: 'new_bid' | 'message' | 'listing_sold' | 'general';
-  listingId?: string;
-  bidId?: string;
-  userId?: string;
-  title: string;
-  body: string;
-}
+    await Notifications.setNotificationChannelAsync('bids', {
+      name: 'Teklifler',
+      importance: Notifications.AndroidImportance.HIGH,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#f0a500',
+      sound: 'default',
+    });
 
-export const useNotificationCounts = () => {
-  const { user, isAuthenticated } = useAuth();
-  const { data: receivedOffers } = useReceivedOffers();
-
-  return useQuery({
-    queryKey: ["notificationCounts", user?.id],
-    queryFn: async (): Promise<NotificationCounts> => {
-      if (!isAuthenticated || !user) {
-        return { pendingOffers: 0, newMessages: 0, total: 0 };
-      }
-
-      // Count pending received offers (new bids on user's listings)
-      const pendingOffers = receivedOffers?.filter(offer => 
-        offer.status === 'pending' || offer.status === 'countered'
-      ).length || 0;
-
-      // Future: Add new messages count
-      const newMessages = 0;
-
-      const total = pendingOffers + newMessages;
-
-      return {
-        pendingOffers,
-        newMessages,
-        total
-      };
-    },
-    enabled: isAuthenticated && !!user,
-    refetchInterval: 30000, // Refetch every 30 seconds for real-time updates
-  });
+    await Notifications.setNotificationChannelAsync('messages', {
+      name: 'Mesajlar',
+      importance: Notifications.AndroidImportance.DEFAULT,
+      vibrationPattern: [0, 250],
+      lightColor: '#f0a500',
+      sound: 'default',
+    });
+  }
 };
 
-// Push Notification Service
+// Ana bildirim servisi
 class NotificationService {
-  private expoPushToken: string | null = null;
+  private static instance: NotificationService;
+  private isInitialized = false;
+  private notificationListener: any = null;
+  private responseListener: any = null;
 
-  async initialize(): Promise<string | null> {
+  static getInstance(): NotificationService {
+    if (!NotificationService.instance) {
+      NotificationService.instance = new NotificationService();
+    }
+    return NotificationService.instance;
+  }
+
+  async initialize(): Promise<void> {
+    if (this.isInitialized) return;
+
     try {
-      // Check if Firebase is available for push notifications
-      if (Platform.OS === 'android' && !isFirebaseAvailable()) {
-        console.log('⚠️ Firebase not available - push notifications will use Expo Push service only');
-        console.log('📝 To enable FCM push notifications, configure google-services.json');
-      }
+      console.log('📱 Initializing notification service...');
 
-      // Sadece fiziksel cihazlarda çalışır
-      if (!Device.isDevice) {
-        console.log('📱 Push notifications only work on physical devices (using simulator/emulator)');
-        return null;
-      }
+      // Request permissions
+      await this.requestPermissions();
 
-      // İzin kontrolü
-      let finalStatus: string;
-      try {
+      // Setup notification channels (Android)
+      await setupNotificationChannels();
+
+      // Setup listeners
+      this.setupNotificationListeners();
+
+      this.isInitialized = true;
+      console.log('✅ Notification service initialized successfully');
+    } catch (error) {
+      console.error('❌ Failed to initialize notification service:', error);
+    }
+  }
+
+  private async requestPermissions(): Promise<boolean> {
+    try {
+      if (Device.isDevice) {
         const { status: existingStatus } = await Notifications.getPermissionsAsync();
-        finalStatus = existingStatus;
+        let finalStatus = existingStatus;
         
         if (existingStatus !== 'granted') {
           const { status } = await Notifications.requestPermissionsAsync();
           finalStatus = status;
         }
-      } catch (permissionError) {
-        console.log('📱 Permission check failed, notifications will be disabled:', permissionError);
-        return null;
+        
+        if (finalStatus !== 'granted') {
+          console.log('❌ Failed to get push token for push notification!');
+          return false;
+        }
+        
+        console.log('✅ Notification permissions granted');
+        return true;
+      } else {
+        console.log('📱 Must use physical device for Push Notifications');
+        return false;
       }
-      
-      if (finalStatus !== 'granted') {
-        console.log('📱 Push notification permission denied by user');
-        return null;
-      }
-
-      // Token al
-      const projectId = Constants.expoConfig?.extra?.eas?.projectId;
-      if (!projectId) {
-        console.log('📱 No project ID found for push notifications (this is normal in development)');
-        return null;
-      }
-
-      const token = await Notifications.getExpoPushTokenAsync({
-        projectId,
-      });
-      
-      this.expoPushToken = token.data;
-      console.log('📱 Push token obtained successfully:', this.expoPushToken);
-      console.log('🔥 FIREBASE TOKEN FOR TESTING:', this.expoPushToken);
-      console.log('📋 COPY THIS TOKEN FOR FIREBASE CONSOLE TESTING ⬆️');
-      
-      return this.expoPushToken;
     } catch (error) {
-      // Don't log as error - this is expected in development
-      console.log('📱 Notification initialization completed without push token (this is normal):', error instanceof Error ? error.message : String(error));
-      // Continue gracefully - app should work without push notifications
+      console.error('❌ Error requesting permissions:', error);
+      return false;
+    }
+  }
+
+  async getPushToken(): Promise<string | null> {
+    try {
+      if (!Device.isDevice) {
+        console.log('📱 Must use physical device for Push Notifications');
+        return null;
+      }
+
+      const token = (await Notifications.getExpoPushTokenAsync({
+        projectId: Constants.expoConfig?.extra?.eas?.projectId,
+      })).data;
+      
+      console.log('🎫 Expo Push Token:', token);
+      return token;
+    } catch (error) {
+      console.error('❌ Error getting push token:', error);
       return null;
     }
   }
 
-  async scheduleBidNotification(listingTitle: string, bidAmount: number, listingId: string) {
+  private setupNotificationListeners(): void {
+    // Uygulama açıkken gelen bildirimler
+    this.notificationListener = Notifications.addNotificationReceivedListener(notification => {
+      console.log('📨 Notification received:', notification);
+      // Badge sayısını güncelle
+      this.updateBadgeCount();
+    });
+
+    // Bildirime tıklandığında
+    this.responseListener = Notifications.addNotificationResponseReceivedListener(response => {
+      console.log('👆 Notification tapped:', response);
+      // Deep linking burada handle edilebilir
+      this.handleNotificationTap(response);
+    });
+  }
+
+  private async handleNotificationTap(response: any): Promise<void> {
+    const data = response.notification.request.content.data;
+    console.log('📂 Notification data:', data);
+    
+    // Burada deep linking mantığı eklenebilir
+    // Örneğin: router.push() ile ilgili sayfaya yönlendirme
+  }
+
+  async updateBadgeCount(): Promise<void> {
     try {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: 'Yeni Teklif! 🎯',
-          body: `${listingTitle} için ${bidAmount} TL teklif aldınız`,
-          data: {
-            type: 'new_bid',
-            listingId,
-          },
-        },
-        trigger: null, // Hemen gönder
-      });
-      console.log('✅ Bid notification scheduled');
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) return;
+
+      // Okunmamış bildirim sayısını al
+      const { count } = await supabase
+        .from('notifications')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.user.id)
+        .eq('read', false);
+
+      await Notifications.setBadgeCountAsync(count || 0);
     } catch (error) {
-      console.error('Error scheduling bid notification:', error);
+      console.error('❌ Error updating badge count:', error);
     }
   }
 
-  async scheduleMessageNotification(senderName: string, messagePreview: string) {
+  async sendLocalNotification(title: string, body: string, data?: any): Promise<void> {
     try {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: `${senderName} mesaj gönderdi 💬`,
-          body: messagePreview,
-          data: {
-            type: 'message',
-          },
-        },
-        trigger: null,
-      });
-      console.log('✅ Message notification scheduled');
-    } catch (error) {
-      console.error('Error scheduling message notification:', error);
-    }
-  }
-
-  async scheduleSoldNotification(listingTitle: string, finalPrice: number) {
-    try {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: 'Ürün Satıldı! 🎉',
-          body: `${listingTitle} ${finalPrice} TL'ye satıldı`,
-          data: {
-            type: 'listing_sold',
-          },
-        },
-        trigger: null,
-      });
-      console.log('✅ Sold notification scheduled');
-    } catch (error) {
-      console.error('Error scheduling sold notification:', error);
-    }
-  }
-
-  async scheduleReminderNotification(title: string, body: string, triggerSeconds: number = 3600) {
-    try {
-      const trigger: TimeIntervalTriggerInput = {
-        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-        seconds: triggerSeconds,
-      };
-      
       await Notifications.scheduleNotificationAsync({
         content: {
           title,
           body,
-          data: {
-            type: 'general',
-          },
+          data: data || {},
         },
-        trigger: triggerSeconds > 0 ? trigger : null,
+        trigger: null, // Hemen gönder
       });
-      console.log('✅ Reminder notification scheduled');
     } catch (error) {
-      console.error('Error scheduling reminder notification:', error);
+      console.error('❌ Error sending local notification:', error);
     }
   }
 
-  getExpoPushToken(): string | null {
-    return this.expoPushToken;
+  async clearBadge(): Promise<void> {
+    try {
+      await Notifications.setBadgeCountAsync(0);
+    } catch (error) {
+      console.error('❌ Error clearing badge:', error);
+    }
   }
 
-  // Bildirim dinleyicilerini kaydet
-  addNotificationReceivedListener(listener: (notification: Notifications.Notification) => void) {
-    return Notifications.addNotificationReceivedListener(listener);
-  }
-
-  addNotificationResponseReceivedListener(listener: (response: Notifications.NotificationResponse) => void) {
-    return Notifications.addNotificationResponseReceivedListener(listener);
-  }
-
-  // Android için bildirim kanalları
-  async setupAndroidChannels() {
-    if (Platform.OS === 'android') {
-      try {
-        await Notifications.setNotificationChannelAsync('bids', {
-          name: 'Teklifler',
-          importance: Notifications.AndroidImportance.HIGH,
-          vibrationPattern: [0, 250, 250, 250],
-          lightColor: '#FF231F7C',
-        });
-
-        await Notifications.setNotificationChannelAsync('messages', {
-          name: 'Mesajlar',
-          importance: Notifications.AndroidImportance.DEFAULT,
-        });
-
-        await Notifications.setNotificationChannelAsync('general', {
-          name: 'Genel',
-          importance: Notifications.AndroidImportance.DEFAULT,
-        });
-        
-        console.log('📱 Android notification channels configured successfully');
-      } catch (error) {
-        console.log('📱 Android notification channels setup failed (app continues normally):', error);
-      }
+  cleanup(): void {
+    if (this.notificationListener) {
+      this.notificationListener.remove();
+    }
+    if (this.responseListener) {
+      this.responseListener.remove();
     }
   }
 }
 
-export const notificationService = new NotificationService();
+// Export singleton instance
+export const notificationService = NotificationService.getInstance();
+
+// React Hook for notifications
+export const useNotifications = () => {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  const {
+    data: notifications = [],
+    isLoading,
+    error,
+    refetch
+  } = useQuery({
+    queryKey: ['notifications', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (error) {
+        console.error('Error fetching notifications:', error);
+        throw error;
+      }
+
+      return data || [];
+    },
+    enabled: !!user?.id,
+  });
+
+  const unreadCount = notifications.filter((n: any) => !n.read).length;
+
+  const markAsRead = async (notificationId: string) => {
+    try {
+      const { error } = await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('id', notificationId);
+
+      if (error) throw error;
+
+      // Invalidate queries to refetch
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      
+      // Update badge count
+      await notificationService.updateBadgeCount();
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      if (!user?.id) return;
+
+      const { error } = await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('user_id', user.id)
+        .eq('read', false);
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      await notificationService.clearBadge();
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+    }
+  };
+
+  return {
+    notifications,
+    unreadCount,
+    isLoading,
+    error,
+    refetch,
+    markAsRead,
+    markAllAsRead,
+  };
+};
+
+// Bildirim test fonksiyonu
+export const testNotification = async () => {
+  await notificationService.sendLocalNotification(
+    'Test Bildirimi',
+    'Bu bir test bildirimidir!',
+    { test: true }
+  );
+};
+
+export default NotificationService;

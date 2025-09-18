@@ -1,0 +1,135 @@
+{
+  "expo": {
+    "name": "ESKICI",
+    "slug": "barter-mvp-expo",
+    "scheme": "eskici",
+    "version": "1.2.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#f0a500"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sbabadag.imece",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSLocationWhenInUseUsageDescription": "Bu uygulama konum bilginizi ilanlarınızda konum seçimi için kullanır.",
+        "NSCameraUsageDescription": "Bu uygulama fotoğraf çekmek için kamerayı kullanır.",
+        "NSPhotoLibraryUsageDescription": "Bu uygulama galeri fotoğraflarını seçmek için kullanır.",
+        "NSMicrophoneUsageDescription": "Bu uygulama sesli mesaj göndermek için mikrofonu kullanır.",
+        "NSUserNotificationsUsageDescription": "Bu uygulama size önemli bildirimler göndermek için izin ister."
+      },
+      "icon": "./assets/icon.png",
+      "requireFullScreen": false,
+      "config": {
+        "usesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#f0a500"
+      },
+      "package": "com.sbabadag.imece",
+      "versionCode": 1,
+      "googleServicesFile": "./android/app/google-services.json",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "RECORD_AUDIO",
+        "VIBRATE"
+      ],
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyB0VA45VjT4YnAKdYOb61XVA5vaOdlY7eA"
+        }
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png",
+      "name": "ESKICI - Komşular Arası Al-Sat Platformu",
+      "shortName": "ESKICI",
+      "lang": "tr",
+      "scope": "/",
+      "themeColor": "#f0a500",
+      "backgroundColor": "#ffffff",
+      "display": "standalone",
+      "orientation": "portrait",
+      "startUrl": "/",
+      "meta": {
+        "apple-mobile-web-app-capable": "yes",
+        "apple-mobile-web-app-status-bar-style": "default",
+        "apple-mobile-web-app-title": "İmece",
+        "mobile-web-app-capable": "yes",
+        "msapplication-TileColor": "#f0a500"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#f0a500",
+          "defaultChannel": "default"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Bu uygulama fotoğraf çekmek için kamerayı kullanır.",
+          "photosPermission": "Bu uygulama galeri fotoğraflarını seçmek için kullanır."
+        }
+      ],
+      [
+        "@react-native-firebase/app",
+        {
+          "ios": {
+            "googleServicesFile": "./GoogleService-Info.plist"
+          },
+          "android": {
+            "googleServicesFile": "./android/app/google-services.json"
+          }
+        }
+      ],
+      [
+        "@react-native-firebase/messaging",
+        {
+          "ios": {
+            "enableAutoInit": true
+          },
+          "android": {
+            "enableAutoInit": true,
+            "requestPermissionOnAppStart": true
+          }
+        }
+      ]
+    ],
+    "notification": {
+      "icon": "./assets/icon.png",
+      "color": "#f0a500",
+      "iosDisplayInForeground": true,
+      "androidMode": "default",
+      "androidCollapsedTitle": "#{unread_notifications} yeni bildirim"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "0044881e-df69-4c63-817a-6869f9ec0bf8"
+      },
+      "firebaseVapidKey": "hhEN1uzby_gXhXDKGtxJMNw-g729whBWnf-5gF6hgQ4"
+    },
+    "owner": "sbabadag"
+  }
+}

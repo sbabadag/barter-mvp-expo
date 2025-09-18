@@ -1,8 +1,12 @@
 import { Tabs } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
-import { Platform } from "react-native";
+import { Platform, View } from "react-native";
+import { useNotifications } from "../../src/services/notifications";
+import { TabBadge } from "../../src/components/NotificationBadge";
 
 export default function TabsLayout() {
+  const { unreadCount } = useNotifications();
+
   return (
     <Tabs 
       screenOptions={{ 
@@ -46,7 +50,12 @@ export default function TabsLayout() {
         name="bids" 
         options={{ 
           tabBarLabel: "Tekliflerim", 
-          tabBarIcon: ({color, size}) => <MaterialIcons name="local-offer" color={color} size={size} /> 
+          tabBarIcon: ({color, size, focused}) => (
+            <View style={{ position: 'relative' }}>
+              <MaterialIcons name="local-offer" color={color} size={size} />
+              <TabBadge count={unreadCount || 0} focused={focused} />
+            </View>
+          )
         }} 
       />
       <Tabs.Screen 

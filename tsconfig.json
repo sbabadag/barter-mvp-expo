@@ -24,5 +24,10 @@
       ]
     }
   },
+  "exclude": [
+    "supabase/functions/**/*",
+    "node_modules",
+    ".expo"
+  ],
   "extends": "expo/tsconfig.base"
 }

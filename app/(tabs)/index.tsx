@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, Dimensions, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useListings } from "../../src/services/listings";
-import { useNotificationCounts } from "../../src/services/notifications";
+import { useNotifications } from "../../src/services/notifications";
 import { Header } from "../../src/components/modern/Header";
 import { CategoryFilter } from "../../src/components/modern/CategoryFilter";
 import { ProductCard, Product } from "../../src/components/modern/ProductCard";
@@ -13,7 +13,7 @@ const { width } = Dimensions.get('window');
 export default function FeedScreen() {
   const router = useRouter();
   const { data, isLoading, refetch } = useListings();
-  const { data: notificationCounts } = useNotificationCounts();
+  const { unreadCount } = useNotifications();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
@@ -120,11 +120,13 @@ export default function FeedScreen() {
   return (
     <View style={styles.container}>
       <Header
-        cartItemCount={notificationCounts?.total || 0}
+        notificationCount={unreadCount || 0}
+        cartItemCount={0} // Could be implemented for shopping cart
         onCartClick={handleCartClick}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onNotificationPress={handleNotificationPress}
+        onFavoritesPress={() => router.push('/favorites')}
       />
 
       <View style={styles.content}>

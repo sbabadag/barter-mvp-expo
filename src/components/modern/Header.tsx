@@ -2,21 +2,26 @@ import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { NotificationIconWithBadge } from '../NotificationBadge';
 
 interface HeaderProps {
   cartItemCount?: number;
+  notificationCount?: number;
   onCartClick?: () => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
   onNotificationPress?: () => void;
+  onFavoritesPress?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   cartItemCount = 0,
+  notificationCount = 0,
   onCartClick,
   searchQuery,
   onSearchChange,
-  onNotificationPress
+  onNotificationPress,
+  onFavoritesPress
 }) => {
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -28,7 +33,7 @@ export const Header: React.FC<HeaderProps> = ({
             <Ionicons name="search" size={16} color="#9CA3AF" style={styles.searchIcon} />
             <TextInput
               style={styles.searchInput}
-              placeholder="Search for anything"
+              placeholder="Ara..."
               placeholderTextColor="#9CA3AF"
               value={searchQuery}
               onChangeText={onSearchChange}
@@ -37,10 +42,25 @@ export const Header: React.FC<HeaderProps> = ({
           
           {/* Icons Container */}
           <View style={styles.iconsContainer}>
-            {/* Favorites/Heart */}
+            {/* Notification Bell */}
             <TouchableOpacity 
               style={styles.iconButton}
               onPress={onNotificationPress}
+              activeOpacity={0.7}
+            >
+              <NotificationIconWithBadge
+                icon={<Ionicons name="notifications-outline" size={24} color="#374151" />}
+                count={notificationCount}
+                badgeColor="#F0A500"
+                badgeSize="small"
+              />
+            </TouchableOpacity>
+            
+            {/* Favorites/Heart */}
+            <TouchableOpacity 
+              style={styles.iconButton}
+              onPress={onFavoritesPress}
+              activeOpacity={0.7}
             >
               <Ionicons name="heart-outline" size={24} color="#374151" />
             </TouchableOpacity>
@@ -49,13 +69,14 @@ export const Header: React.FC<HeaderProps> = ({
             <TouchableOpacity 
               style={styles.iconButton}
               onPress={onCartClick}
+              activeOpacity={0.7}
             >
-              <Ionicons name="bag-outline" size={24} color="#374151" />
-              {cartItemCount > 0 && (
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>{cartItemCount}</Text>
-                </View>
-              )}
+              <NotificationIconWithBadge
+                icon={<Ionicons name="bag-outline" size={24} color="#374151" />}
+                count={cartItemCount}
+                badgeColor="#EF4444"
+                badgeSize="small"
+              />
             </TouchableOpacity>
           </View>
         </View>
