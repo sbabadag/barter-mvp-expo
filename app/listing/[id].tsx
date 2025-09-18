@@ -24,6 +24,13 @@ export default function ListingDetail(){
   const [loadBids, setLoadBids] = useState(false);
   const [loadSeller, setLoadSeller] = useState(false);
   
+  // Debug logging
+  console.log('🔥 Listing Detail Page:', {
+    id,
+    hasData: !!data,
+    dataTitle: data?.title
+  });
+  
   // Lazy load seller info only when needed
   const { data: sellerInfo } = useSellerInfo(loadSeller ? data?.seller_id : undefined);
   
@@ -317,19 +324,35 @@ export default function ListingDetail(){
         <Pressable 
           style={[
             styles.offerButton,
-            !isAuthenticated && styles.disabledButton
+            (!isAuthenticated || (user && data.seller_id === user.id)) && styles.disabledButton
           ]}
           onPress={() => {
             if (!isAuthenticated) {
               Alert.alert('Giriş Gerekli', 'Teklif vermek için önce giriş yapmalısınız.');
               return;
             }
+            
+            // Check if user is trying to bid on their own listing
+            if (user && data.seller_id === user.id) {
+              Alert.alert(
+                'Kendi İlanınız', 
+                'Kendi yayınladığınız ilanlara teklif veremezsiniz. Başka kullanıcıların ilanlarına teklif verebilirsiniz.',
+                [{ text: 'Tamam' }]
+              );
+              return;
+            }
+            
             setShowBiddingModal(true);
           }}
         >
           <MaterialIcons name="local-offer" size={20} color="white" />
           <Text style={styles.offerButtonText}>
-            {isAuthenticated ? 'Teklif Ver' : 'Giriş Yap'}
+            {!isAuthenticated 
+              ? 'Giriş Yap' 
+              : (user && data.seller_id === user.id) 
+                ? 'Kendi İlanınız' 
+                : 'Teklif Ver'
+            }
           </Text>
         </Pressable>
       </View>

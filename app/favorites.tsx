@@ -28,7 +28,7 @@ export default function FavoritesScreen() {
       price: listingItem.price,
       currency: listingItem.currency,
       image_url: listingItem.image_url || listingItem.images?.[0],
-      seller_name: listingItem.seller_name || (listingItem.profiles?.[0]?.display_name) || ('user' + listingItem.id.slice(-2)),
+      seller_name: listingItem.seller_name || (listingItem.profiles?.[0]?.display_name) || 'İsimsiz Kullanıcı',
       seller_avatar: listingItem.seller_avatar || (listingItem.profiles?.[0]?.avatar_url) || '',
       location: listingItem.location,
       category: listingItem.category,

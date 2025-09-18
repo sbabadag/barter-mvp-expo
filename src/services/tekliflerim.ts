@@ -1,6 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase, supabaseConfig } from "../utils/supabase";
 import { useAuth } from "../state/AuthProvider";
+import { triggerGlobalNotificationRefresh, notificationService } from './notifications';
+
+// Generate UUID for bid IDs
+const generateUUID = (): string => {
+  return 'bid_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8);
+};
 
 // Helper function to check if an ID is from mock data
 const isMockDataId = (id: string): boolean => {
@@ -667,21 +673,107 @@ export const useCreateOffer = () => {
       
       console.log('Creating offer in real Supabase');
       
-      // Real Supabase
+      // Real Supabase - with proper bid ID generation
       try {
+        console.log('Creating offer in real Supabase with authentication context', {
+          listing_id: listingId,
+          bidder_id: user.id,
+          amount,
+          message
+        });
+
+        const bidId = generateUUID();
+        
         const { data, error } = await supabase
           .from('bids')
           .insert({
+            id: bidId,
             listing_id: listingId,
             bidder_id: user.id,
             amount,
             message,
-            expires_at: expiresAt
+            status: 'pending'
           })
           .select()
           .single();
         
-        if (error) throw error;
+        if (error) {
+          console.error('Direct insert failed:', error);
+          throw error;
+        }
+        
+        console.log('✅ Bid created successfully:', data);
+        
+        // Send notification to the listing owner
+        try {
+          console.log('📱 Sending notification to listing owner...');
+          
+          // First, get the listing to find the seller
+          const { data: listing, error: listingError } = await supabase
+            .from('listings')
+            .select('seller_id, title')
+            .eq('id', listingId)
+            .single();
+            
+          if (listingError) {
+            console.error('❌ Failed to get listing for notification:', listingError);
+          } else if (listing) {
+            console.log('📋 Found listing seller:', listing.seller_id);
+            
+            // Create notification in database
+            const notificationData = {
+              user_id: listing.seller_id,
+              type: 'new_bid',
+              title: 'Yeni Teklif Aldınız!',
+              body: `"${listing.title}" ilanınıza ${amount} TL teklif verildi.`,
+              data: {
+                listing_id: listingId,
+                bid_id: data.id,
+                amount: amount,
+                bidder_id: user.id
+              },
+              listing_id: listingId,
+              bid_id: data.id,
+              read: false,
+              sent: false,
+              delivery_method: 'in_app'
+            };
+            
+            const { error: notificationError } = await supabase
+              .from('notifications')
+              .insert(notificationData);
+              
+            if (notificationError) {
+              console.error('❌ Failed to create notification:', notificationError);
+            } else {
+              console.log('✅ Notification created successfully');
+              
+              // Send push notification to the listing owner
+              console.log('📤 Sending push notification to listing owner...');
+              try {
+                await notificationService.sendPushNotification(
+                  listing.seller_id,
+                  notificationData.title,
+                  notificationData.body,
+                  notificationData.data,
+                  'new_bid'
+                );
+                console.log('✅ Push notification sent successfully');
+              } catch (pushError) {
+                console.error('❌ Failed to send push notification:', pushError);
+              }
+              
+              // Force refresh notifications for the recipient
+              setTimeout(() => {
+                console.log('📱 Triggering notification refresh after bid creation');
+                triggerGlobalNotificationRefresh();
+              }, 500);
+            }
+          }
+        } catch (notificationError) {
+          console.error('❌ Error in notification process:', notificationError);
+        }
+        
         return data;
       } catch (error) {
         console.error('Error creating offer in Supabase:', error);
@@ -744,6 +836,12 @@ export const useRespondToOffer = () => {
       const status = action === 'accept' ? 'accepted' : 
                    action === 'reject' ? 'rejected' : 'countered';
       
+      console.log('📊 Mock mode check:', { 
+        offerId, 
+        shouldUseMock: shouldUseMockMode(offerId),
+        isMockId: offerId.startsWith('offer_') || offerId.startsWith('bid_mock_')
+      });
+      
       if (shouldUseMockMode(offerId)) {
         // Mock mode
         console.log('Responding to offer in mock mode:', { offerId, action });
@@ -761,12 +859,34 @@ export const useRespondToOffer = () => {
       }
       
       console.log('Responding to offer in real Supabase');
+      console.log('📋 Offer details:', { offerId, action, status, counterAmount, counterMessage });
       
       // Real Supabase
       try {
+        // First check if the bid exists
+        console.log('🔍 Checking if bid exists:', offerId);
+        const { data: existingBid, error: checkError } = await supabase
+          .from('bids')
+          .select('id, status, listing_id, bidder_id')
+          .eq('id', offerId)
+          .single();
+          
+        if (checkError) {
+          console.error('❌ Error checking bid existence:', checkError);
+          if (checkError.code === 'PGRST116') {
+            console.log('❌ Bid not found in database, ID might be mock:', offerId);
+            throw new Error(`Bid with ID ${offerId} not found in database`);
+          }
+          throw checkError;
+        }
+        
+        console.log('✅ Bid found:', existingBid);
+        
         const updateData: any = { status };
         if (counterAmount) updateData.counter_offer_amount = counterAmount;
         if (counterMessage) updateData.counter_offer_message = counterMessage;
+        
+        console.log('📝 Updating bid with data:', updateData);
         
         const { data, error } = await supabase
           .from('bids')

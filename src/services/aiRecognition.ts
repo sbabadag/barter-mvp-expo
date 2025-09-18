@@ -267,7 +267,13 @@ export const aiRecognitionService = new AIRecognitionService();
 
 // Helper function to validate if AI service is available
 export const isAIServiceAvailable = (): boolean => {
-  return !!process.env.EXPO_PUBLIC_OPENAI_API_KEY;
+  const hasApiKey = !!process.env.EXPO_PUBLIC_OPENAI_API_KEY;
+  if (!hasApiKey) {
+    console.log('ℹ️ AI service not configured: OpenAI API key not found');
+    console.log('📝 Users can still create listings manually');
+    console.log('🤖 To enable AI features, see AI_SETUP_GUIDE.md');
+  }
+  return hasApiKey;
 };
 
 // Helper function to format AI suggestions for UI display

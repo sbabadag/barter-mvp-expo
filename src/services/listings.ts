@@ -244,7 +244,7 @@ export const useListings = () => useQuery({
       return allListings;
     }
 
-    // Mobil platformlarda Supabase kullan
+    // Mobil platformlarda Supabase kullan - seller bilgileri de dahil
     const { data, error } = await supabase.from("listings").select(`
       id, 
       title, 
@@ -253,17 +253,42 @@ export const useListings = () => useQuery({
       currency,
       category,
       location,
-      seller_name,
+      seller_id,
       condition,
       status,
       images,
       created_at
     `).eq("status", "active").order("created_at", { ascending: false }).limit(100);
-    if (error) throw error;
+    
+    if (error) {
+      console.error('❌ Listings query error:', error.message);
+      throw error;
+    }
+    
+    console.log('✅ Listings loaded:', data?.length || 0, 'items');
     
     // Transform the data to include the primary image URL from the images array and parse location coordinates
-    const transformedData = data?.map(item => {
+    const transformedData = await Promise.all(data?.map(async (item) => {
       const locationInfo = parseLocationWithCoords(item.location);
+      
+      // Get seller name from profiles table using seller_id
+      let seller_name = 'İsimsiz Kullanıcı';
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('display_name, first_name, last_name')
+          .eq('id', item.seller_id)
+          .single();
+        
+        if (profile) {
+          seller_name = profile.display_name || 
+                       `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 
+                       'İsimsiz Kullanıcı';
+        }
+      } catch (error) {
+        console.log('Profile not found for seller:', item.seller_id);
+      }
+      
       return {
         ...item,
         location: locationInfo.address, // Clean address without coordinates
@@ -271,12 +296,17 @@ export const useListings = () => useQuery({
         image_url: item.images && Array.isArray(item.images) && item.images.length > 0 
           ? item.images[0] 
           : `https://picsum.photos/300/400?random=${item.id.slice(-3)}`,
-        images: item.images || []
+        images: item.images || [],
+        seller_name: seller_name
       };
-    });
+    }) || []);
     
     return transformedData as Listing[];
-  }
+  },
+  staleTime: 1000 * 60 * 5, // 5 minutes
+  refetchOnWindowFocus: false,
+  retry: 3,
+  retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000)
 });
 
 export const useListing = (id: string) => useQuery({
@@ -335,12 +365,11 @@ export const useListing = (id: string) => useQuery({
       currency,
       category,
       location,
-      seller_name,
+      seller_id,
       condition,
       status,
       images,
-      created_at,
-      seller_id
+      created_at
     `).eq("id", id).single();
     if (error) throw error;
     if (!data) throw new Error("Listing not found");
@@ -354,11 +383,16 @@ export const useListing = (id: string) => useQuery({
       image_url: data.images && Array.isArray(data.images) && data.images.length > 0 
         ? data.images[0] 
         : `https://picsum.photos/300/400?random=${data.id.slice(-3)}`,
-      images: data.images || []
+      images: data.images || [],
+      seller_name: `Kullanıcı ${data.seller_id?.slice(-4) || 'xxxx'}` // Simple seller name from ID
     };
     
     return transformedListing as Listing;
-  }
+  },
+  staleTime: 1000 * 60 * 5, // 5 minutes
+  refetchOnWindowFocus: false,
+  retry: 3,
+  retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000)
 });
 
 export const createListing = async (
@@ -522,8 +556,8 @@ export const createListing = async (
       currency: 'TRY',
       status: 'active',
       images: uploadedImageUrls, // Store array of image URLs
+      image_url: uploadedImageUrls[0] || null, // Primary image
       seller_id: user.id, // Current user ID
-      seller_name: displayName // User's display name
     }).select("id").single();
     
     if (error) throw error;
@@ -533,7 +567,7 @@ export const createListing = async (
     
     console.log("Listing created successfully with ID:", data.id);
     console.log("Images uploaded:", uploadedImageUrls.length);
-    console.log("Seller:", displayName, "ID:", user.id);
+    console.log("Seller ID:", user.id);
     
     return data.id;
   } catch (error) {

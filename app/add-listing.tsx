@@ -81,7 +81,8 @@ export default function AddListingScreen() {
   // AI analiz fonksiyonu
   const analyzeImageWithAI = async (imageUri: string) => {
     if (!isAIServiceAvailable()) {
-      console.log('AI service not available, skipping analysis');
+      console.log('📝 AI not configured - continuing with manual entry');
+      console.log('🤖 To enable AI features, see AI_SETUP_GUIDE.md');
       return;
     }
 

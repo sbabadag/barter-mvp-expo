@@ -1,10 +1,16 @@
 require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
 
-const supabase = createClient(
-  process.env.EXPO_PUBLIC_SUPABASE_URL,
-  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
-);
+// Get Supabase credentials from environment or fallback to hardcoded values
+const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://guvdkdyrmmoyadmapokx.supabase.co';
+const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1dmRrZHlybW1veWFkbWFwb2t4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0NzQ3ODcsImV4cCI6MjA3MjA1MDc4N30.im804Kl-WJ3s_6HLt0oXHJ66ROeClPy-EGXAg46LwVg';
+
+console.log('Database config:', {
+  url: SUPABASE_URL,
+  hasKey: !!SUPABASE_ANON_KEY
+});
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 async function checkTables() {
   console.log('🔍 Checking database tables...\n');

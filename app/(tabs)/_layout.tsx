@@ -3,9 +3,13 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Platform, View } from "react-native";
 import { useNotifications } from "../../src/services/notifications";
 import { TabBadge } from "../../src/components/NotificationBadge";
+import { usePushNotificationSetup } from "../../src/hooks/usePushNotificationSetup";
 
 export default function TabsLayout() {
   const { unreadCount } = useNotifications();
+  
+  // Set up push notifications when user is authenticated
+  usePushNotificationSetup();
 
   return (
     <Tabs 

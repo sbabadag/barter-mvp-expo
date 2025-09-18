@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, Dimensions, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, FlatList, ActivityIndicator, RefreshControl, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useListings } from "../../src/services/listings";
 import { useNotifications } from "../../src/services/notifications";
@@ -12,7 +12,7 @@ const { width } = Dimensions.get('window');
 
 export default function FeedScreen() {
   const router = useRouter();
-  const { data, isLoading, refetch } = useListings();
+  const { data, isLoading, error, refetch } = useListings();
   const { unreadCount } = useNotifications();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -31,7 +31,7 @@ export default function FeedScreen() {
       currency: listingItem.currency || 'TL',
       image_url: listingItem.image_url || '',
       category: listingItem.category,
-      seller_name: listingItem.seller_name || ('user' + listingItem.id.slice(-2)),
+      seller_name: listingItem.seller_name || 'İsimsiz Kullanıcı',
       location: listingItem.location || 'İstanbul',
       created_at: listingItem.created_at || new Date().toISOString(),
       isNew: isNewListing(listingItem.created_at),
@@ -97,7 +97,13 @@ export default function FeedScreen() {
   };
 
   const handleProductPress = (product: Product) => {
-    router.push(`/listing/${product.id}`);
+    console.log('🔥 Card tapped:', product.id);
+    try {
+      router.push(`/listing/${product.id}`);
+      console.log('🔥 Navigation initiated to:', `/listing/${product.id}`);
+    } catch (error) {
+      console.error('🔥 Navigation error:', error);
+    }
   };
 
   const handleNotificationPress = () => {
@@ -113,6 +119,17 @@ export default function FeedScreen() {
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#3B82F6" />
         <Text style={styles.loadingText}>İlanlar yükleniyor...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.errorText}>Bir hata oluştu</Text>
+        <TouchableOpacity onPress={() => refetch()} style={styles.retryButton}>
+          <Text style={styles.retryText}>Tekrar Dene</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -171,6 +188,11 @@ export default function FeedScreen() {
             columnWrapperStyle={styles.row}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
+            removeClippedSubviews={true}
+            maxToRenderPerBatch={10}
+            updateCellsBatchingPeriod={50}
+            initialNumToRender={6}
+            windowSize={10}
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}
@@ -238,5 +260,22 @@ const styles = StyleSheet.create({
   row: {
     justifyContent: 'space-between',
     marginBottom: 16,
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#EF4444',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  retryButton: {
+    backgroundColor: '#3B82F6',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
