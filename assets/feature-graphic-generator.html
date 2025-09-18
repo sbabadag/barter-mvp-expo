@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESKICI Feature Graphic Generator</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        
+        #canvas {
+            border: 2px solid #333;
+            background: white;
+            margin: 20px 0;
+        }
+        
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        
+        button:hover {
+            background: #45a049;
+        }
+        
+        .download-btn {
+            background: #2196F3;
+        }
+        
+        .download-btn:hover {
+            background: #1976D2;
+        }
+        
+        input[type="color"] {
+            width: 50px;
+            height: 40px;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .color-control {
+            display: inline-block;
+            margin-right: 20px;
+        }
+        
+        .preview {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 ESKICI Feature Graphic Generator</h1>
+    <p><strong>Google Play Store Requirements:</strong> 1024 x 500 pixels, PNG/JPEG format</p>
+    
+    <div class="controls">
+        <h3>Design Controls</h3>
+        
+        <div class="color-control">
+            <label>Background Color:</label><br>
+            <input type="color" id="bgColor" value="#4CAF50">
+        </div>
+        
+        <div class="color-control">
+            <label>Text Color:</label><br>
+            <input type="color" id="textColor" value="#ffffff">
+        </div>
+        
+        <div class="color-control">
+            <label>Accent Color:</label><br>
+            <input type="color" id="accentColor" value="#FFA726">
+        </div>
+        
+        <br><br>
+        
+        <button onclick="generateDesign1()">Design 1: Modern</button>
+        <button onclick="generateDesign2()">Design 2: Community</button>
+        <button onclick="generateDesign3()">Design 3: Trade Focus</button>
+        <button class="download-btn" onclick="downloadImage()">Download PNG</button>
+    </div>
+    
+    <canvas id="canvas" width="1024" height="500"></canvas>
+    
+    <div class="preview">
+        <h3>📋 Feature Graphic Checklist</h3>
+        <ul>
+            <li>✅ Dimensions: 1024 x 500 pixels</li>
+            <li>✅ High contrast text for readability</li>
+            <li>✅ App branding and logo</li>
+            <li>✅ Key features highlighted</li>
+            <li>✅ Professional appearance</li>
+            <li>🔄 No text covering important visual elements</li>
+            <li>🔄 Consistent with app design language</li>
+        </ul>
+        
+        <p><strong>Content Guidelines:</strong></p>
+        <ul>
+            <li>Showcase main app functionality</li>
+            <li>Use Turkish language for Turkey market</li>
+            <li>Include key value propositions</li>
+            <li>Avoid cluttered design</li>
+            <li>Ensure mobile-friendly viewing</li>
+        </ul>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        function generateDesign1() {
+            const bgColor = document.getElementById('bgColor').value;
+            const textColor = document.getElementById('textColor').value;
+            const accentColor = document.getElementById('accentColor').value;
+            
+            // Clear canvas
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(0, 0, 1024, 500);
+            
+            // Add gradient overlay
+            const gradient = ctx.createLinearGradient(0, 0, 1024, 500);
+            gradient.addColorStop(0, bgColor);
+            gradient.addColorStop(1, accentColor + '40');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 1024, 500);
+            
+            // App title
+            ctx.fillStyle = textColor;
+            ctx.font = 'bold 72px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('ESKICI', 512, 160);
+            
+            // Subtitle
+            ctx.font = 'bold 32px Arial';
+            ctx.fillText('Komşular Arası Al-Sat', 512, 210);
+            
+            // Features
+            ctx.font = '28px Arial';
+            ctx.fillStyle = accentColor;
+            ctx.fillText('📱 Kolay İlan Verme', 256, 280);
+            ctx.fillText('💬 Güvenli Mesajlaşma', 512, 320);
+            ctx.fillText('⭐ Kullanıcı Değerlendirme', 768, 280);
+            
+            // Bottom tagline
+            ctx.fillStyle = textColor;
+            ctx.font = '24px Arial';
+            ctx.fillText('Yakınınızdaki kişilerle güvenli alışveriş', 512, 380);
+            
+            // Decorative elements
+            drawTradeIcon(150, 300);
+            drawTradeIcon(874, 320);
+        }
+        
+        function generateDesign2() {
+            const bgColor = document.getElementById('bgColor').value;
+            const textColor = document.getElementById('textColor').value;
+            const accentColor = document.getElementById('accentColor').value;
+            
+            // Clear canvas with lighter background
+            ctx.fillStyle = '#f8f9fa';
+            ctx.fillRect(0, 0, 1024, 500);
+            
+            // Main banner area
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(50, 50, 924, 400);
+            
+            // App title
+            ctx.fillStyle = textColor;
+            ctx.font = 'bold 64px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('ESKICI', 512, 150);
+            
+            // Community focus
+            ctx.font = 'bold 28px Arial';
+            ctx.fillText('Komşularınızla Takas ve Alışveriş', 512, 190);
+            
+            // Key features with icons
+            ctx.font = '24px Arial';
+            ctx.fillStyle = accentColor;
+            ctx.textAlign = 'left';
+            
+            // Left column
+            ctx.fillText('🏠 Komşu Odaklı', 120, 250);
+            ctx.fillText('🔒 Güvenli Platform', 120, 290);
+            ctx.fillText('💰 Ücretsiz Kullanım', 120, 330);
+            
+            // Right column
+            ctx.fillText('📸 Kolay İlan', 600, 250);
+            ctx.fillText('⚡ Hızlı İletişim', 600, 290);
+            ctx.fillText('🤝 Güvenilir Topluluk', 600, 330);
+            
+            // Call to action
+            ctx.fillStyle = textColor;
+            ctx.font = 'bold 26px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Hemen İndirin ve Takasa Başlayın!', 512, 390);
+        }
+        
+        function generateDesign3() {
+            const bgColor = document.getElementById('bgColor').value;
+            const textColor = document.getElementById('textColor').value;
+            const accentColor = document.getElementById('accentColor').value;
+            
+            // Create modern gradient background
+            const gradient = ctx.createRadialGradient(512, 250, 0, 512, 250, 500);
+            gradient.addColorStop(0, bgColor);
+            gradient.addColorStop(1, '#1a237e');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 1024, 500);
+            
+            // Main app name with shadow
+            ctx.shadowColor = 'rgba(0,0,0,0.3)';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetX = 3;
+            ctx.shadowOffsetY = 3;
+            
+            ctx.fillStyle = textColor;
+            ctx.font = 'bold 80px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('ESKICI', 512, 140);
+            
+            // Reset shadow
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+            
+            // Trade-focused tagline
+            ctx.font = 'bold 36px Arial';
+            ctx.fillStyle = accentColor;
+            ctx.fillText('Takas • Sohbet • Keşfet', 512, 190);
+            
+            // Value propositions
+            ctx.font = '32px Arial';
+            ctx.fillStyle = textColor;
+            ctx.fillText('🔄 Kullanmadığınız eşyalara yeni hayat', 512, 260);
+            ctx.fillText('🌍 Sürdürülebilir alışveriş deneyimi', 512, 310);
+            ctx.fillText('👥 Güvenilir komşu ağı', 512, 360);
+            
+            // Modern CTA
+            ctx.fillStyle = accentColor;
+            ctx.fillRect(362, 390, 300, 60);
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 24px Arial';
+            ctx.fillText('Şimdi Deneyin', 512, 430);
+        }
+        
+        function drawTradeIcon(x, y) {
+            const accentColor = document.getElementById('accentColor').value;
+            
+            ctx.fillStyle = accentColor;
+            ctx.beginPath();
+            ctx.arc(x, y, 25, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Arrow
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('↔', x, y + 7);
+        }
+        
+        function downloadImage() {
+            const link = document.createElement('a');
+            link.download = 'eskici-feature-graphic-1024x500.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+        
+        // Generate initial design
+        generateDesign1();
+        
+        // Update design when colors change
+        document.getElementById('bgColor').addEventListener('change', generateDesign1);
+        document.getElementById('textColor').addEventListener('change', generateDesign1);
+        document.getElementById('accentColor').addEventListener('change', generateDesign1);
+    </script>
+</body>
+</html>

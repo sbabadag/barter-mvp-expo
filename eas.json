@@ -36,7 +36,10 @@
       "android": {
         "resourceClass": "default",
         "autoIncrement": true,
-        "buildType": "apk"
+        "buildType": "app-bundle",
+        "env": {
+          "NODE_ENV": "production"
+        }
       }
     },
     "adhoc": {
@@ -57,6 +60,10 @@
         "appleId": "sbabadag@gmail.com",
         "ascAppId": "6752503885",
         "appleTeamId": "5PH75H5VQN"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./google-play-service-account.json",
+        "track": "internal"
       }
     }
   }

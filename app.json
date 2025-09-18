@@ -37,8 +37,7 @@
         "backgroundColor": "#f0a500"
       },
       "package": "com.sbabadag.imece",
-      "versionCode": 1,
-      "googleServicesFile": "./android/app/google-services.json",
+      "versionCode": 3,
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
