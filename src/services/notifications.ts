@@ -55,24 +55,63 @@ export async function registerPushToken(userId: string) {
     
     console.log('📱 Got push token:', token);
 
-    // Store token in database
-    const { error } = await supabase
+    // First, try to find existing token for this user+token combination
+    const { data: existingToken, error: selectError } = await supabase
       .from('user_push_tokens')
-      .upsert({
-        user_id: userId,
-        token: token,
-        platform: Platform.OS,
-        device_name: Device.deviceName || `${Platform.OS} Device`,
-        is_active: true,
-        updated_at: new Date().toISOString()
-      });
+      .select('*')
+      .eq('user_id', userId)
+      .eq('token', token)
+      .single();
 
-    if (error) {
-      console.error('❌ Error storing push token:', error);
-      return null;
+    if (selectError && selectError.code !== 'PGRST116') {
+      console.error('❌ Error checking existing token:', selectError);
     }
 
-    console.log('✅ Push token registered successfully');
+    if (existingToken) {
+      // Token already exists, just update it
+      const { error: updateError } = await supabase
+        .from('user_push_tokens')
+        .update({
+          platform: Platform.OS,
+          device_name: Device.deviceName || `${Platform.OS} Device`,
+          is_active: true,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', existingToken.id);
+
+      if (updateError) {
+        console.error('❌ Error updating existing token:', updateError);
+        return null;
+      }
+      
+      console.log('✅ Push token updated successfully');
+    } else {
+      // Token doesn't exist, insert new one
+      const { error: insertError } = await supabase
+        .from('user_push_tokens')
+        .insert({
+          user_id: userId,
+          token: token,
+          platform: Platform.OS,
+          device_name: Device.deviceName || `${Platform.OS} Device`,
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
+
+      if (insertError) {
+        // If it's a duplicate key error, that's fine - another process might have inserted it
+        if (insertError.code === '23505') {
+          console.log('⚠️  Token already exists (inserted by another process), continuing...');
+        } else {
+          console.error('❌ Error inserting push token:', insertError);
+          return null;
+        }
+      } else {
+        console.log('✅ Push token registered successfully');
+      }
+    }
+
     return token;
   } catch (error) {
     console.error('❌ Error registering push token:', error);
@@ -232,37 +271,38 @@ class NotificationService {
 
   async storePushToken(token: string, userId: string) {
     try {
-      // Check if token already exists for this user
-      const { data: existingToken, error: fetchError } = await supabase
+      // First, try to find existing token for this user+token combination
+      const { data: existingToken, error: selectError } = await supabase
         .from('user_push_tokens')
         .select('*')
         .eq('user_id', userId)
-        .eq('platform', Platform.OS)
+        .eq('token', token)
         .single();
 
-      if (fetchError && fetchError.code !== 'PGRST116') {
-        console.error('Error checking existing token:', fetchError);
+      if (selectError && selectError.code !== 'PGRST116') {
+        console.error('Error checking existing token:', selectError);
         return;
       }
 
       if (existingToken) {
-        // Update existing token
+        // Token already exists, just update it
         const { error: updateError } = await supabase
           .from('user_push_tokens')
           .update({
-            token: token,
-            updated_at: new Date().toISOString(),
+            platform: Platform.OS,
+            device_name: Device.deviceName || `${Platform.OS} Device`,
+            is_active: true,
+            updated_at: new Date().toISOString()
           })
-          .eq('user_id', userId)
-          .eq('platform', Platform.OS);
+          .eq('id', existingToken.id);
 
         if (updateError) {
-          console.error('Error updating push token:', updateError);
+          console.error('Error updating existing token:', updateError);
         } else {
           console.log('✅ Push token updated successfully');
         }
       } else {
-        // Insert new token
+        // Token doesn't exist, insert new one
         const { error: insertError } = await supabase
           .from('user_push_tokens')
           .insert({
@@ -270,12 +310,18 @@ class NotificationService {
             token: token,
             platform: Platform.OS,
             device_name: Device.deviceName || `${Platform.OS} Device`,
+            is_active: true,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           });
 
         if (insertError) {
-          console.error('Error storing push token:', insertError);
+          // If it's a duplicate key error, that's fine - another process might have inserted it
+          if (insertError.code === '23505') {
+            console.log('⚠️  Token already exists (inserted by another process), continuing...');
+          } else {
+            console.error('Error storing push token:', insertError);
+          }
         } else {
           console.log('✅ Push token stored successfully');
         }

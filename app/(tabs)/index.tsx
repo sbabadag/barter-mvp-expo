@@ -107,11 +107,11 @@ export default function FeedScreen() {
   };
 
   const handleNotificationPress = () => {
-    router.push('/notifications');
+    router.push('/(tabs)/bids?tab=received');
   };
 
   const handleCartClick = () => {
-    router.push('/tekliflerim');
+    router.push('/(tabs)/inbox');
   };
 
   if (isLoading) {

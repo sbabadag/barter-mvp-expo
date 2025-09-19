@@ -107,6 +107,19 @@ export default function ChatScreen() {
       return;
     }
 
+    // Double-check authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      Alert.alert(
+        'Oturum Hatası', 
+        'Oturumunuzun süresi dolmuş. Lütfen tekrar giriş yapın.',
+        [
+          { text: 'Tamam', onPress: () => router.push('/profile') }
+        ]
+      );
+      return;
+    }
+
     try {
       HapticService.light();
 
@@ -115,7 +128,7 @@ export default function ChatScreen() {
         .from('bids')
         .insert({
           listing_id: listing,
-          bidder_id: currentUser.id,
+          bidder_id: user.id, // Use freshly verified user ID
           message: newMessage.trim(),
           amount: 0, // Mesaj için 0 tutar
           status: 'pending'
@@ -128,16 +141,25 @@ export default function ChatScreen() {
         
         if (error.code === '42501') {
           Alert.alert(
-            'RLS Policy Hatası', 
-            'Mesaj gönderebilmek için veritabanı izinlerini güncelleyin. fix_messaging_rls.sql dosyasını Supabase SQL Editor\'da çalıştırın.',
+            'İzin Hatası', 
+            'Mesaj gönderebilmek için giriş yapmanız gerekiyor. Lütfen çıkış yapıp tekrar giriş yapın.',
             [
               { text: 'Tamam', style: 'default' },
               { 
-                text: 'Tekliflerim\'e Git', 
-                onPress: () => router.push('/bids'),
+                text: 'Profil Sayfası', 
+                onPress: () => router.push('/profile'),
                 style: 'default'
               }
             ]
+          );
+          return;
+        }
+        
+        if (error.code === 'PGRST116') {
+          Alert.alert(
+            'Bağlantı Hatası', 
+            'Sunucu ile bağlantı kurulamadı. İnternet bağlantınızı kontrol edin.',
+            [{ text: 'Tamam', style: 'default' }]
           );
           return;
         }
@@ -155,10 +177,21 @@ export default function ChatScreen() {
       
       HapticService.success();
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Mesaj gönderilirken hata:', error);
       HapticService.error();
-      Alert.alert('Hata', 'Mesaj gönderilemedi');
+      
+      // Provide specific error messages based on the error type
+      if (error?.message?.includes('JWT')) {
+        Alert.alert('Oturum Hatası', 'Oturumunuzun süresi dolmuş. Lütfen tekrar giriş yapın.');
+        router.push('/profile');
+      } else if (error?.code === '42501') {
+        Alert.alert('İzin Hatası', 'Mesaj gönderme izniniz yok. Lütfen uygulamayı yeniden başlatın.');
+      } else if (error?.message?.includes('network')) {
+        Alert.alert('Bağlantı Hatası', 'İnternet bağlantınızı kontrol edin.');
+      } else {
+        Alert.alert('Hata', `Mesaj gönderilemedi: ${error?.message || 'Bilinmeyen hata'}`);
+      }
     }
   };
 

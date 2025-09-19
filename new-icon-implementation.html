@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>🎨 New Icon Implementation - ESKICI</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            padding: 20px; 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            background: linear-gradient(135deg, #439BEB 0%, #4FFFB0 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .icon-preview {
+            text-align: center;
+            margin: 30px 0;
+            padding: 30px;
+            background: linear-gradient(45deg, #f0f8ff, #f0fff0);
+            border-radius: 15px;
+        }
+        .current-vs-new {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 20px 0;
+        }
+        .icon-card {
+            text-align: center;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            background: #fafafa;
+        }
+        .icon-image {
+            width: 200px;
+            height: 200px;
+            border-radius: 25px;
+            margin: 10px auto;
+            background: #f0f0f0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            object-fit: cover;
+        }
+        .step {
+            background: #e3f2fd;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border-left: 4px solid #2196f3;
+        }
+        .step h3 {
+            color: #1976d2;
+            margin-top: 0;
+        }
+        .download-area {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px dashed #ffc107;
+            text-align: center;
+        }
+        .action-btn {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .action-btn:hover {
+            background: #45a049;
+        }
+        .warning {
+            background: #ffebee;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #f44336;
+            margin: 20px 0;
+        }
+        .success {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+            margin: 20px 0;
+        }
+        .file-input {
+            margin: 20px 0;
+            padding: 10px;
+        }
+        .canvas-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Yeni AI Icon Uygulaması - ESKICI</h1>
+        <p>Beautiful AI-generated mandala style icon'u ana uygulama icon'u olarak ayarlıyalım!</p>
+        
+        <div class="icon-preview">
+            <h2>🆕 Yeni Icon Tasarımı</h2>
+            <p><strong>Özellikler:</strong> Mandala tarzı, mavi tonları, el motifi, kültürel sembolizm</p>
+            <p><strong>Tema:</strong> Türk kültürü + Modern marketplace + Sanat eseri kalitesi</p>
+        </div>
+        
+        <div class="download-area">
+            <h3>📥 Icon Yükleme Alanı</h3>
+            <p>Yeni AI icon'unuzu buraya yükleyin ve farklı boyutlarda optimize edin:</p>
+            <input type="file" id="iconUpload" accept="image/*" class="file-input">
+            <div class="canvas-container">
+                <canvas id="iconCanvas" width="400" height="400" style="display:none;"></canvas>
+            </div>
+        </div>
+        
+        <div class="current-vs-new">
+            <div class="icon-card">
+                <h3>📱 Mevcut Icon</h3>
+                <img src="../assets/icon.png" class="icon-image" alt="Current Icon" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5NZXZjdXQ8L3RleHQ+PC9zdmc+';">
+                <p>Gradient shopping bag tasarımı</p>
+            </div>
+            
+            <div class="icon-card">
+                <h3>🆕 Yeni AI Icon</h3>
+                <img id="newIconPreview" class="icon-image" alt="New AI Icon" style="display:none;">
+                <div id="uploadPrompt" style="padding: 50px 20px; color: #666;">
+                    ⬆️ Yukarıdan icon yükleyin
+                </div>
+                <p>AI-generated mandala design</p>
+            </div>
+        </div>
+        
+        <div class="step">
+            <h3>🔧 1. Icon Optimizasyonu</h3>
+            <p>Yüklediğiniz icon'u farklı boyutlarda optimize edin:</p>
+            <button class="action-btn" onclick="generateIconSizes()" id="generateBtn" disabled>
+                📱 Tüm Boyutları Oluştur
+            </button>
+            <div id="iconSizes" style="display:none; margin-top: 20px;">
+                <h4>📏 Oluşturulacak Boyutlar:</h4>
+                <ul>
+                    <li>1024x1024 - High resolution</li>
+                    <li>512x512 - Google Play Store</li>
+                    <li>256x256 - Standard</li>
+                    <li>128x128 - Small devices</li>
+                    <li>64x64 - Notifications</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="step">
+            <h3>💾 2. Icon'u Kaydetme</h3>
+            <p>Optimize edilmiş icon'ları indirin ve doğru klasörlere yerleştirin:</p>
+            <div id="downloadLinks" style="display:none;">
+                <!-- Download links will be generated here -->
+            </div>
+        </div>
+        
+        <div class="step">
+            <h3>🔄 3. Uygulama Güncellemesi</h3>
+            <p>Icon'u uygulamaya entegre etmek için:</p>
+            <ol>
+                <li>📁 <code>assets/icon.png</code> dosyasını yeni icon ile değiştirin</li>
+                <li>📁 <code>assets/adaptive-icon.png</code> dosyasını da güncelleyin</li>
+                <li>🧹 Expo cache'i temizleyin: <code>expo start -c</code></li>
+                <li>🏗️ Yeni build alın: <code>eas build</code></li>
+            </ol>
+        </div>
+        
+        <div class="warning">
+            <h4>⚠️ Önemli Notlar:</h4>
+            <ul>
+                <li>Icon değişikliği sonrası cache temizlemek gerekebilir</li>
+                <li>App Store'larda görünmesi için yeni build gerekir</li>
+                <li>Mevcut icon'un yedeği otomatik alınacak</li>
+            </ul>
+        </div>
+        
+        <div class="step">
+            <h3>🚀 4. Son Adımlar</h3>
+            <button class="action-btn" onclick="showFinalSteps()">
+                📋 Uygulama Rehberini Göster
+            </button>
+            <div id="finalSteps" style="display:none; margin-top: 20px;">
+                <h4>Terminal Komutları:</h4>
+                <pre style="background: #f5f5f5; padding: 15px; border-radius: 8px; overflow-x: auto;">
+# Expo cache temizleme
+npx expo start --clear
+
+# Development build
+eas build --platform ios --profile development
+eas build --platform android --profile development
+
+# Production build (App Store için)
+eas build --platform ios --profile production
+eas build --platform android --profile production
+                </pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let uploadedImage = null;
+        
+        document.getElementById('iconUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        uploadedImage = img;
+                        displayUploadedIcon();
+                        document.getElementById('generateBtn').disabled = false;
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        function displayUploadedIcon() {
+            const preview = document.getElementById('newIconPreview');
+            const prompt = document.getElementById('uploadPrompt');
+            const canvas = document.getElementById('iconCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Show canvas and draw image
+            canvas.style.display = 'block';
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(uploadedImage, 0, 0, 400, 400);
+            
+            // Update preview
+            preview.src = canvas.toDataURL();
+            preview.style.display = 'block';
+            prompt.style.display = 'none';
+        }
+        
+        function generateIconSizes() {
+            if (!uploadedImage) {
+                alert('Önce bir icon yükleyin!');
+                return;
+            }
+            
+            const sizes = [1024, 512, 256, 128, 64];
+            const downloadDiv = document.getElementById('downloadLinks');
+            downloadDiv.innerHTML = '';
+            downloadDiv.style.display = 'block';
+            
+            document.getElementById('iconSizes').style.display = 'block';
+            
+            sizes.forEach(size => {
+                const canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+                
+                // Draw image at specific size
+                ctx.drawImage(uploadedImage, 0, 0, size, size);
+                
+                // Create download link
+                canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `eskici-icon-${size}x${size}.png`;
+                    link.className = 'action-btn';
+                    link.style.margin = '5px';
+                    link.textContent = `📥 ${size}x${size}`;
+                    
+                    downloadDiv.appendChild(link);
+                    
+                    // Special handling for main icon size
+                    if (size === 1024) {
+                        const mainLink = document.createElement('a');
+                        mainLink.href = url;
+                        mainLink.download = 'icon.png';
+                        mainLink.className = 'action-btn';
+                        mainLink.style.backgroundColor = '#ff6b6b';
+                        mainLink.style.margin = '5px';
+                        mainLink.textContent = '🎯 Ana Icon (icon.png)';
+                        downloadDiv.appendChild(document.createElement('br'));
+                        downloadDiv.appendChild(mainLink);
+                    }
+                });
+            });
+            
+            // Add instructions
+            const instructions = document.createElement('div');
+            instructions.style.marginTop = '20px';
+            instructions.style.padding = '15px';
+            instructions.style.background = '#e8f5e8';
+            instructions.style.borderRadius = '8px';
+            instructions.innerHTML = `
+                <h4>📋 İndirme Talimatları:</h4>
+                <ol>
+                    <li><strong>"Ana Icon (icon.png)"</strong> butonuna tıklayın</li>
+                    <li>İndirilen dosyayı <code>assets/icon.png</code> olarak kaydedin</li>
+                    <li>Mevcut icon dosyasının üzerine yazın</li>
+                    <li>Terminal'de <code>npx expo start --clear</code> çalıştırın</li>
+                </ol>
+            `;
+            downloadDiv.appendChild(instructions);
+        }
+        
+        function showFinalSteps() {
+            document.getElementById('finalSteps').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

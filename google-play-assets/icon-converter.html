@@ -1,0 +1,237 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Google Play Icon Converter</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .tool { border: 1px solid #ddd; padding: 20px; margin: 20px 0; border-radius: 8px; }
+        canvas { border: 1px solid #ccc; margin: 10px 0; }
+        .download-btn { background: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        .download-btn:hover { background: #45a049; }
+        input[type="file"] { margin: 10px 0; }
+        .preview { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+    </style>
+</head>
+<body>
+    <h1>🎨 Google Play Store Icon Converter</h1>
+    
+    <div class="tool">
+        <h2>📱 App Icon Converter (512x512)</h2>
+        <p>Google Play Store için 512x512 PNG icon oluştur (alpha channel olmadan)</p>
+        <input type="file" id="iconInput" accept="image/*">
+        <div class="preview">
+            <div>
+                <h4>Orijinal</h4>
+                <canvas id="originalCanvas" width="256" height="256"></canvas>
+            </div>
+            <div>
+                <h4>512x512 (Google Play)</h4>
+                <canvas id="playStoreCanvas" width="256" height="256"></canvas>
+                <br>
+                <button class="download-btn" onclick="downloadPlayStoreIcon()">İndir (512x512)</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="tool">
+        <h2>🎯 Feature Graphic Creator (1024x500)</h2>
+        <p>Google Play Store banner için feature graphic oluştur</p>
+        <div>
+            <label>App Adı: <input type="text" id="appName" value="ESKICI" style="padding: 5px; margin: 5px;"></label><br>
+            <label>Alt Başlık: <input type="text" id="subtitle" value="Takas ve İkinci El Platformu" style="padding: 5px; margin: 5px; width: 300px;"></label><br>
+            <label>Özellikler: <input type="text" id="features" value="• Güvenli Takas • AI Destekli • Kolay Kullanım" style="padding: 5px; margin: 5px; width: 400px;"></label><br>
+            <button class="download-btn" onclick="createFeatureGraphic()">Feature Graphic Oluştur</button>
+        </div>
+        <div>
+            <h4>Feature Graphic (1024x500)</h4>
+            <canvas id="featureCanvas" width="512" height="250" style="max-width: 100%;"></canvas>
+            <br>
+            <button class="download-btn" onclick="downloadFeatureGraphic()">Feature Graphic İndir</button>
+        </div>
+    </div>
+    
+    <div class="tool">
+        <h2>📋 Asset Checklist</h2>
+        <ul>
+            <li>✅ App Icon (512x512 PNG) - Bu araçla oluştur</li>
+            <li>✅ Feature Graphic (1024x500) - Bu araçla oluştur</li>
+            <li>⏳ Screenshots (2-8 adet telefon, 1-8 adet tablet)</li>
+            <li>⏳ App Açıklaması (Türkçe, max 4000 karakter)</li>
+            <li>⏳ Kısa Açıklama (max 80 karakter)</li>
+            <li>⏳ Privacy Policy URL</li>
+            <li>⏳ Terms of Service URL</li>
+        </ul>
+    </div>
+
+    <script>
+        let originalImage = null;
+        
+        document.getElementById('iconInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        originalImage = img;
+                        drawOriginal();
+                        createPlayStoreIcon();
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        function drawOriginal() {
+            const canvas = document.getElementById('originalCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(originalImage, 0, 0, 256, 256);
+        }
+        
+        function createPlayStoreIcon() {
+            if (!originalImage) return;
+            
+            const canvas = document.getElementById('playStoreCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Clear and fill with white background (remove alpha channel)
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw the icon
+            ctx.drawImage(originalImage, 0, 0, 256, 256);
+        }
+        
+        function downloadPlayStoreIcon() {
+            if (!originalImage) {
+                alert('Önce bir icon yükleyin!');
+                return;
+            }
+            
+            // Create a 512x512 canvas for actual download
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            
+            // White background (no alpha channel)
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, 512, 512);
+            
+            // Draw the icon
+            ctx.drawImage(originalImage, 0, 0, 512, 512);
+            
+            // Download
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'app-icon-512.png';
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+        
+        function createFeatureGraphic() {
+            const canvas = document.getElementById('featureCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Dimensions for display (will be scaled up for download)
+            canvas.width = 512;
+            canvas.height = 250;
+            
+            // Create gradient background
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+            gradient.addColorStop(0, '#439BEB');
+            gradient.addColorStop(0.5, '#4FFFB0');
+            gradient.addColorStop(1, '#FFD700');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Add text
+            const appName = document.getElementById('appName').value;
+            const subtitle = document.getElementById('subtitle').value;
+            const features = document.getElementById('features').value;
+            
+            // App name
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 36px Arial';
+            ctx.textAlign = 'center';
+            ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+            ctx.lineWidth = 2;
+            ctx.strokeText(appName, canvas.width/2, 75);
+            ctx.fillText(appName, canvas.width/2, 75);
+            
+            // Subtitle
+            ctx.font = '18px Arial';
+            ctx.fillStyle = 'rgba(255,255,255,0.9)';
+            ctx.fillText(subtitle, canvas.width/2, 110);
+            
+            // Features
+            ctx.font = '12px Arial';
+            ctx.fillStyle = 'rgba(255,255,255,0.8)';
+            ctx.fillText(features, canvas.width/2, 140);
+        }
+        
+        function downloadFeatureGraphic() {
+            // Create full-size 1024x500 canvas
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024;
+            canvas.height = 500;
+            const ctx = canvas.getContext('2d');
+            
+            // Create gradient background
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+            gradient.addColorStop(0, '#439BEB');
+            gradient.addColorStop(0.5, '#4FFFB0');
+            gradient.addColorStop(1, '#FFD700');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Add text with proper scaling
+            const appName = document.getElementById('appName').value;
+            const subtitle = document.getElementById('subtitle').value;
+            const features = document.getElementById('features').value;
+            
+            // App name
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 72px Arial';
+            ctx.textAlign = 'center';
+            ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+            ctx.lineWidth = 4;
+            ctx.strokeText(appName, canvas.width/2, 150);
+            ctx.fillText(appName, canvas.width/2, 150);
+            
+            // Subtitle
+            ctx.font = '36px Arial';
+            ctx.fillStyle = 'rgba(255,255,255,0.9)';
+            ctx.fillText(subtitle, canvas.width/2, 220);
+            
+            // Features
+            ctx.font = '24px Arial';
+            ctx.fillStyle = 'rgba(255,255,255,0.8)';
+            ctx.fillText(features, canvas.width/2, 280);
+            
+            // Download
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'feature-graphic-1024x500.png';
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+        
+        // Initialize feature graphic
+        createFeatureGraphic();
+    </script>
+</body>
+</html>
+  

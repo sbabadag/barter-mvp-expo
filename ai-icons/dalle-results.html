@@ -1,0 +1,142 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>DALL-E Generated Icons - ESKICI</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 15px; }
+        .icon-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin: 30px 0; }
+        .icon-card { 
+            border: 2px solid #e0e0e0; 
+            padding: 20px; 
+            text-align: center; 
+            border-radius: 15px; 
+            background: #fafafa;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .icon-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .icon-preview { 
+            width: 200px; 
+            height: 200px; 
+            border-radius: 25px; 
+            margin: 10px auto; 
+            background: #f0f0f0; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .style-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #439BEB;
+            margin: 15px 0;
+        }
+        .download-btn {
+            background: #4FFFB0;
+            color: #333;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 10px;
+        }
+        .download-btn:hover {
+            background: #3ee89f;
+        }
+        .current-comparison {
+            background: linear-gradient(45deg, #439BEB, #4FFFB0);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 DALL-E Generated Icons - ESKICI</h1>
+        <p>OpenAI DALL-E 3 ile oluşturulan ESKICI app iconları</p>
+        
+        <div class="current-comparison">
+            <h3>📱 Mevcut Icon vs AI Generated</h3>
+            <p>Aşağıdaki AI-generated iconları mevcut iconla karşılaştırın ve en uygun olanı seçin</p>
+        </div>
+        
+        <div class="icon-grid">
+            <div class="icon-card">
+                <div class="style-name">Mevcut Icon</div>
+                <img src="../assets/icon.png" class="icon-preview" alt="Current Icon" onerror="this.style.display='none';">
+                <p>Gradient shopping bag design</p>
+            </div>
+            
+            
+                <div class="icon-card">
+                    <div class="style-name">Modern Gradient</div>
+                    <img src="dalle-icon-modern-gradient.png" class="icon-preview" alt="Modern Gradient" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5Mb2FkaW5nLi4uPC90ZXh0Pjwvc3ZnPg==';">
+                    <p>AI Generated: Modern Gradient</p>
+                    <button class="download-btn" onclick="downloadAsAppIcon('dalle-icon-modern-gradient.png', 'modern-gradient')">
+                        📱 App Icon Olarak Kullan
+                    </button>
+                </div>
+            
+                <div class="icon-card">
+                    <div class="style-name">Geometric Exchange</div>
+                    <img src="dalle-icon-geometric-exchange.png" class="icon-preview" alt="Geometric Exchange" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5Mb2FkaW5nLi4uPC90ZXh0Pjwvc3ZnPg==';">
+                    <p>AI Generated: Geometric Exchange</p>
+                    <button class="download-btn" onclick="downloadAsAppIcon('dalle-icon-geometric-exchange.png', 'geometric-exchange')">
+                        📱 App Icon Olarak Kullan
+                    </button>
+                </div>
+            
+                <div class="icon-card">
+                    <div class="style-name">Sustainable Badge</div>
+                    <img src="dalle-icon-sustainable-badge.png" class="icon-preview" alt="Sustainable Badge" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5Mb2FkaW5nLi4uPC90ZXh0Pjwvc3ZnPg==';">
+                    <p>AI Generated: Sustainable Badge</p>
+                    <button class="download-btn" onclick="downloadAsAppIcon('dalle-icon-sustainable-badge.png', 'sustainable-badge')">
+                        📱 App Icon Olarak Kullan
+                    </button>
+                </div>
+            
+        </div>
+        
+        <div class="current-comparison">
+            <h3>🚀 Sonraki Adımlar</h3>
+            <ol style="text-align: left; max-width: 600px; margin: 0 auto;">
+                <li>Beğendiğiniz icon için "App Icon Olarak Kullan" butonuna tıklayın</li>
+                <li>İndirilecek icon assets/icon.png olarak kaydedilecek</li>
+                <li>google-play-assets/icon-converter.html ile 512x512 versiyonu oluşturun</li>
+                <li>Uygulamayı yeniden build edin</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function downloadAsAppIcon(filename, name) {
+            // Create a link to download and rename the file
+            const link = document.createElement('a');
+            link.href = filename;
+            link.download = 'eskici-icon-' + name + '.png';
+            link.click();
+            
+            alert('Icon indirildi! Bu dosyayı assets/icon.png olarak kaydedin ve uygulamayı yeniden build edin.');
+        }
+        
+        // Check if images loaded successfully
+        window.onload = function() {
+            const images = document.querySelectorAll('.icon-preview');
+            images.forEach(img => {
+                img.addEventListener('error', function() {
+                    this.style.background = '#f0f0f0';
+                    this.alt = 'Icon oluşturuluyor...';
+                });
+            });
+        };
+    </script>
+</body>
+</html>
+  

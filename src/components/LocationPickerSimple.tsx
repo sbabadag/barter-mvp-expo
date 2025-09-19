@@ -7,12 +7,14 @@ interface LocationPickerProps {
   onLocationSelect: (locationData: LocationData) => void;
   selectedLocation?: string;
   label?: string;
+  onFocus?: () => void;
 }
 
 export const LocationPicker: React.FC<LocationPickerProps> = ({
   onLocationSelect,
   selectedLocation,
-  label = "Konum"
+  label = "Konum",
+  onFocus
 }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedCity, setSelectedCity] = useState<string>('');
@@ -130,7 +132,10 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
       <Text style={styles.label}>{label}</Text>
       <Pressable 
         style={styles.button}
-        onPress={() => setIsModalVisible(true)}
+        onPress={() => {
+          onFocus?.();
+          setIsModalVisible(true);
+        }}
       >
         <View style={styles.buttonContent}>
           <MaterialIcons name="location-on" size={20} color="#007AFF" />

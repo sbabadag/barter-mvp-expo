@@ -1,0 +1,25 @@
+{
+  "name": "ESKICI Mandala Icon",
+  "description": "AI-generated mandala style icon representing community, exchange, and Turkish cultural heritage",
+  "style": "Mandala/Cultural",
+  "colors": {
+    "primary": "#4A9BEB",
+    "secondary": "#4FFFB0",
+    "accent": "#FFD700"
+  },
+  "symbolism": [
+    "Mandala patterns represent community and wholeness",
+    "Hands symbolize exchange and trading",
+    "Blue tones convey trust and reliability",
+    "Golden center represents value and quality",
+    "Geometric patterns reflect Turkish artistic heritage"
+  ],
+  "technical": {
+    "format": "SVG (scalable vector)",
+    "sizes_generated": "1024x1024 primary, multiple variants",
+    "compatibility": "iOS, Android, Web",
+    "optimization": "Reduced complexity for small sizes"
+  },
+  "created": "2025-09-19T11:33:31.124Z",
+  "ai_generated": true
+}

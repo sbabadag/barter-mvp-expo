@@ -11,6 +11,7 @@ import {
   Dimensions,
   Platform
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import {
   useMyOffers,
@@ -295,7 +296,7 @@ export default function TekliflerimScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Tekliflerim</Text>
@@ -376,15 +377,13 @@ export default function TekliflerimScreen() {
               <Text style={styles.loadingText}>Yükleniyor...</Text>
             ) : (
               renderStatsCard()
-            )}
-          </View>
+          )}
+        </View>
         )}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
-}
-
-const styles = StyleSheet.create({
+}const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
@@ -402,7 +401,8 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: '#fff',
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingTop: Platform.OS === 'ios' ? 8 : 16,
+    paddingBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
@@ -410,6 +410,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '700',
     color: '#333',
+    textAlign: 'left',
   },
   tabContainer: {
     flexDirection: 'row',

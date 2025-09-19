@@ -3,7 +3,7 @@
     "name": "ESKICI",
     "slug": "barter-mvp-expo",
     "scheme": "eskici",
-    "version": "1.3.0",
+    "version": "1.3.4",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -16,8 +16,9 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.sbabadag.imece",
+      "buildNumber": "35",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSLocationWhenInUseUsageDescription": "Bu uygulama konum bilginizi ilanlarınızda konum seçimi için kullanır.",
@@ -37,7 +38,7 @@
         "backgroundColor": "#f0a500"
       },
       "package": "com.sbabadag.imece",
-      "versionCode": 3,
+      "versionCode": 4,
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
@@ -73,6 +74,10 @@
         "msapplication-TileColor": "#f0a500"
       }
     },
+    "developmentClient": {
+      "silentLaunch": false
+    },
+    "jsEngine": "jsc",
     "plugins": [
       "expo-router",
       [

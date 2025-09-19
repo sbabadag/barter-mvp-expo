@@ -1,13 +1,55 @@
 #!/bin/bash
 
-echo "🚀 ESKICI iOS TestFlight Deployment Script"
-echo "============================================"
+echo "🚀 ESKICI - TestFlight Deployment Script"
+echo "========================================="
+echo ""
 
-# Function to check if EAS CLI is installed
-check_eas_cli() {
-    if ! command -v eas &> /dev/null; then
-        echo "❌ EAS CLI not found. Installing..."
-        npm install -g @expo/eas-cli
+echo "📋 Current Status Check..."
+echo ""
+
+# Check current version
+echo "📱 Checking app.json version..."
+grep '"version":' app.json
+
+echo ""
+echo "🔨 Building and Submitting to TestFlight..."
+echo ""
+
+# Build for iOS
+echo "⏳ Starting iOS production build..."
+eas build --platform ios --profile production --non-interactive
+
+if [ $? -ne 0 ]; then
+    echo "❌ Build failed! Please check the error messages above."
+    exit 1
+fi
+
+echo ""
+echo "✅ Build completed successfully!"
+echo ""
+
+# Submit to TestFlight
+echo "📲 Submitting to TestFlight..."
+eas submit --platform ios --latest --non-interactive
+
+if [ $? -ne 0 ]; then
+    echo "❌ Submission failed! The build might already exist."
+    echo "💡 Try incrementing the build number in app.json"
+    exit 1
+fi
+
+echo ""
+echo "🎉 Successfully submitted to TestFlight!"
+echo ""
+echo "📱 Next steps:"
+echo "1. Go to App Store Connect: https://appstoreconnect.apple.com"
+echo "2. Navigate to TestFlight section"
+echo "3. Add internal testers"
+echo "4. Create external test group (if needed)"
+echo "5. Test the app thoroughly"
+echo ""
+echo "⏰ Processing time: 10-30 minutes for TestFlight availability"
+echo ""
     else
         echo "✅ EAS CLI found"
     fi

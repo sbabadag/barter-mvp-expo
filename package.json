@@ -7,8 +7,9 @@
   "license": "MIT",
   "main": "expo-router/entry",
   "scripts": {
-    "start": "expo start --dev-client --clear",
-    "start-hot": "expo start --dev-client",
+    "start": "expo start --dev-client",
+    "start-hot": "expo start --dev-client --no-dev --no-minify",
+    "start-clean": "expo start --dev-client --clear",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",

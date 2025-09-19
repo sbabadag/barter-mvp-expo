@@ -1,0 +1,68 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Icon Comparison - ESKICI</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .icon-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .icon-card { border: 1px solid #ddd; padding: 20px; text-align: center; border-radius: 12px; }
+        .icon-preview { width: 128px; height: 128px; border-radius: 20px; margin: 10px auto; background: #f0f0f0; }
+        .upload-area { border: 2px dashed #ccc; padding: 20px; margin: 10px 0; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <h1>🎨 ESKICI Icon Karşılaştırması</h1>
+    
+    <div class="icon-grid">
+        <div class="icon-card">
+            <h3>Mevcut Icon</h3>
+            <img src="../assets/icon.png" class="icon-preview" alt="Current Icon">
+            <p>Gradient shopping bag</p>
+        </div>
+        
+        <div class="icon-card">
+            <h3>AI Generated #1</h3>
+            <div class="upload-area">
+                <input type="file" accept="image/*" onchange="previewIcon(this, 1)">
+                <p>AI ile oluşturulan icon yükleyin</p>
+            </div>
+            <img id="preview1" class="icon-preview" style="display:none;">
+        </div>
+        
+        <div class="icon-card">
+            <h3>AI Generated #2</h3>
+            <div class="upload-area">
+                <input type="file" accept="image/*" onchange="previewIcon(this, 2)">
+                <p>AI ile oluşturulan icon yükleyin</p>
+            </div>
+            <img id="preview2" class="icon-preview" style="display:none;">
+        </div>
+        
+        <div class="icon-card">
+            <h3>AI Generated #3</h3>
+            <div class="upload-area">
+                <input type="file" accept="image/*" onchange="previewIcon(this, 3)">
+                <p>AI ile oluşturulan icon yükleyin</p>
+            </div>
+            <img id="preview3" class="icon-preview" style="display:none;">
+        </div>
+    </div>
+    
+    <script>
+        function previewIcon(input, num) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('preview' + num);
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+</body>
+</html>
+  

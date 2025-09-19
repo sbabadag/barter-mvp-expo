@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>📱 ESKICI - Screenshot Generator</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            padding: 20px; 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        h1 { text-align: center; color: #FFD700; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        .phone-frame {
+            width: 300px;
+            height: 600px;
+            background: #1a1a1a;
+            border-radius: 30px;
+            padding: 20px;
+            margin: 20px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: inline-block;
+            vertical-align: top;
+        }
+        .screen {
+            width: 100%;
+            height: 100%;
+            background: #f8f9fa;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        .status-bar {
+            height: 25px;
+            background: #000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            color: white;
+            font-size: 12px;
+        }
+        .header {
+            height: 60px;
+            background: linear-gradient(45deg, #4A9BEB, #2E7BD6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .content {
+            padding: 20px;
+            background: #f8f9fa;
+            height: calc(100% - 145px);
+            overflow: hidden;
+        }
+        .product-card {
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .product-image {
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(45deg, #FF6B35, #F7931E);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+        }
+        .product-info {
+            padding: 12px;
+        }
+        .product-title {
+            font-weight: bold;
+            font-size: 14px;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .product-location {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 8px;
+        }
+        .product-price {
+            font-size: 16px;
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .message-bubble {
+            background: #e3f2fd;
+            padding: 12px;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            max-width: 80%;
+        }
+        .message-bubble.sent {
+            background: #4A9BEB;
+            color: white;
+            margin-left: auto;
+            margin-right: 0;
+        }
+        .profile-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #4A9BEB, #2E7BD6);
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .download-btn { 
+            background: linear-gradient(45deg, #4CAF50, #45a049); 
+            color: white; 
+            padding: 15px 25px; 
+            border: none; 
+            border-radius: 25px; 
+            cursor: pointer; 
+            margin: 10px; 
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        .download-btn:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        .screenshots-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .main-btn {
+            background: linear-gradient(45deg, #FF6B35, #F7931E);
+            font-size: 18px;
+            padding: 20px 30px;
+        }
+        .nav-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        .nav-item {
+            text-align: center;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+        .nav-item.active {
+            color: #4A9BEB;
+        }
+        .fab {
+            position: absolute;
+            bottom: 80px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(45deg, #FF6B35, #F7931E);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 ESKICI - Google Play Screenshots</h1>
+        <p style="text-align: center; font-size: 18px;">Profesyonel uygulama ekran görüntüleri</p>
+        
+        <div class="screenshots-container">
+            <!-- Ana Sayfa -->
+            <div class="phone-frame" id="homeScreen">
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <span>📶 📶 🔋</span>
+                    </div>
+                    <div class="header">
+                        🏠 ESKICI - Ana Sayfa
+                    </div>
+                    <div class="content">
+                        <div class="product-card">
+                            <div class="product-image">📱</div>
+                            <div class="product-info">
+                                <div class="product-title">iPhone 12 Temiz</div>
+                                <div class="product-location">📍 Kadıköy, İstanbul</div>
+                                <div class="product-price">Takas Edilebilir</div>
+                            </div>
+                        </div>
+                        <div class="product-card">
+                            <div class="product-image">👕</div>
+                            <div class="product-info">
+                                <div class="product-title">Vintage Denim Ceket</div>
+                                <div class="product-location">📍 Beşiktaş, İstanbul</div>
+                                <div class="product-price">Değişim Teklifi</div>
+                            </div>
+                        </div>
+                        <div class="product-card">
+                            <div class="product-image">📚</div>
+                            <div class="product-info">
+                                <div class="product-title">Programlama Kitapları</div>
+                                <div class="product-location">📍 Şişli, İstanbul</div>
+                                <div class="product-price">Takas Mümkün</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="nav-bar">
+                        <div class="nav-item active">🏠<br>Ana Sayfa</div>
+                        <div class="nav-item">🔍<br>Ara</div>
+                        <div class="nav-item">💬<br>Mesajlar</div>
+                        <div class="nav-item">👤<br>Profil</div>
+                    </div>
+                    <div class="fab">+</div>
+                </div>
+            </div>
+
+            <!-- Ürün Detay -->
+            <div class="phone-frame" id="productDetail">
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <span>📶 📶 🔋</span>
+                    </div>
+                    <div class="header">
+                        📱 Ürün Detayı
+                    </div>
+                    <div class="content">
+                        <div style="width: 100%; height: 200px; background: linear-gradient(45deg, #FF6B35, #F7931E); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 60px; color: white; margin-bottom: 20px;">📱</div>
+                        
+                        <div style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 15px;">
+                            <h3 style="margin: 0 0 10px 0; color: #2c3e50;">iPhone 12 - Temiz Durumda</h3>
+                            <p style="margin: 0 0 10px 0; color: #7f8c8d; font-size: 14px;">📍 Kadıköy, İstanbul • 2 km uzakta</p>
+                            <p style="margin: 0 0 15px 0; color: #2c3e50; font-size: 14px;">Çok az kullanılmış, kutulu. Laptop veya tablet ile takas edilebilir.</p>
+                            
+                            <div style="display: flex; gap: 10px;">
+                                <button style="flex: 1; background: #4A9BEB; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold;">💬 Mesaj Gönder</button>
+                                <button style="flex: 1; background: #27ae60; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold;">🤝 Takas Teklifi</button>
+                            </div>
+                        </div>
+                        
+                        <div style="background: white; border-radius: 12px; padding: 15px;">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div style="width: 50px; height: 50px; background: linear-gradient(45deg, #4A9BEB, #2E7BD6); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">AH</div>
+                                <div>
+                                    <div style="font-weight: bold; color: #2c3e50;">Ahmet K.</div>
+                                    <div style="font-size: 12px; color: #7f8c8d;">⭐ 4.8 • 23 takas</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mesajlaşma -->
+            <div class="phone-frame" id="messages">
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <span>📶 📶 🔋</span>
+                    </div>
+                    <div class="header">
+                        💬 Ahmet K. ile sohbet
+                    </div>
+                    <div class="content">
+                        <div class="message-bubble">
+                            Merhaba! iPhone'unuz hala mevcut mu?
+                        </div>
+                        <div class="message-bubble sent">
+                            Evet, hala mevcut. Hangi cihazla takas düşünüyorsunuz?
+                        </div>
+                        <div class="message-bubble">
+                            MacBook Air 2020 var, ilginizi çeker mi?
+                        </div>
+                        <div class="message-bubble sent">
+                            Çok güzel! Fotoğraflarını görebilir miyim?
+                        </div>
+                        <div class="message-bubble">
+                            Tabii ki! Hemen gönderiyorum 📸
+                        </div>
+                        <div class="message-bubble sent">
+                            Harika görünüyor! Yarın buluşabilir miyiz?
+                        </div>
+                        <div class="message-bubble">
+                            Elbette! Kadıköy merkez nasıl?
+                        </div>
+                        
+                        <div style="position: absolute; bottom: 80px; left: 20px; right: 20px; background: white; border-radius: 25px; padding: 12px 20px; border: 1px solid #e0e0e0; display: flex; align-items: center; gap: 10px;">
+                            <span style="flex: 1; color: #7f8c8d;">Mesajınızı yazın...</span>
+                            <span style="color: #4A9BEB;">📷</span>
+                            <span style="color: #4A9BEB;">➤</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profil -->
+            <div class="phone-frame" id="profile">
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <span>📶 📶 🔋</span>
+                    </div>
+                    <div class="header">
+                        👤 Profilim
+                    </div>
+                    <div class="content">
+                        <div class="profile-section">
+                            <div class="avatar">SK</div>
+                            <h3 style="margin: 0 0 5px 0; color: #2c3e50;">Selin K.</h3>
+                            <p style="margin: 0 0 15px 0; color: #7f8c8d; font-size: 14px;">📍 Kadıköy, İstanbul</p>
+                            <div style="display: flex; justify-content: space-around; margin-bottom: 15px;">
+                                <div style="text-align: center;">
+                                    <div style="font-weight: bold; color: #4A9BEB; font-size: 18px;">4.9</div>
+                                    <div style="font-size: 12px; color: #7f8c8d;">Puan</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-weight: bold; color: #27ae60; font-size: 18px;">34</div>
+                                    <div style="font-size: 12px; color: #7f8c8d;">Takas</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-weight: bold; color: #FF6B35; font-size: 18px;">12</div>
+                                    <div style="font-size: 12px; color: #7f8c8d;">İlan</div>
+                                </div>
+                            </div>
+                            <button style="width: 100%; background: #4A9BEB; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold;">Profili Düzenle</button>
+                        </div>
+                        
+                        <div style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 15px;">
+                            <h4 style="margin: 0 0 15px 0; color: #2c3e50;">Aktif İlanlarım</h4>
+                            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                                <div style="width: 50px; height: 50px; background: linear-gradient(45deg, #FF6B35, #F7931E); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">👕</div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: bold; font-size: 14px; color: #2c3e50;">Vintage Ceket</div>
+                                    <div style="font-size: 12px; color: #7f8c8d;">3 teklif var</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <div style="width: 50px; height: 50px; background: linear-gradient(45deg, #FF6B35, #F7931E); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">📚</div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: bold; font-size: 14px; color: #2c3e50;">Programlama Kitapları</div>
+                                    <div style="font-size: 12px; color: #7f8c8d;">1 teklif var</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="nav-bar">
+                        <div class="nav-item">🏠<br>Ana Sayfa</div>
+                        <div class="nav-item">🔍<br>Ara</div>
+                        <div class="nav-item">💬<br>Mesajlar</div>
+                        <div class="nav-item active">👤<br>Profil</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align: center;">
+            <button class="download-btn main-btn" onclick="downloadAllScreenshots()">📱 Tüm Screenshot'ları İndir</button>
+            <br>
+            <button class="download-btn" onclick="downloadScreenshot('homeScreen')">🏠 Ana Sayfa</button>
+            <button class="download-btn" onclick="downloadScreenshot('productDetail')">📱 Ürün Detay</button>
+            <button class="download-btn" onclick="downloadScreenshot('messages')">💬 Mesajlar</button>
+            <button class="download-btn" onclick="downloadScreenshot('profile')">👤 Profil</button>
+        </div>
+        
+        <div style="background: rgba(255, 200, 0, 0.2); padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <h4>📏 Screenshot Boyutları:</h4>
+            <ul>
+                <li><strong>Phone:</strong> 1080x1920 (9:16 aspect ratio)</li>
+                <li><strong>Google Play Store gereksinimleri:</strong> Min 320px, Max 3840px</li>
+                <li><strong>Önerilen boyut:</strong> 1080x1920 (Full HD)</li>
+                <li><strong>Format:</strong> PNG (şeffaflık için)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script>
+        function downloadScreenshot(elementId) {
+            const element = document.getElementById(elementId);
+            const phoneFrame = element.querySelector('.phone-frame') || element;
+            
+            html2canvas(phoneFrame, {
+                width: 300,
+                height: 600,
+                scale: 3.6, // 1080px genişlik için (300 * 3.6 = 1080)
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: null
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `eskici-${elementId}-screenshot.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+        
+        function downloadAllScreenshots() {
+            const screens = ['homeScreen', 'productDetail', 'messages', 'profile'];
+            let delay = 0;
+            
+            screens.forEach((screenId, index) => {
+                setTimeout(() => {
+                    downloadScreenshot(screenId);
+                }, delay);
+                delay += 1000; // 1 saniye aralıklarla indir
+            });
+            
+            alert('🎉 Tüm screenshot\'lar indiriliyor!\n\n4 adet PNG dosyası indirilecek:\n- Ana Sayfa\n- Ürün Detay\n- Mesajlaşma\n- Profil\n\nGoogle Play Store\'da kullanmaya hazır! 📱');
+        }
+        
+        // Auto-generate screenshots on load
+        window.onload = function() {
+            console.log('📱 ESKICI Screenshot Generator hazır!');
+        };
+    </script>
+</body>
+</html>

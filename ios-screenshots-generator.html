@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>📱 ESKICI - iOS Screenshots for TestFlight</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            padding: 20px; 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        h1 { text-align: center; color: #FFD700; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        
+        /* iPhone 6.7" (Pro Max) - 1290x2796 */
+        .phone-frame-67 {
+            width: 387px;
+            height: 839px;
+            background: #1a1a1a;
+            border-radius: 40px;
+            padding: 20px;
+            margin: 20px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: inline-block;
+            vertical-align: top;
+        }
+        
+        /* iPhone 5.5" - 1242x2208 */
+        .phone-frame-55 {
+            width: 372px;
+            height: 662px;
+            background: #1a1a1a;
+            border-radius: 25px;
+            padding: 15px;
+            margin: 20px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: inline-block;
+            vertical-align: top;
+        }
+        
+        .screen {
+            width: 100%;
+            height: 100%;
+            background: #f8f9fa;
+            border-radius: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .status-bar {
+            height: 44px;
+            background: #000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .header {
+            height: 80px;
+            background: linear-gradient(45deg, #4A9BEB, #2E7BD6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 22px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .content {
+            padding: 25px;
+            background: #f8f9fa;
+            height: calc(100% - 204px);
+            overflow: hidden;
+        }
+        
+        .product-card {
+            background: white;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 160px;
+            background: linear-gradient(45deg, #FF6B35, #F7931E);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            color: white;
+        }
+        
+        .product-info {
+            padding: 20px;
+        }
+        
+        .product-title {
+            font-weight: bold;
+            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        
+        .product-location {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 12px;
+        }
+        
+        .product-price {
+            font-size: 18px;
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        .nav-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding-bottom: 20px;
+        }
+        
+        .nav-item {
+            text-align: center;
+            font-size: 14px;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+        
+        .nav-item.active {
+            color: #4A9BEB;
+        }
+        
+        .fab {
+            position: absolute;
+            bottom: 100px;
+            right: 25px;
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(45deg, #FF6B35, #F7931E);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+            box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4);
+        }
+        
+        .download-btn { 
+            background: linear-gradient(45deg, #4CAF50, #45a049); 
+            color: white; 
+            padding: 15px 25px; 
+            border: none; 
+            border-radius: 25px; 
+            cursor: pointer; 
+            margin: 10px; 
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .download-btn:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .main-btn {
+            background: linear-gradient(45deg, #FF6B35, #F7931E);
+            font-size: 18px;
+            padding: 20px 30px;
+        }
+        
+        .screenshots-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .size-toggle {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .toggle-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid #FFD700;
+            padding: 10px 20px;
+            border-radius: 25px;
+            margin: 0 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .toggle-btn.active {
+            background: #FFD700;
+            color: #1a1a1a;
+        }
+        
+        .message-bubble {
+            background: #e3f2fd;
+            padding: 16px;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            max-width: 85%;
+            font-size: 16px;
+        }
+        
+        .message-bubble.sent {
+            background: #4A9BEB;
+            color: white;
+            margin-left: auto;
+            margin-right: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 ESKICI - iOS TestFlight Screenshots</h1>
+        <p style="text-align: center; font-size: 18px;">App Store Connect için profesyonel iOS ekran görüntüleri</p>
+        
+        <div class="size-toggle">
+            <button class="toggle-btn active" onclick="toggleSize('67')">iPhone 6.7" (Pro Max)</button>
+            <button class="toggle-btn" onclick="toggleSize('55')">iPhone 5.5"</button>
+        </div>
+        
+        <div class="screenshots-container" id="screenshots-67">
+            <!-- iPhone 6.7" Screenshots -->
+            <div class="phone-frame-67" id="homeScreen67">
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <span>📶 🔋 100%</span>
+                    </div>
+                    <div class="header">
+                        🏠 ESKICI - Komşular Arası Takas
+                    </div>
+                    <div class="content">
+                        <div class="product-card">
+                            <div class="product-image">📱</div>
+                            <div class="product-info">
+                                <div class="product-title">iPhone 12 - Temiz Durumda</div>
+                                <div class="product-location">📍 Kadıköy, İstanbul • 1.2 km</div>
+                                <div class="product-price">Takas Edilebilir</div>
+                            </div>
+                        </div>
+                        <div class="product-card">
+                            <div class="product-image">👕</div>
+                            <div class="product-info">
+                                <div class="product-title">Vintage Denim Ceket</div>
+                                <div class="product-location">📍 Beşiktaş, İstanbul • 2.5 km</div>
+                                <div class="product-price">Değişim Teklifi</div>
+                            </div>
+                        </div>
+                        <div class="product-card">
+                            <div class="product-image">📚</div>
+                            <div class="product-info">
+                                <div class="product-title">Programlama Kitap Seti</div>
+                                <div class="product-location">📍 Şişli, İstanbul • 3.1 km</div>
+                                <div class="product-price">Takas Mümkün</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="nav-bar">
+                        <div class="nav-item active">🏠<br>Ana Sayfa</div>
+                        <div class="nav-item">🔍<br>Keşfet</div>
+                        <div class="nav-item">💬<br>Mesajlar</div>
+                        <div class="nav-item">👤<br>Profil</div>
+                    </div>
+                    <div class="fab">+</div>
+                </div>
+            </div>
+
+            <div class="phone-frame-67" id="productDetail67">
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <span>📶 🔋 100%</span>
+                    </div>
+                    <div class="header">
+                        📱 iPhone 12 Detayları
+                    </div>
+                    <div class="content">
+                        <div style="width: 100%; height: 240px; background: linear-gradient(45deg, #FF6B35, #F7931E); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 80px; color: white; margin-bottom: 25px;">📱</div>
+                        
+                        <div style="background: white; border-radius: 16px; padding: 25px; margin-bottom: 20px;">
+                            <h3 style="margin: 0 0 12px 0; color: #2c3e50; font-size: 20px;">iPhone 12 - Çok Az Kullanılmış</h3>
+                            <p style="margin: 0 0 12px 0; color: #7f8c8d; font-size: 16px;">📍 Kadıköy, İstanbul • 1.2 km uzakta</p>
+                            <p style="margin: 0 0 20px 0; color: #2c3e50; font-size: 16px;">128GB, kutulu ve aksesuarlarıyla. Laptop veya tablet ile takas edilebilir.</p>
+                            
+                            <div style="display: flex; gap: 15px;">
+                                <button style="flex: 1; background: #4A9BEB; color: white; border: none; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 16px;">💬 Mesaj Gönder</button>
+                                <button style="flex: 1; background: #27ae60; color: white; border: none; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 16px;">🤝 Takas Teklifi</button>
+                            </div>
+                        </div>
+                        
+                        <div style="background: white; border-radius: 16px; padding: 20px;">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div style="width: 60px; height: 60px; background: linear-gradient(45deg, #4A9BEB, #2E7BD6); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px;">AK</div>
+                                <div>
+                                    <div style="font-weight: bold; color: #2c3e50; font-size: 18px;">Ahmet Kaya</div>
+                                    <div style="font-size: 14px; color: #7f8c8d;">⭐ 4.8 puan • 23 başarılı takas</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="phone-frame-67" id="messages67">
+                <div class="screen">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <span>📶 🔋 100%</span>
+                    </div>
+                    <div class="header">
+                        💬 Ahmet Kaya ile Sohbet
+                    </div>
+                    <div class="content" style="padding: 20px;">
+                        <div class="message-bubble">
+                            Merhaba! iPhone'unuz hala mevcut mu?
+                        </div>
+                        <div class="message-bubble sent">
+                            Evet, hala mevcut. Hangi cihazla takas düşünüyorsunuz?
+                        </div>
+                        <div class="message-bubble">
+                            MacBook Air 2020 var, M1 işlemcili. İlginizi çeker mi?
+                        </div>
+                        <div class="message-bubble sent">
+                            Çok güzel! Fotoğraflarını ve detayları görebilir miyim?
+                        </div>
+                        <div class="message-bubble">
+                            Tabii ki! Hemen gönderiyorum 📸
+                        </div>
+                        <div class="message-bubble sent">
+                            Harika görünüyor! Yarın buluşabilir miyiz? Kadıköy merkez nasıl?
+                        </div>
+                        <div class="message-bubble">
+                            Perfect! Saat 14:00'te Kadıköy sahil uygun mu?
+                        </div>
+                        <div class="message-bubble sent">
+                            Süper! Görüşmek üzere 👋
+                        </div>
+                        
+                        <div style="position: absolute; bottom: 100px; left: 20px; right: 20px; background: white; border-radius: 30px; padding: 16px 25px; border: 1px solid #e0e0e0; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                            <span style="flex: 1; color: #7f8c8d; font-size: 16px;">Mesajınızı yazın...</span>
+                            <span style="color: #4A9BEB; font-size: 20px;">📷</span>
+                            <span style="color: #4A9BEB; font-size: 20px;">➤</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="screenshots-container" id="screenshots-55" style="display: none;">
+            <!-- iPhone 5.5" Screenshots - Smaller versions -->
+            <div class="phone-frame-55" id="homeScreen55">
+                <div class="screen">
+                    <div class="status-bar" style="height: 35px; font-size: 14px; padding: 0 15px;">
+                        <span>9:41</span>
+                        <span>📶 🔋</span>
+                    </div>
+                    <div class="header" style="height: 60px; font-size: 18px;">
+                        🏠 ESKICI
+                    </div>
+                    <div class="content" style="padding: 15px; height: calc(100% - 155px);">
+                        <div class="product-card" style="margin-bottom: 15px;">
+                            <div class="product-image" style="height: 120px; font-size: 40px;">📱</div>
+                            <div class="product-info" style="padding: 15px;">
+                                <div class="product-title" style="font-size: 16px;">iPhone 12</div>
+                                <div class="product-location" style="font-size: 12px;">📍 Kadıköy, İstanbul</div>
+                                <div class="product-price" style="font-size: 16px;">Takas Edilebilir</div>
+                            </div>
+                        </div>
+                        <div class="product-card" style="margin-bottom: 15px;">
+                            <div class="product-image" style="height: 120px; font-size: 40px;">👕</div>
+                            <div class="product-info" style="padding: 15px;">
+                                <div class="product-title" style="font-size: 16px;">Vintage Ceket</div>
+                                <div class="product-location" style="font-size: 12px;">📍 Beşiktaş, İstanbul</div>
+                                <div class="product-price" style="font-size: 16px;">Değişim Teklifi</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="nav-bar" style="height: 60px; padding-bottom: 10px;">
+                        <div class="nav-item active" style="font-size: 12px;">🏠<br>Ana Sayfa</div>
+                        <div class="nav-item" style="font-size: 12px;">🔍<br>Keşfet</div>
+                        <div class="nav-item" style="font-size: 12px;">💬<br>Mesajlar</div>
+                        <div class="nav-item" style="font-size: 12px;">👤<br>Profil</div>
+                    </div>
+                    <div class="fab" style="bottom: 80px; right: 20px; width: 56px; height: 56px; font-size: 24px;">+</div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 40px;">
+            <button class="download-btn main-btn" onclick="downloadAllScreenshots()">📱 iOS Screenshots İndir</button>
+            <br>
+            <button class="download-btn" onclick="downloadScreenshot('homeScreen')">🏠 Ana Sayfa</button>
+            <button class="download-btn" onclick="downloadScreenshot('productDetail')">📱 Ürün Detay</button>
+            <button class="download-btn" onclick="downloadScreenshot('messages')">💬 Mesajlar</button>
+        </div>
+        
+        <div style="background: rgba(76, 175, 80, 0.2); padding: 20px; border-radius: 12px; margin: 30px 0;">
+            <h4>📏 iOS Screenshot Boyutları:</h4>
+            <ul>
+                <li><strong>iPhone 6.7" (Pro Max):</strong> 1290 x 2796 piksel</li>
+                <li><strong>iPhone 5.5":</strong> 1242 x 2208 piksel</li>
+                <li><strong>Minimum gereksinim:</strong> 3 screenshot</li>
+                <li><strong>Maximum limit:</strong> 10 screenshot</li>
+                <li><strong>Format:</strong> PNG veya JPEG</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script>
+        let currentSize = '67';
+        
+        function toggleSize(size) {
+            currentSize = size;
+            
+            // Update button states
+            document.querySelectorAll('.toggle-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Show/hide appropriate screenshots
+            document.getElementById('screenshots-67').style.display = size === '67' ? 'block' : 'none';
+            document.getElementById('screenshots-55').style.display = size === '55' ? 'block' : 'none';
+        }
+        
+        function downloadScreenshot(elementId) {
+            const fullId = elementId + currentSize;
+            const element = document.getElementById(fullId);
+            const phoneFrame = element;
+            
+            // Set scale based on target resolution
+            let targetWidth, targetHeight, scale;
+            
+            if (currentSize === '67') {
+                targetWidth = 1290;
+                targetHeight = 2796;
+                scale = targetWidth / 387; // 387px is the frame width
+            } else {
+                targetWidth = 1242;
+                targetHeight = 2208;
+                scale = targetWidth / 372; // 372px is the frame width
+            }
+            
+            html2canvas(phoneFrame, {
+                width: currentSize === '67' ? 387 : 372,
+                height: currentSize === '67' ? 839 : 662,
+                scale: scale,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: null
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `eskici-ios-${currentSize}-${elementId}-${targetWidth}x${targetHeight}.png`;
+                link.href = canvas.toDataURL('image/png', 1.0);
+                link.click();
+            });
+        }
+        
+        function downloadAllScreenshots() {
+            const screens = ['homeScreen', 'productDetail', 'messages'];
+            let delay = 0;
+            
+            screens.forEach((screenId) => {
+                setTimeout(() => {
+                    downloadScreenshot(screenId);
+                }, delay);
+                delay += 1500;
+            });
+            
+            const sizeText = currentSize === '67' ? '6.7" (1290x2796)' : '5.5" (1242x2208)';
+            alert(`🎉 iOS ${sizeText} screenshots indiriliyor!\n\n3 adet PNG dosyası:\n- Ana Sayfa\n- Ürün Detay\n- Mesajlaşma\n\nTestFlight'ta kullanmaya hazır! 📱`);
+        }
+    </script>
+</body>
+</html>
