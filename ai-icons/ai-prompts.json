@@ -1,0 +1,46 @@
+{
+  "main_concept": "ESKICI - Turkish barter and second-hand marketplace app",
+  "detailed_prompts": [
+    {
+      "style": "Modern Minimalist",
+      "prompt": "Create a clean, modern app icon for ESKICI (Turkish for 'old/second-hand dealer'). The icon should represent bartering, exchange, and sustainability. Use a circular or rounded square design with a gradient from blue to green, symbolizing trust and environmental consciousness. Include subtle elements like arrows forming a circle (representing exchange), or two hands exchanging items. The design should be simple enough to be recognizable at small sizes (16px) but detailed enough for larger displays.",
+      "colors": "Blue to green gradient (#439BEB to #4FFFB0)",
+      "elements": "Exchange arrows, handshake, recycling symbol"
+    },
+    {
+      "style": "Playful Geometric",
+      "prompt": "Design a friendly, approachable app icon for a Turkish marketplace app called ESKICI. Create geometric shapes that represent exchange and community - perhaps overlapping circles, interlocking squares, or a stylized shopping bag with exchange arrows. Use warm, inviting colors with a modern gradient. The icon should feel trustworthy and sustainable, appealing to environmentally conscious users who enjoy second-hand shopping and bartering.",
+      "colors": "Warm gradient with blues and greens",
+      "elements": "Geometric shapes, shopping elements, community symbols"
+    },
+    {
+      "style": "Symbolic Badge",
+      "prompt": "Create a badge-style app icon for ESKICI that combines traditional Turkish design elements with modern app iconography. Include symbols of trade, exchange, and sustainability. Think of a modern interpretation of a traditional marketplace or bazaar symbol, with contemporary app design principles. Use a sophisticated color palette that conveys trust and quality.",
+      "colors": "Deep blues, emerald greens, gold accents",
+      "elements": "Badge design, traditional meets modern, marketplace symbols"
+    },
+    {
+      "style": "Icon with Typography",
+      "prompt": "Design an app icon that incorporates the letter 'E' for ESKICI in a creative way. The 'E' could be formed by exchange arrows, or integrated into a symbol representing recycling, sustainability, or community exchange. Use modern typography with clean lines and a premium feel. The overall design should work well on various backgrounds and sizes.",
+      "colors": "Monochromatic with gradient accents",
+      "elements": "Letter E, typography, clean lines"
+    }
+  ],
+  "technical_specs": {
+    "sizes": [
+      "1024x1024",
+      "512x512",
+      "256x256",
+      "128x128",
+      "64x64",
+      "32x32",
+      "16x16"
+    ],
+    "formats": [
+      "PNG",
+      "SVG",
+      "ICO"
+    ],
+    "requirements": "No text in small sizes, recognizable at 16px, works on light and dark backgrounds"
+  }
+}

@@ -16,6 +16,13 @@
 			"isBackground": true,
 			"problemMatcher": [],
 			"group": "build"
+		},
+		{
+			"label": "Compile Expo Project",
+			"type": "shell",
+			"command": "npx expo start",
+			"isBackground": true,
+			"group": "build"
 		}
 	]
 }

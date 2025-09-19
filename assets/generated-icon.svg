@@ -1,0 +1,199 @@
+
+<svg width="1024" height="1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#4A9BEB;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#2E7BD6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1E5A96;stop-opacity:1" />
+    </radialGradient>
+    <radialGradient id="centerGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFA500;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF6B35;stop-opacity:1" />
+    </radialGradient>
+    <linearGradient id="handGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFDBCC;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFAB91;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="512" cy="512" r="450" fill="url(#bgGrad)" stroke="#1A4E80" stroke-width="8"/>
+  
+  <!-- Outer decorative ring -->
+  <circle cx="512" cy="512" r="380" fill="none" stroke="#4FFFB0" stroke-width="4" opacity="0.7"/>
+  
+  <!-- Mandala patterns -->
+  <g transform="translate(512,512)">
+    <!-- Center circle -->
+    <circle cx="0" cy="0" r="120" fill="url(#centerGrad)" stroke="#FFF" stroke-width="3"/>
+    
+    <!-- Inner ring of symbols -->
+    <g>
+      
+        <g transform="translate(80,0) rotate(0)">
+          <circle cx="0" cy="0" r="25" fill="#4FFFB0" stroke="#FFF" stroke-width="2"/>
+          <circle cx="0" cy="0" r="12" fill="#FFD700"/>
+        </g>
+        <g transform="translate(56.568542494923804,56.5685424949238) rotate(45)">
+          <circle cx="0" cy="0" r="25" fill="#4FFFB0" stroke="#FFF" stroke-width="2"/>
+          <circle cx="0" cy="0" r="12" fill="#FFD700"/>
+        </g>
+        <g transform="translate(4.898587196589413e-15,80) rotate(90)">
+          <circle cx="0" cy="0" r="25" fill="#4FFFB0" stroke="#FFF" stroke-width="2"/>
+          <circle cx="0" cy="0" r="12" fill="#FFD700"/>
+        </g>
+        <g transform="translate(-56.5685424949238,56.568542494923804) rotate(135)">
+          <circle cx="0" cy="0" r="25" fill="#4FFFB0" stroke="#FFF" stroke-width="2"/>
+          <circle cx="0" cy="0" r="12" fill="#FFD700"/>
+        </g>
+        <g transform="translate(-80,9.797174393178826e-15) rotate(180)">
+          <circle cx="0" cy="0" r="25" fill="#4FFFB0" stroke="#FFF" stroke-width="2"/>
+          <circle cx="0" cy="0" r="12" fill="#FFD700"/>
+        </g>
+        <g transform="translate(-56.56854249492382,-56.5685424949238) rotate(225)">
+          <circle cx="0" cy="0" r="25" fill="#4FFFB0" stroke="#FFF" stroke-width="2"/>
+          <circle cx="0" cy="0" r="12" fill="#FFD700"/>
+        </g>
+        <g transform="translate(-1.4695761589768237e-14,-80) rotate(270)">
+          <circle cx="0" cy="0" r="25" fill="#4FFFB0" stroke="#FFF" stroke-width="2"/>
+          <circle cx="0" cy="0" r="12" fill="#FFD700"/>
+        </g>
+        <g transform="translate(56.56854249492379,-56.56854249492382) rotate(315)">
+          <circle cx="0" cy="0" r="25" fill="#4FFFB0" stroke="#FFF" stroke-width="2"/>
+          <circle cx="0" cy="0" r="12" fill="#FFD700"/>
+        </g>
+    </g>
+    
+    <!-- Middle ring of patterns -->
+    <g>
+      
+        <g transform="translate(160,0) rotate(0)">
+          <ellipse cx="0" cy="0" rx="20" ry="35" fill="#87CEEB" stroke="#FFF" stroke-width="1.5"/>
+          <circle cx="0" cy="0" r="8" fill="#FF6B35"/>
+        </g>
+        <g transform="translate(138.5640646055102,79.99999999999999) rotate(30)">
+          <ellipse cx="0" cy="0" rx="20" ry="35" fill="#87CEEB" stroke="#FFF" stroke-width="1.5"/>
+          <circle cx="0" cy="0" r="8" fill="#FF6B35"/>
+        </g>
+        <g transform="translate(80.00000000000001,138.56406460551017) rotate(60)">
+          <ellipse cx="0" cy="0" rx="20" ry="35" fill="#87CEEB" stroke="#FFF" stroke-width="1.5"/>
+          <circle cx="0" cy="0" r="8" fill="#FF6B35"/>
+        </g>
+        <g transform="translate(9.797174393178826e-15,160) rotate(90)">
+          <ellipse cx="0" cy="0" rx="20" ry="35" fill="#87CEEB" stroke="#FFF" stroke-width="1.5"/>
+          <circle cx="0" cy="0" r="8" fill="#FF6B35"/>
+        </g>
+        <g transform="translate(-79.99999999999997,138.5640646055102) rotate(120)">
+          <ellipse cx="0" cy="0" rx="20" ry="35" fill="#87CEEB" stroke="#FFF" stroke-width="1.5"/>
+          <circle cx="0" cy="0" r="8" fill="#FF6B35"/>
+        </g>
+        <g transform="translate(-138.5640646055102,79.99999999999999) rotate(150)">
+          <ellipse cx="0" cy="0" rx="20" ry="35" fill="#87CEEB" stroke="#FFF" stroke-width="1.5"/>
+          <circle cx="0" cy="0" r="8" fill="#FF6B35"/>
+        </g>
+        <g transform="translate(-160,1.9594348786357652e-14) rotate(180)">
+          <ellipse cx="0" cy="0" rx="20" ry="35" fill="#87CEEB" stroke="#FFF" stroke-width="1.5"/>
+          <circle cx="0" cy="0" r="8" fill="#FF6B35"/>
+        </g>
+        <g transform="translate(-138.56406460551017,-80.00000000000001) rotate(210)">
+          <ellipse cx="0" cy="0" rx="20" ry="35" fill="#87CEEB" stroke="#FFF" stroke-width="1.5"/>
+          <circle cx="0" cy="0" r="8" fill="#FF6B35"/>
+        </g>
+        <g transform="translate(-80.00000000000007,-138.56406460551017) rotate(240)">
+          <ellipse cx="0" cy="0" rx="20" ry="35" fill="#87CEEB" stroke="#FFF" stroke-width="1.5"/>
+          <circle cx="0" cy="0" r="8" fill="#FF6B35"/>
+        </g>
+        <g transform="translate(-2.9391523179536473e-14,-160) rotate(270)">
+          <ellipse cx="0" cy="0" rx="20" ry="35" fill="#87CEEB" stroke="#FFF" stroke-width="1.5"/>
+          <circle cx="0" cy="0" r="8" fill="#FF6B35"/>
+        </g>
+        <g transform="translate(80.00000000000001,-138.56406460551017) rotate(300)">
+          <ellipse cx="0" cy="0" rx="20" ry="35" fill="#87CEEB" stroke="#FFF" stroke-width="1.5"/>
+          <circle cx="0" cy="0" r="8" fill="#FF6B35"/>
+        </g>
+        <g transform="translate(138.56406460551014,-80.00000000000007) rotate(330)">
+          <ellipse cx="0" cy="0" rx="20" ry="35" fill="#87CEEB" stroke="#FFF" stroke-width="1.5"/>
+          <circle cx="0" cy="0" r="8" fill="#FF6B35"/>
+        </g>
+    </g>
+    
+    <!-- Outer ring of decorative elements -->
+    <g>
+      
+        <g transform="translate(240,0) rotate(0)">
+          <path d="M 0,-15 Q 10,0 0,15 Q -10,0 0,-15" fill="#4FFFB0" stroke="#FFF" stroke-width="1"/>
+        </g>
+        <g transform="translate(221.73108780270883,91.84402376762155) rotate(22.5)">
+          <path d="M 0,-15 Q 10,0 0,15 Q -10,0 0,-15" fill="#4FFFB0" stroke="#FFF" stroke-width="1"/>
+        </g>
+        <g transform="translate(169.7056274847714,169.70562748477138) rotate(45)">
+          <path d="M 0,-15 Q 10,0 0,15 Q -10,0 0,-15" fill="#4FFFB0" stroke="#FFF" stroke-width="1"/>
+        </g>
+        <g transform="translate(91.84402376762156,221.73108780270883) rotate(67.5)">
+          <path d="M 0,-15 Q 10,0 0,15 Q -10,0 0,-15" fill="#4FFFB0" stroke="#FFF" stroke-width="1"/>
+        </g>
+        <g transform="translate(1.469576158976824e-14,240) rotate(90)">
+          <path d="M 0,-15 Q 10,0 0,15 Q -10,0 0,-15" fill="#4FFFB0" stroke="#FFF" stroke-width="1"/>
+        </g>
+        <g transform="translate(-91.84402376762154,221.73108780270883) rotate(112.5)">
+          <path d="M 0,-15 Q 10,0 0,15 Q -10,0 0,-15" fill="#4FFFB0" stroke="#FFF" stroke-width="1"/>
+        </g>
+        <g transform="translate(-169.70562748477138,169.7056274847714) rotate(135)">
+          <path d="M 0,-15 Q 10,0 0,15 Q -10,0 0,-15" fill="#4FFFB0" stroke="#FFF" stroke-width="1"/>
+        </g>
+        <g transform="translate(-221.73108780270883,91.84402376762158) rotate(157.5)">
+          <path d="M 0,-15 Q 10,0 0,15 Q -10,0 0,-15" fill="#4FFFB0" stroke="#FFF" stroke-width="1"/>
+        </g>
+        <g transform="translate(-240,2.939152317953648e-14) rotate(180)">
+          <path d="M 0,-15 Q 10,0 0,15 Q -10,0 0,-15" fill="#4FFFB0" stroke="#FFF" stroke-width="1"/>
+        </g>
+        <g transform="translate(-221.73108780270888,-91.84402376762141) rotate(202.5)">
+          <path d="M 0,-15 Q 10,0 0,15 Q -10,0 0,-15" fill="#4FFFB0" stroke="#FFF" stroke-width="1"/>
+        </g>
+        <g transform="translate(-169.70562748477144,-169.70562748477138) rotate(225)">
+          <path d="M 0,-15 Q 10,0 0,15 Q -10,0 0,-15" fill="#4FFFB0" stroke="#FFF" stroke-width="1"/>
+        </g>
+        <g transform="translate(-91.84402376762148,-221.73108780270886) rotate(247.5)">
+          <path d="M 0,-15 Q 10,0 0,15 Q -10,0 0,-15" fill="#4FFFB0" stroke="#FFF" stroke-width="1"/>
+        </g>
+        <g transform="translate(-4.408728476930471e-14,-240) rotate(270)">
+          <path d="M 0,-15 Q 10,0 0,15 Q -10,0 0,-15" fill="#4FFFB0" stroke="#FFF" stroke-width="1"/>
+        </g>
+        <g transform="translate(91.84402376762161,-221.7310878027088) rotate(292.5)">
+          <path d="M 0,-15 Q 10,0 0,15 Q -10,0 0,-15" fill="#4FFFB0" stroke="#FFF" stroke-width="1"/>
+        </g>
+        <g transform="translate(169.70562748477136,-169.70562748477144) rotate(315)">
+          <path d="M 0,-15 Q 10,0 0,15 Q -10,0 0,-15" fill="#4FFFB0" stroke="#FFF" stroke-width="1"/>
+        </g>
+        <g transform="translate(221.73108780270886,-91.8440237676215) rotate(337.5)">
+          <path d="M 0,-15 Q 10,0 0,15 Q -10,0 0,-15" fill="#4FFFB0" stroke="#FFF" stroke-width="1"/>
+        </g>
+    </g>
+  </g>
+  
+  <!-- Hands holding the mandala -->
+  <g transform="translate(512,512)">
+    <!-- Left hand -->
+    <path d="M -420,-50 Q -380,-80 -350,-40 Q -320,-20 -280,20 Q -300,60 -340,40 Q -380,20 -420,50 Q -450,10 -420,-50" 
+          fill="url(#handGrad)" stroke="#D84315" stroke-width="2" opacity="0.8"/>
+    
+    <!-- Right hand -->
+    <path d="M 420,-50 Q 380,-80 350,-40 Q 320,-20 280,20 Q 300,60 340,40 Q 380,20 420,50 Q 450,10 420,-50" 
+          fill="url(#handGrad)" stroke="#D84315" stroke-width="2" opacity="0.8"/>
+  </g>
+  
+  <!-- Exchange arrows (subtle) -->
+  <g transform="translate(512,512)" opacity="0.6">
+    <path d="M -300,-200 Q 0,-250 300,-200" stroke="#4FFFB0" stroke-width="6" fill="none" marker-end="url(#arrowhead)"/>
+    <path d="M 300,200 Q 0,250 -300,200" stroke="#4FFFB0" stroke-width="6" fill="none" marker-end="url(#arrowhead)"/>
+  </g>
+  
+  <!-- Arrow marker definition -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#4FFFB0"/>
+    </marker>
+  </defs>
+</svg>
+  

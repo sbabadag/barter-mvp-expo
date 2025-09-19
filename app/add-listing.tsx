@@ -28,6 +28,8 @@ import { HapticService } from "../src/services/haptics";
 import { useAuth } from "../src/state/AuthProvider";
 import { aiRecognitionService, AIRecognitionResult, isAIServiceAvailable } from "../src/services/aiRecognition";
 import AISuggestions from "../src/components/AISuggestions";
+import { usePremiumGate, PREMIUM_FEATURES } from "../src/hooks/usePremiumGate";
+import PremiumModal from "../src/components/PremiumModal";
 
 // Konum tipi tanımı
 interface LocationData {
@@ -52,6 +54,7 @@ export default function AddListingScreen() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadMessage, setUploadMessage] = useState("");
+  const [isFeatured, setIsFeatured] = useState(false);
   
   // AI Recognition state
   const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
@@ -61,6 +64,9 @@ export default function AddListingScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  
+  // Premium features
+  const { isPremium, showPremiumModal, closePremiumModal, checkPremiumAccess } = usePremiumGate();
 
   // Auto-populate default address when user starts filling location
   const populateDefaultAddress = () => {
@@ -242,9 +248,29 @@ export default function AddListingScreen() {
 
   const pickImages = async () => {
     console.log('📷 pickImages button pressed, current images:', images.length);
-    if (images.length >= 6) {
-      Alert.alert("Limit", "En fazla 6 fotoğraf ekleyebilirsiniz");
-      return;
+    
+    // Check photo limit based on premium status
+    const maxPhotos = isPremium ? 10 : 3;
+    
+    if (images.length >= maxPhotos) {
+      if (!isPremium && images.length >= 3) {
+        // Show premium modal for unlimited photos
+        Alert.alert(
+          "Fotoğraf Limiti",
+          "Ücretsiz kullanıcılar en fazla 3 fotoğraf ekleyebilir. Premium üyelikle 10 fotoğrafa kadar yükleyebilirsiniz.",
+          [
+            { text: "İptal", style: "cancel" },
+            { 
+              text: "Premium'a Geç", 
+              onPress: () => checkPremiumAccess(() => {}) 
+            }
+          ]
+        );
+        return;
+      } else {
+        Alert.alert("Limit", `En fazla ${maxPhotos} fotoğraf ekleyebilirsiniz`);
+        return;
+      }
     }
     setShowImageOptions(true);
   };
@@ -469,6 +495,7 @@ export default function AddListingScreen() {
         location,
         locationCoords: locationCoords || undefined,
         imageUris: images,
+        isFeatured: isPremium && isFeatured, // Only allow featured if premium
       };
 
       console.log('Attempting to create listing:', {
@@ -521,7 +548,12 @@ export default function AddListingScreen() {
         
         {/* Photo Adding Panel - Moved to Top */}
         <View style={styles.formGroup}>
-          <Text style={styles.label}>Fotoğraflar ({images.length}/6)</Text>
+          <Text style={styles.label}>
+            Fotoğraflar ({images.length}/{isPremium ? 10 : 3})
+            {!isPremium && (
+              <Text style={styles.premiumHint}> • Premium: 10 fotoğraf</Text>
+            )}
+          </Text>
           
           {images.length > 0 && (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imageScrollView}>
@@ -539,7 +571,7 @@ export default function AddListingScreen() {
           <Pressable onPress={pickImages} style={styles.imagePickerButton}>
             <MaterialIcons name="add-a-photo" size={24} color="#666" />
             <Text style={styles.imagePickerText}>
-              {images.length === 0 ? "📷 Fotoğraf Ekle (Kamera/Galeri)" : `📸 Daha Fazla Ekle (${images.length}/6)`}
+              {images.length === 0 ? "📷 Fotoğraf Ekle (Kamera/Galeri)" : `📸 Daha Fazla Ekle (${images.length}/${isPremium ? 10 : 3})`}
             </Text>
           </Pressable>
         </View>
@@ -715,6 +747,40 @@ export default function AddListingScreen() {
           </View>
         </View>
 
+        {/* Featured Listing Option */}
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>İlan Özellikleri</Text>
+          <Pressable 
+            style={styles.featuredOption}
+            onPress={() => {
+              if (!isPremium) {
+                checkPremiumAccess(() => setIsFeatured(true));
+              } else {
+                setIsFeatured(!isFeatured);
+              }
+            }}
+          >
+            <View style={styles.featuredOptionLeft}>
+              <MaterialIcons 
+                name={isFeatured ? "star" : "star-border"} 
+                size={24} 
+                color={isFeatured ? "#f0a500" : "#666"} 
+              />
+              <View style={styles.featuredOptionText}>
+                <Text style={styles.featuredOptionTitle}>Öne Çıkan İlan</Text>
+                <Text style={styles.featuredOptionDescription}>
+                  İlanınız listede üstte görünsün ve daha fazla görüntülensin
+                </Text>
+              </View>
+            </View>
+            {!isPremium && (
+              <View style={styles.premiumBadge}>
+                <Text style={styles.premiumBadgeText}>Premium</Text>
+              </View>
+            )}
+          </Pressable>
+        </View>
+
         <Pressable 
           onPress={onSubmit} 
           style={[styles.submitButton, (!title || !description || isUploading) && styles.submitButtonDisabled]}
@@ -725,6 +791,13 @@ export default function AddListingScreen() {
           </Text>
         </Pressable>
       </ScrollView>
+
+      {/* Premium Modal */}
+      <PremiumModal 
+        visible={showPremiumModal}
+        onClose={closePremiumModal}
+        feature={PREMIUM_FEATURES.UNLIMITED_PHOTOS}
+      />
 
       {/* Progress Modal */}
       <Modal
@@ -1114,5 +1187,52 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#FF6B35',
     fontWeight: '500',
+  },
+  // Premium feature styles
+  premiumHint: {
+    fontSize: 12,
+    color: '#f0a500',
+    fontWeight: '500',
+  },
+  featuredOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+  featuredOptionLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  featuredOptionText: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  featuredOptionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+  },
+  featuredOptionDescription: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 18,
+  },
+  premiumBadge: {
+    backgroundColor: '#f0a500',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  premiumBadgeText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '600',
   },
 });
