@@ -3,7 +3,7 @@
     "name": "ESKICI",
     "slug": "barter-mvp-expo",
     "scheme": "eskici",
-    "version": "1.3.4",
+    "version": "1.3.7",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -38,7 +38,7 @@
         "backgroundColor": "#f0a500"
       },
       "package": "com.sbabadag.imece",
-      "versionCode": 4,
+      "versionCode": 11,
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",

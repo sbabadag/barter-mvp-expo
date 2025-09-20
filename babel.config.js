@@ -3,7 +3,8 @@ module.exports = function(api) {
   return {
     presets: ['babel-preset-expo'],
     plugins: [
-      'react-native-worklets/plugin'
+      // 'react-native-reanimated/plugin' - Removed for Android build compatibility
+      // 'react-native-worklets/plugin' - Removed to fix Android build
     ],
   };
 };

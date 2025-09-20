@@ -1,11 +1,12 @@
 import { Platform, Alert } from 'react-native';
 
-// Check if we're in Expo Go environment
+// Check if we're in Expo Go environment or if IAP package is not available
 const isExpoGo = (() => {
   try {
     require('expo-in-app-purchases');
     return false;
   } catch (error) {
+    // Package not available or in Expo Go - use mock service
     return true;
   }
 })();
